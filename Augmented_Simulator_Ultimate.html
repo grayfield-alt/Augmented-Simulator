@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Augmented Simulator - ULTIMATE IMPACT</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: "#0a0a0c",
+                        surface: "#111114",
+                        primary: "#6366f1",
+                        danger: "#ef4444",
+                        success: "#10b981",
+                        gold: "#fbbf24",
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'glow': '0 0 30px rgba(99, 102, 241, 0.4)',
+                        'premium': '0 20px 60px -15px rgba(0, 0, 0, 0.9)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .premium-card { @apply bg-surface/90 backdrop-blur-2xl border border-white/5 rounded-3xl shadow-premium p-6; }
+            .glass-button { @apply relative overflow-hidden px-6 py-3 rounded-2xl font-bold transition-all duration-300 bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 disabled:opacity-20 disabled:cursor-not-allowed; }
+            .primary-btn { @apply bg-primary hover:bg-primary/80 text-white shadow-glow border-none; }
+            .stat-box { @apply p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-1; }
+        }
+        canvas { image-rendering: auto; cursor: crosshair; }
+        @keyframes shake {
+            0% { transform: translate(2px, 2px); }
+            10% { transform: translate(-2px, -3px); }
+            20% { transform: translate(-4px, 0px); }
+            30% { transform: translate(4px, 3px); }
+            40% { transform: translate(2px, -2px); }
+            50% { transform: translate(-2px, 3px); }
+            60% { transform: translate(-4px, 2px); }
+            70% { transform: translate(4px, 2px); }
+            80% { transform: translate(-2px, -2px); }
+            90% { transform: translate(2px, 3px); }
+            100% { transform: translate(2px, -3px); }
+        }
+        .shake { animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both; }
+        .bg-radial-impact {
+            background: radial-gradient(circle at center, transparent 30%, rgba(239, 68, 68, 0.3) 100%);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-slate-300 font-sans overflow-hidden select-none flex items-center justify-center min-h-screen">
+
+    <div id="game-container" class="relative w-full max-w-4xl p-4 flex flex-col gap-6">
+
+        <!-- Header Section -->
+        <header class="premium-card flex justify-between items-center py-5 px-8">
+            <div class="flex items-center gap-4">
+                <i data-lucide="swords" class="text-primary w-9 h-9"></i>
+                <h1 class="text-2xl font-black italic tracking-tighter text-white uppercase">Augmented <span
+                        class="text-primary">Ultimate</span></h1>
+            </div>
+            <div class="flex gap-3">
+                <button class="glass-button p-2.5"><i data-lucide="settings" class="w-5 h-5"></i></button>
+                <button class="glass-button p-2.5" onclick="location.reload()"><i data-lucide="refresh-cw"
+                        class="w-5 h-5"></i></button>
+            </div>
+        </header>
+
+        <!-- View: Landing Menu -->
+        <div id="menu-view"
+            class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div class="premium-card flex flex-col gap-8">
+                <h2 class="text-lg font-black flex items-center gap-3 text-white uppercase tracking-widest"><i
+                        data-lucide="shield-check" class="text-gold"></i> Core Systems Online</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="stat-box">
+                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Initial HP</span>
+                        <span class="text-2xl font-black text-danger" id="menu-hp">100</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Base ATK</span>
+                        <span class="text-2xl font-black text-primary" id="menu-atk">50</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Armor</span>
+                        <span class="text-2xl font-black text-success" id="menu-def">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Phase</span>
+                        <span class="text-2xl font-black text-gold" id="menu-round">1</span>
+                    </div>
+                </div>
+                <button onclick="startCombat()"
+                    class="glass-button primary-btn py-5 text-xl font-black italic uppercase tracking-tighter hover:scale-105">⚔️
+                    Deploy to Battlefield</button>
+            </div>
+            <div class="premium-card bg-primary/5 flex flex-col gap-5 border-primary/10">
+                <h3 class="font-black text-primary flex items-center gap-2 uppercase tracking-widest text-sm"><i
+                        data-lucide="info" class="w-4 h-4"></i> Battle Protocol</h3>
+                <div class="space-y-4 opacity-75 text-sm leading-relaxed font-medium">
+                    <p>1. 적이 <span class="text-danger font-bold">붉게 충전</span>될 때가 공격 전조입니다. 타격 직전 화면을 클릭하여 패링하세요.</p>
+                    <p>2. <span class="text-gold font-black italic underline">PERFECT</span> 패링은 소모된 AP를 빠르게 채우는 유일한
+                        방법입니다.</p>
+                    <p>3. 획득한 AP를 전략적으로 소모하여 다수의 적을 섬멸하거나 강력한 보스를 처치하세요.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Combat Interface -->
+        <div id="combat-view" class="hidden flex flex-col gap-5 animate-in zoom-in-95 duration-500">
+            <!-- Top Status Bar -->
+            <div class="flex justify-between items-center premium-card py-4 px-10">
+                <div class="flex gap-14">
+                    <div class="flex flex-col items-center"><span
+                            class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Vitality</span><span
+                            class="text-3xl font-black text-danger" id="play-hp">100</span></div>
+                    <div class="flex flex-col items-center"><span
+                            class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Action
+                            Points</span><span class="text-3xl font-black text-success" id="play-ap">0</span></div>
+                </div>
+                <div id="turn-indicator"
+                    class="text-3xl font-black italic text-primary animate-pulse tracking-tighter uppercase">
+                    Initializing...</div>
+                <div class="text-slate-500 font-mono font-black border-l border-white/10 pl-8" id="play-round">PHASE 01
+                </div>
+            </div>
+
+            <!-- Main Combat Field -->
+            <div class="relative group overflow-hidden rounded-[48px] shadow-2xl bg-surface/50 border-4 border-white/5 active:scale-[0.99] transition-transform"
+                id="field-wrapper">
+                <canvas id="gameCanvas" width="800" height="500" class="w-full h-auto block"></canvas>
+
+                <!-- Impact FX Layer -->
+                <div id="vignette"
+                    class="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-200 bg-radial-impact">
+                </div>
+
+                <!-- Feedback Overlay -->
+                <div id="feedback-layer" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span id="feedback-text"
+                        class="text-8xl font-black italic scale-150 drop-shadow-[0_10px_40px_rgba(0,0,0,1)] opacity-0 transition-all duration-300"></span>
+                </div>
+
+                <!-- Hit Sequence Monitor -->
+                <div id="hit-dots" class="absolute bottom-10 right-10 flex gap-2.5"></div>
+
+                <!-- Strategic Hints -->
+                <div id="target-hint"
+                    class="absolute top-10 left-1/2 -translate-x-1/2 bg-primary/90 backdrop-blur-md px-10 py-2.5 rounded-full text-white font-black shadow-glow hidden animate-bounce uppercase text-[10px] tracking-[0.2em] border border-white/20">
+                    Target Lock-On Required</div>
+            </div>
+
+            <!-- Tactical Skill Grid -->
+            <div class="grid grid-cols-4 gap-4">
+                <button id="btn-atk" onclick="startSkill('atk')"
+                    class="glass-button flex flex-col items-center py-5 bg-primary/10 border-primary/20 hover:border-primary/50 group">
+                    <span class="text-lg uppercase text-white group-hover:scale-110 transition-transform">기본 타격</span>
+                    <span class="text-[9px] text-primary font-black tracking-widest mt-1">2 AP COST</span>
+                </button>
+                <button id="btn-spin" onclick="executeSpin()"
+                    class="glass-button flex flex-col items-center py-5 bg-success/10 border-success/20 hover:border-success/50 group">
+                    <span class="text-lg uppercase text-success group-hover:scale-110 transition-transform">회전 참격</span>
+                    <span class="text-[9px] text-success font-black tracking-widest mt-1">3 AP COST</span>
+                </button>
+                <button id="btn-heavy" onclick="startSkill('heavy')"
+                    class="glass-button flex flex-col items-center py-5 bg-gold/10 border-gold/20 hover:border-gold/50 group">
+                    <span class="text-lg uppercase text-gold group-hover:scale-110 transition-transform">대검 강타</span>
+                    <span class="text-[9px] text-gold font-black tracking-widest mt-1">5 AP COST</span>
+                </button>
+                <button id="btn-end" onclick="endTurn()"
+                    class="glass-button bg-danger/10 text-danger border-danger/20 hover:bg-danger/20 font-black uppercase text-xl shadow-lg shadow-danger/5">Turn
+                    End</button>
+            </div>
+        </div>
+
+        <!-- Overlays -->
+        <div id="augment-overlay"
+            class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-50 hidden flex-col items-center justify-center p-8 animate-in fade-in duration-500">
+            <h2
+                class="text-5xl font-black text-white italic mb-16 tracking-tighter uppercase border-b-8 border-primary pb-4">
+                Mission Success Rewards</h2>
+            <div id="augment-cards" class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl"></div>
+        </div>
+
+        <div id="game-over"
+            class="fixed inset-0 bg-red-950/98 backdrop-blur-3xl z-50 hidden flex-col items-center justify-center p-8">
+            <h1
+                class="text-[10rem] font-black text-white italic mb-8 tracking-tighter uppercase leading-none text-shadow-xl">
+                WASTED</h1>
+            <p class="text-red-200 text-xl font-bold mb-12 uppercase tracking-[1em]">Tactical Failure Detected</p>
+            <button onclick="location.reload()"
+                class="glass-button primary-btn px-24 py-8 text-3xl font-black italic uppercase tracking-tighter shadow-[0_0_100px_rgba(239,68,68,0.6)] hover:scale-110">Revive
+                Hero</button>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const GAME_CONFIG = {
+            FPS: 60,
+            PARRY_LIFE: 21,
+            PERFECT_WINDOW: 8,
+            ATK_TIME: 15,
+            RET_TIME: 20,
+            K: 50
+        };
+
+        const Player = {
+            hp: 100, mHp: 100, atk: 50, def: 0, ap: 0, x: 150, y: 250, radius: 35,
+            parryT: 0,
+            aug: { atk: 1.0, spin: 1.0, heavy: 1.0, pAp: 0, sAp: 0, dmgM: 1.0, pApB: 0 },
+            st: { focus: false, perfThis: false, kills: 0, gained: false, first: true }
+        };
+
+        let monsters = [];
+        let curRd = 1;
+        let gState = 'IDLE';
+        let turn = 'MONSTER';
+        let curMIdx = 0;
+        let targeting = false;
+        let skill = null;
+        let lastT = 0;
+        let dmgTexts = [];
+        let waitT = 0;
+
+        // --- DIFFICULTY BALANCING ---
+        // Slowing down early game for better reaction
+        const SPEEDS = {
+            FAST: 55,    // 40 -> 55 (Early waves)
+            NORMAL: 85,  // 60 -> 85 (Early waves)
+            SLOW: 120    // 90 -> 120 (Early waves)
+        };
+        const LATE_SPEEDS = {
+            FAST: 40,
+            NORMAL: 60,
+            SLOW: 90
+        };
+
+        const WAVES = {
+            1: [{ t: "Grit", h: 100, a: 10, y: 180, p: ["NORMAL"] }, { t: "Grit", h: 100, a: 10, y: 320, p: ["NORMAL", "FAST"] }],
+            2: [{ t: "Elite", h: 120, a: 12, y: 180, p: ["FAST"] }, { t: "Elite", h: 150, a: 10, y: 320, p: ["NORMAL", "SLOW"] }],
+            3: [{ t: "Slayer", h: 450, a: 16, y: 250, p: ["FAST", "NORMAL", "SLOW"] }],
+            4: [{ t: "OMEGA", h: 2000, a: 25, y: 250, p: [["NORMAL", "FAST", "SLOW"], ["FAST", "NORMAL", "FAST", "SLOW"]] }]
+        };
+
+        const ALL_AUG = [
+            { name: "날카로운 칼날", desc: "공격력 ×1.25 상승", effect: p => p.aug.atk *= 1.25 },
+            { name: "정밀 가드", desc: "패링 성공 시 AP +1 추가 수급", effect: p => p.aug.pAp += 1 },
+            { name: "피의 선동", desc: "적 처치 시 AP +2 즉시 회복", effect: p => p.aug.pAp += 2 },
+            { name: "검성의 가호", desc: "모든 스킬 피해량 ×1.40 상승", effect: p => { p.aug.spin *= 1.4; p.aug.heavy *= 1.4; } },
+            { name: "무한 엔진", desc: "전투 시작 AP +5 보너스", effect: p => p.aug.sAp += 5 }
+        ];
+
+        function startCombat() {
+            document.getElementById('menu-view').classList.add('hidden');
+            document.getElementById('combat-view').classList.remove('hidden');
+            spawn();
+        }
+
+        function spawn() {
+            const data = WAVES[curRd] || WAVES[1];
+            // Use late speeds starting from round 3
+            const currentSpeedSet = curRd >= 3 ? LATE_SPEEDS : SPEEDS;
+
+            monsters = data.map(d => {
+                const patterns = Array.isArray(d.p[0]) ? d.p.map(h => ({ h: h.map(s => currentSpeedSet[s]) })) : [{ h: d.p.map(s => currentSpeedSet[s]) }];
+                return {
+                    id: Math.random(), x: 650, y: d.y, hX: 650, hY: d.y, r: d.t === "OMEGA" ? 85 : 35,
+                    hp: d.h, mHp: d.h, atk: d.a, color: d.t === "OMEGA" ? "#ef4444" : "#ff4a4a",
+                    st: "IDLE", t: 0, pats: patterns, pIdx: 0, pStep: 0, hit: false
+                };
+            });
+            curMIdx = 0; turn = 'MONSTER'; gState = 'FIGHTING';
+            Player.ap += Player.aug.sAp; waitT = 80;
+            updateUI();
+        }
+
+        function gameLoop(t) {
+            if (!lastT) lastT = t;
+            const dt = (Math.min(t - lastT, 100) / 16.66) * 1.8;
+            lastT = t;
+            update(dt);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update(dt) {
+            if (gState !== 'FIGHTING') return;
+            for (let i = dmgTexts.length - 1; i >= 0; i--) {
+                dmgTexts[i].y -= 0.6 * dt; dmgTexts[i].l -= dt;
+                if (dmgTexts[i].l <= 0) dmgTexts.splice(i, 1);
+            }
+            if (waitT > 0) { waitT -= dt; if (waitT <= 0) { waitT = 0; document.getElementById('turn-indicator').innerText = "ENEMY TURN"; } return; }
+            if (turn === 'MONSTER') {
+                if (Player.parryT > 0) Player.parryT -= dt;
+                const m = monsters[curMIdx];
+                if (!m || m.hp <= 0) { nextM(); return; }
+                upM(m, dt);
+            } else { checkEnd(); }
+        }
+
+        function upM(m, dt) {
+            if (m.st === "IDLE") {
+                m.t += dt; if (m.t > 50) { m.st = "TELE"; m.t = 0; dots(m); } // Increased idle time
+            } else if (m.st === "TELE") {
+                m.t += dt; const wait = m.pats[m.pIdx].h[m.pStep];
+                const r = Math.min(m.t / wait, 1);
+                m.x = m.hX + Math.sin(r * Math.PI) * 35; // More pronounced shake
+                if (m.t >= wait) { m.st = "ATK"; m.t = 0; m.sX = m.x; m.sY = m.y; }
+            } else if (m.st === "ATK") {
+                m.t += dt; const r = m.t / GAME_CONFIG.ATK_TIME;
+                m.x = m.sX + (Player.x + Player.radius - m.sX) * (r * r);
+                m.y = m.sY + (Player.y - m.sY) * (r * r);
+                if (m.t >= GAME_CONFIG.ATK_TIME - 1.5 && !m.hit) { m.hit = true; parry(m); }
+                if (m.t >= GAME_CONFIG.ATK_TIME) { m.st = "RET"; m.rX = m.x; m.rY = m.y; m.t = 0; m.hit = false; m.pStep++; dots(m); }
+            } else if (m.st === "RET") {
+                m.t += dt; const last = m.pStep === m.pats[m.pIdx].h.length;
+                const dur = last ? GAME_CONFIG.RET_TIME : 25; // Slower return in bursts
+                const tx = last ? m.hX : (m.hX + m.rX) / 2;
+                const ty = last ? m.hY : (m.hY + m.rY) / 2;
+                const r = m.t / dur;
+                m.x = m.rX + (tx - m.rX) * (1 - (1 - r) ** 2);
+                m.y = m.rY + (ty - m.rY) * (1 - (1 - r) ** 2);
+                if (m.t >= dur) {
+                    if (m.pStep < m.pats[m.pIdx].h.length) { m.st = "ATK"; m.t = 0; m.sX = m.x; m.sY = m.y; }
+                    else { m.pIdx = (m.pIdx + 1) % m.pats.length; m.st = "DONE"; nextM(); }
+                }
+            }
+        }
+
+        function parry(m) {
+            if (Player.parryT > 0) {
+                const e = GAME_CONFIG.PARRY_LIFE - Player.parryT;
+                if (e <= GAME_CONFIG.PERFECT_WINDOW) { showF("PERFECT!", "#fbbf24"); Player.ap += 2 + Player.aug.pApB; }
+                else { showF("GOOD", "#10b981"); Player.ap += 1; }
+                Player.ap += Player.aug.pAp;
+            } else {
+                const d = Math.round(m.atk * (GAME_CONFIG.K / (GAME_CONFIG.K + Player.def)) * Player.aug.dmgM);
+                Player.hp = Math.max(0, Player.hp - d);
+                txt(Player.x, Player.y - 50, `-${d}`, "#ef4444");
+                shake();
+                if (Player.hp <= 0) { gState = 'OVER'; document.getElementById('game-over').classList.remove('hidden'); }
+            }
+            updateUI();
+        }
+
+        function nextM() {
+            curMIdx++;
+            if (curMIdx >= monsters.length) {
+                turn = 'PLAYER'; document.getElementById('turn-indicator').innerText = "YOUR TURN";
+                document.getElementById('turn-indicator').classList.replace('text-primary', 'text-success');
+                Player.st.first = true;
+            } else { dots(monsters[curMIdx]); }
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('menu-hp').innerText = Math.ceil(Player.hp);
+            document.getElementById('menu-atk').innerText = Math.ceil(Player.atk);
+            document.getElementById('menu-def').innerText = Math.ceil(Player.def);
+            document.getElementById('menu-round').innerText = curRd;
+            document.getElementById('play-hp').innerText = Math.ceil(Player.hp);
+            document.getElementById('play-ap').innerText = Math.floor(Player.ap);
+            document.getElementById('play-round').innerText = "PHASE 0" + curRd;
+
+            document.getElementById('btn-atk').disabled = turn !== 'PLAYER' || Player.ap < 2;
+            document.getElementById('btn-spin').disabled = turn !== 'PLAYER' || Player.ap < 3;
+            document.getElementById('btn-heavy').disabled = turn !== 'PLAYER' || Player.ap < 5;
+            document.getElementById('btn-end').disabled = turn !== 'PLAYER';
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, 800, 500);
+            monsters.forEach(m => {
+                if (m.hp <= 0) return;
+                ctx.fillStyle = m.color;
+                if (m.st === "TELE") {
+                    const alpha = m.t / m.pats[m.pIdx].h[m.pStep];
+                    ctx.fillStyle = `rgb(255, ${74 + 181 * (1 - alpha)}, ${74 + 181 * (1 - alpha)})`;
+                }
+                ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "#fff"; ctx.font = "black 15px Inter"; ctx.textAlign = "center";
+                ctx.fillText(`HP ${Math.ceil(m.hp)}`, m.x, m.y + m.r + 24);
+                if (targeting) {
+                    ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(m.x, m.y, m.r + 12, 0, Math.PI * 2); ctx.stroke();
+                }
+            });
+
+            ctx.save();
+            if (Player.parryT > 0) {
+                ctx.shadowBlur = 25; ctx.shadowColor = "#fbbf24"; ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 5;
+                ctx.beginPath(); ctx.arc(Player.x, Player.y, Player.radius + 10, 0, Math.PI * 2); ctx.stroke();
+            }
+            ctx.fillStyle = "#6366f1"; ctx.beginPath(); ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+
+            dmgTexts.forEach(t => { ctx.fillStyle = t.c; ctx.font = "black 36px Inter"; ctx.fillText(t.t, t.x, t.y); });
+        }
+
+        function startSkill(s) { skill = s; targeting = true; document.getElementById('target-hint').classList.remove('hidden'); }
+
+        function handleT(m) {
+            let d = Player.atk; let c = 2;
+            if (skill === 'heavy') { d *= 3.0; c = 5; } // Higher power for better feel
+            m.hp -= d; txt(m.x, m.y - 40, `-${Math.ceil(d)}`, "#ef4444");
+            Player.ap -= c; targeting = false; skill = null;
+            document.getElementById('target-hint').classList.add('hidden');
+            checkW(); updateUI();
+        }
+
+        function executeSpin() {
+            const alive = monsters.filter(m => m.hp > 0);
+            const d = (Player.atk * 2.0) / alive.length;
+            alive.forEach(m => { m.hp -= d; txt(m.x, m.y - 40, `-${Math.ceil(d)}`, "#10b981"); });
+            Player.ap -= 3; showF("BURST!", "#10b981");
+            checkW(); updateUI();
+        }
+
+        function checkW() {
+            if (monsters.filter(m => m.hp > 0).length === 0) {
+                gState = 'AUGMENT'; setTimeout(showAugs, 600);
+            }
+        }
+
+        function endTurn() {
+            turn = 'MONSTER'; curMIdx = 0; waitT = 50;
+            document.getElementById('turn-indicator').innerText = "ENEMY TURN";
+            document.getElementById('turn-indicator').classList.replace('text-success', 'text-primary');
+            monsters.forEach(m => { m.st = "IDLE"; m.t = 0; m.pStep = 0; });
+            updateUI();
+        }
+
+        function checkEnd() { if (Player.ap < 2) setTimeout(endTurn, 1000); }
+
+        function showF(t, c) {
+            const el = document.getElementById('feedback-text'); el.innerText = t; el.style.color = c;
+            el.style.opacity = '1'; el.style.transform = 'scale(1.2) rotate(-5deg)';
+            setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'scale(1)'; }, 800);
+        }
+
+        function shake() {
+            const w = document.getElementById('field-wrapper'); w.classList.add('shake');
+            document.getElementById('vignette').style.opacity = '1';
+            setTimeout(() => { w.classList.remove('shake'); document.getElementById('vignette').style.opacity = '0'; }, 350);
+        }
+
+        function txt(x, y, t, c) { dmgTexts.push({ x, y, t, c, l: 60 }); }
+
+        function dots(m) {
+            const container = document.getElementById('hit-dots'); container.innerHTML = "";
+            if (!m || m.st === "DONE") return;
+            m.pats[m.pIdx].h.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = `w-4 h-4 rounded-full border-2 border-white/40 ${i < m.pStep ? 'bg-slate-700 opacity-30' : 'bg-success shadow-[0_0_10px_#10b981]'}`;
+                container.appendChild(dot);
+            });
+        }
+
+        function showAugs() {
+            document.getElementById('augment-overlay').classList.remove('hidden');
+            const container = document.getElementById('augment-cards'); container.innerHTML = "";
+            [...ALL_AUG].sort(() => 0.5 - Math.random()).slice(0, 3).forEach(aug => {
+                const card = document.createElement('div');
+                card.className = "premium-card cursor-pointer hover:scale-110 transition-all border-white/5 hover:border-primary group bg-surface hover:shadow-glow";
+                card.innerHTML = `<h3 class="text-2xl font-black mb-3 group-hover:text-primary transition-colors italic uppercase">${aug.name}</h3><p class="text-slate-400 font-medium leading-relaxed">${aug.desc}</p>`;
+                card.onclick = () => {
+                    aug.effect(Player); curRd++;
+                    document.getElementById('augment-overlay').classList.add('hidden');
+                    document.getElementById('menu-view').classList.remove('hidden');
+                    document.getElementById('combat-view').classList.add('hidden');
+                    gState = 'IDLE'; updateUI();
+                };
+                container.appendChild(card);
+            });
+        }
+
+        // Coordinate Mapping
+        window.addEventListener('mousedown', (e) => {
+            if (gState !== 'FIGHTING') return;
+            if (turn === 'MONSTER') { Player.parryT = GAME_CONFIG.PARRY_LIFE; }
+            else if (targeting) {
+                const rect = canvas.getBoundingClientRect();
+                const sX = canvas.width / rect.width;
+                const sY = canvas.height / rect.height;
+                const mx = (e.clientX - rect.left) * sX;
+                const my = (e.clientY - rect.top) * sY;
+                monsters.forEach(m => {
+                    if (m.hp > 0 && Math.hypot(mx - m.x, my - m.y) < m.r * 1.8) handleT(m);
+                });
+            }
+        });
+
+        lucide.createIcons();
+        updateUI();
+        requestAnimationFrame(gameLoop);
+
+    </script>
+</body>
+
+</html>
