@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-slate-300 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .premium-card {
+    @apply bg-surface/80 backdrop-blur-md border border-white/5 rounded-2xl shadow-premium p-6;
+  }
+  
+  .glass-button {
+    @apply relative overflow-hidden px-6 py-2 rounded-xl font-semibold transition-all duration-300
+           bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10;
+  }
+
+  .primary-button {
+    @apply bg-primary hover:bg-primary/80 text-white shadow-glow;
+  }
+
+  .stat-bar-bg {
+    @apply h-2 w-full bg-black/40 rounded-full overflow-hidden;
+  }
+
+  .stat-bar-fill {
+    @apply h-full rounded-full transition-all duration-300;
+  }
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out;
+}
