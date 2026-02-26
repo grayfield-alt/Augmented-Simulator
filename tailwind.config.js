@@ -27,6 +27,7 @@ export default {
             },
             backgroundImage: {
                 'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
+                'radial-gradient': 'radial-gradient(circle, var(--tw-gradient-stops))',
             }
         },
     },

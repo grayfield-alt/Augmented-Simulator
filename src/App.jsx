@@ -22,6 +22,7 @@ export default function App() {
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [isTargeting, setIsTargeting] = useState(false);
   const [damageTexts, setDamageTexts] = useState([]);
+  const [isVignetteActive, setIsVignetteActive] = useState(false); // Added: Vignette state
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -199,6 +200,7 @@ export default function App() {
       const finalDmg = Math.round(m.atk * (50 / (50 + player.def)) * player.augBuffs.takeDmgMult);
       engine.player.hp = Math.max(0, engine.player.hp - finalDmg);
       addDamageText(150, 225 - 40, `-${finalDmg}`, "#ff4a4a");
+      triggerVignette(); // Added: Hit feedback
       if (engine.player.hp <= 0) setGameState('game_over');
     }
     setPlayer({ ...engine.player });
@@ -233,6 +235,7 @@ export default function App() {
     setCurrentTurn("MONSTER");
     setGameState("fighting");
     setPlayer({ ...engine.player });
+    setView('play'); // Fixed: Transition to play view
   };
 
   const executeSkill = (type) => {
@@ -279,6 +282,11 @@ export default function App() {
   const showVisualFeedback = (text, color) => {
     setFeedback({ text, color });
     setTimeout(() => setFeedback(null), 800);
+  };
+
+  const triggerVignette = () => {
+    setIsVignetteActive(true);
+    setTimeout(() => setIsVignetteActive(false), 300);
   };
 
   const addDamageText = (x, y, text, color) => {
@@ -334,8 +342,12 @@ export default function App() {
               <div className="text-slate-400 font-mono">ROUND {engine.currentRound}</div>
             </div>
 
-            <div className="relative group cursor-crosshair" onClick={handleCanvasClick}>
-              <canvas ref={canvasRef} width={800} height={500} className="premium-card bg-surface/50 p-0 overflow-hidden" />
+            <div className="relative group cursor-crosshair overflow-hidden rounded-2xl" onClick={handleCanvasClick}>
+              <canvas ref={canvasRef} width={800} height={500} className="bg-surface/50 p-0" />
+
+              {/* Impact Vignette */}
+              <div className={`absolute inset-0 pointer-events-none transition-opacity duration-300 bg-radial-gradient from-transparent to-red-600/30 ${isVignetteActive ? 'opacity-100' : 'opacity-0'}`} />
+
               {feedback && (
                 <div className="absolute top-1/2 left-1/4 -translate-y-1/2 -translate-x-1/2 pointer-events-none">
                   <span className="text-6xl font-black italic scale-150 drop-shadow-2xl" style={{ color: feedback.color }}>{feedback.text}</span>
