@@ -90,5 +90,16 @@ export const WAVE_DATA = {
                 ["SLOW", "NORMAL", "FAST"]
             ]
         }
+    ],
+    7: [
+        {
+            type: "ANCIENT DRAGON", hp: 3000, atk: 30, y: 225,
+            multiPatterns: [
+                ["SLOW", "NORMAL", "FAST"], // Tail swipe -> Claw -> Bite
+                ["FAST", "FAST", "NORMAL"], // Double claw -> Slam
+                ["SLOW", "SLOW", "SLOW"],   // Heavy stomp sequence
+                ["FAST", "NORMAL", "FAST", "NORMAL", "SLOW"] // Frenzy
+            ]
+        }
     ]
 };

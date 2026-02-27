@@ -21,7 +21,7 @@ cd Augmented-Simulator
 ### Step 2: AI에게 맥락 제공하기
 새 대화를 시작할 때 다음 메시지를 복사해서 입력해 주세요:
 
-> "기존 대화(`4fc72d59-0275-4075-9a2e-e8df240ce6c2`)에서 진행하던 증강 시뮬레이터 작업을 이어서 하고 싶어. 현재 `augmented_simulator` 폴더를 워크스페이스로 설정해줘. Git에서 최신 코드를 받았으니, `task.md`와 `implementation_plan.md`를 참고해서 다음 단계를 알려줘."
+> "기존 대화(`4fc72d59-0275-4075-9a2e-e8df240ce6c2`)에서 진행하던 증강 시뮬레이터 작업을 이어서 하고 싶어. 현재 `augmented_simulator` 폴더를 워크스페이스로 설정해줘. Git에서 최신 코드를 받았으니, `task.md`와 `implementation_plan.md`를 참고해서 다음 단계를 알려줘. UI 안정화와 **Stage 7 고대 드래곤**까지 구현된 상태야."
 
 ## 3. 주요 파일 위치
 - 핵심 로직: `simulator.js`, `combat.js`, `augments.js`

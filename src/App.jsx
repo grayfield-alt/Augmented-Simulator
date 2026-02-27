@@ -70,9 +70,9 @@ export default function App() {
 
       // HP Text
       ctx.fillStyle = "#fff";
-      ctx.font = "14px bold Inter";
+      ctx.font = m.name === "ANCIENT DRAGON" ? "20px bold Inter" : "14px bold Inter";
       ctx.textAlign = "center";
-      ctx.fillText(`HP ${Math.ceil(m.hp)}`, m.x, m.y + m.radius + 20);
+      ctx.fillText(`${m.name} HP ${Math.ceil(m.hp)}`, m.x, m.y + m.radius + (m.name === "ANCIENT DRAGON" ? 40 : 20));
 
       // Target Highlight
       if (isTargeting) {
@@ -180,6 +180,9 @@ export default function App() {
           m.timer = 0;
         } else {
           m.state = "DONE";
+          m.patternStep = 0; // Reset step for next pattern
+          m.currentPatternIdx = (m.currentPatternIdx + 1) % m.patterns.length;
+          m.currentPattern = m.patterns[m.currentPatternIdx];
           nextMonsterOrTurn();
         }
       }
@@ -337,9 +340,6 @@ export default function App() {
               <div className="flex gap-8">
                 <div className="flex flex-col"><span className="text-[10px] text-slate-500 font-bold">HP</span><span className="text-danger font-mono font-bold text-lg">{Math.ceil(player.hp)}</span></div>
                 <div className="flex flex-col"><span className="text-[10px] text-slate-500 font-bold">AP</span><span className="text-success font-mono font-bold text-lg">{Math.floor(player.ap)}</span></div>
-              </div>
-              <div className="text-2xl font-black italic text-primary w-64 text-center tracking-tighter">
-                {currentTurn === 'PLAYER' ? "YOUR TURN" : "ENEMY TURN"}
               </div>
               <div className="text-slate-400 font-mono">ROUND {engine.currentRound}</div>
             </div>
