@@ -76,6 +76,9 @@ export class GameEngine {
                 patternScripts = [this.processPattern(t.patterns)];
             }
 
+            const isDragon = t.type === "ANCIENT DRAGON";
+            const isBoss = t.type === "BOSS" || isDragon;
+
             return {
                 id: Math.random().toString(36).substr(2, 9),
                 name: t.type,
@@ -83,11 +86,11 @@ export class GameEngine {
                 homeY: t.y,
                 x: 600,
                 y: t.y,
-                radius: t.type === "BOSS" ? MONSTER_CONFIG.BOSS_RADIUS : MONSTER_CONFIG.BASE_RADIUS,
+                radius: isDragon ? 100 : (isBoss ? MONSTER_CONFIG.BOSS_RADIUS : MONSTER_CONFIG.BASE_RADIUS),
                 hp: t.hp,
                 maxHp: t.hp,
                 atk: t.atk,
-                color: t.type === "BOSS" ? "#ff0000" : "#ff4a4a",
+                color: isDragon ? "#8b0000" : (isBoss ? "#ff0000" : "#ff4a4a"),
                 state: "IDLE",
                 timer: 0,
                 patterns: patternScripts,

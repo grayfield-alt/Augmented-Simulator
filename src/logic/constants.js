@@ -109,5 +109,22 @@ export const WAVE_DATA = {
                 }
             ]
         }
+    ],
+    7: [
+        {
+            type: "ANCIENT DRAGON",
+            hp: 3000,
+            atk: 35,
+            y: 225,
+            radius: 100,
+            patterns: {
+                steps: [
+                    { type: "TELEGRAPH", duration: 80, action: "ATTACK" },
+                    { type: "TELEGRAPH", duration: 40, action: "ATTACK" },
+                    { type: "TELEGRAPH", duration: 20, action: "ATTACK" },
+                    { type: "TELEGRAPH", duration: 60, action: "ATTACK", unparriable: true }
+                ]
+            }
+        }
     ]
 };

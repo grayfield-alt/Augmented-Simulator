@@ -30,6 +30,9 @@ export default function App() {
 
   // --- Game Loop ---
   const update = useCallback((dt) => {
+    // Update damage texts (Move outside guard to ensure they clear even after combat ends)
+    setDamageTexts(prev => prev.map(d => ({ ...d, y: d.y - 0.5 * dt, timer: d.timer - dt })).filter(d => d.timer > 0));
+
     if (gameState !== 'fighting') return;
 
     // Update monsters
@@ -57,9 +60,6 @@ export default function App() {
         setPlayer({ ...engine.player });
       }
     }
-
-    // Update damage texts
-    setDamageTexts(prev => prev.map(d => ({ ...d, y: d.y - 0.5 * dt, timer: d.timer - dt })).filter(d => d.timer > 0));
   }, [gameState, monsters, currentMonsterIdx, currentTurn]);
 
   const draw = useCallback((ctx) => {
@@ -89,9 +89,9 @@ export default function App() {
 
       // HP Text
       ctx.fillStyle = "#fff";
-      ctx.font = "14px bold Inter";
+      ctx.font = m.name === "ANCIENT DRAGON" ? "20px bold Inter" : "14px bold Inter";
       ctx.textAlign = "center";
-      ctx.fillText(`HP ${Math.ceil(m.hp)}`, m.x, m.y + m.radius + 20);
+      ctx.fillText(`${m.name} HP ${Math.ceil(m.hp)}`, m.x, m.y + m.radius + (m.name === "ANCIENT DRAGON" ? 40 : 20));
 
       // Target Highlight
       if (isTargeting) {
@@ -228,6 +228,9 @@ export default function App() {
           m.timer = 0;
         } else {
           m.state = "DONE";
+          m.patternStep = 0; // Reset step for next pattern
+          m.currentPatternIdx = (m.currentPatternIdx + 1) % m.patterns.length;
+          m.currentPattern = m.patterns[m.currentPatternIdx];
           nextMonsterOrTurn();
         }
       }
@@ -527,7 +530,7 @@ export default function App() {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }
 
@@ -547,8 +550,8 @@ function SkillButton({ label, cost, disabled, onClick }) {
   return (
     <button disabled={disabled} onClick={onClick}
       className={`glass-button flex flex-col items-center py-4 ${disabled ? 'opacity-30' : 'bg-primary/10 hover:bg-primary/20 border-primary/30'}`}>
-      <span className="font-bold text-white">{label}</span>
-      <span className="text-[10px] font-mono text-primary">{cost} AP</span>
+      <span className="font-bold text-white text-lg">{label}</span>
+      <span className="text-xs font-mono text-primary font-bold">{cost} AP</span>
     </button>
   );
 }

@@ -1,0 +1,23 @@
+[
+    {
+        "id": "auto_parry",
+        "name": "오토 패링",
+        "type": "CORRECTION",
+        "logicType": "CHANCE_RESCUE",
+        "description": "패링 실패 시 n% 확률로 성공으로 변경",
+        "trigger": "onParryCheck",
+        "value": 0.2,
+        "atkBonus": 0.1
+    },
+    {
+        "id": "lightning_bash",
+        "name": "라이트닝 배쉬",
+        "type": "SYNERGY",
+        "logicType": "CHANCE_DAMAGE",
+        "description": "패링 성공 시 n% 확률로 추가 데미지",
+        "trigger": "onParrySuccess",
+        "value": 0.3,
+        "atkBonus": 0.3,
+        "extraDamage": 100
+    }
+]
