@@ -30,6 +30,9 @@ export default function App() {
 
   // --- Game Loop ---
   const update = useCallback((dt) => {
+    // Update damage texts (Move outside guard to ensure they clear even after combat ends)
+    setDamageTexts(prev => prev.map(d => ({ ...d, y: d.y - 0.5 * dt, timer: d.timer - dt })).filter(d => d.timer > 0));
+
     if (gameState !== 'fighting') return;
 
     // Update monsters
@@ -44,9 +47,6 @@ export default function App() {
     if (currentTurn === "MONSTER") {
       updateMonsterTurn(currentMonster, dt);
     }
-
-    // Update damage texts
-    setDamageTexts(prev => prev.map(d => ({ ...d, y: d.y - 0.5 * dt, timer: d.timer - dt })).filter(d => d.timer > 0));
   }, [gameState, monsters, currentMonsterIdx, currentTurn]);
 
   const draw = useCallback((ctx) => {
@@ -335,10 +335,12 @@ export default function App() {
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center premium-card py-2 px-6">
               <div className="flex gap-8">
-                <div className="flex flex-col"><span className="text-[10px] text-slate-500 font-bold">HP</span><span className="text-danger font-mono font-bold">{Math.ceil(player.hp)}</span></div>
-                <div className="flex flex-col"><span className="text-[10px] text-slate-500 font-bold">AP</span><span className="text-success font-mono font-bold">{Math.floor(player.ap)}</span></div>
+                <div className="flex flex-col"><span className="text-[10px] text-slate-500 font-bold">HP</span><span className="text-danger font-mono font-bold text-lg">{Math.ceil(player.hp)}</span></div>
+                <div className="flex flex-col"><span className="text-[10px] text-slate-500 font-bold">AP</span><span className="text-success font-mono font-bold text-lg">{Math.floor(player.ap)}</span></div>
               </div>
-              <div className="text-xl font-black italic text-primary">{currentTurn === 'PLAYER' ? "YOUR TURN" : "ENEMY TURN"}</div>
+              <div className="text-2xl font-black italic text-primary w-64 text-center tracking-tighter">
+                {currentTurn === 'PLAYER' ? "YOUR TURN" : "ENEMY TURN"}
+              </div>
               <div className="text-slate-400 font-mono">ROUND {engine.currentRound}</div>
             </div>
 
@@ -373,7 +375,12 @@ export default function App() {
               <SkillButton label="Attack" cost={2} disabled={currentTurn !== 'PLAYER' || player.ap < 2} onClick={() => executeSkill('atk')} />
               <SkillButton label="Spin Slash" cost={3} disabled={currentTurn !== 'PLAYER' || player.ap < 3} onClick={() => executeSkill('spin')} />
               <SkillButton label="Heavy Strike" cost={5} disabled={currentTurn !== 'PLAYER' || player.ap < 5} onClick={() => executeSkill('heavy')} />
-              <button onClick={() => setCurrentTurn('MONSTER')} className="glass-button bg-danger/20 hover:bg-danger/40 text-danger border-danger/50">END TURN</button>
+              <button
+                onClick={() => setCurrentTurn('MONSTER')}
+                className="glass-button bg-danger/20 hover:bg-danger/40 text-danger border-danger/50 font-bold text-lg"
+              >
+                END TURN
+              </button>
             </div>
           </div>
         )}
@@ -413,8 +420,8 @@ function SkillButton({ label, cost, disabled, onClick }) {
   return (
     <button disabled={disabled} onClick={onClick}
       className={`glass-button flex flex-col items-center py-4 ${disabled ? 'opacity-30' : 'bg-primary/10 hover:bg-primary/20 border-primary/30'}`}>
-      <span className="font-bold text-white">{label}</span>
-      <span className="text-[10px] font-mono text-primary">{cost} AP</span>
+      <span className="font-bold text-white text-lg">{label}</span>
+      <span className="text-xs font-mono text-primary font-bold">{cost} AP</span>
     </button>
   );
 }
