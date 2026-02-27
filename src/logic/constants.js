@@ -5,6 +5,7 @@ export const PLAYER_CONFIG = {
     INITIAL_AP: 0,
     RADIUS: 30,
     PARRY_STANCE_DURATION: 21,
+    DASH_DURATION: 50, // 회피 지속 시간 (리턴 없음)
     PERFECT_WINDOW: 8,
     ATTACK_DURATION: 15,
     RETURN_DURATION: 20,
@@ -15,9 +16,10 @@ export const MONSTER_CONFIG = {
     BASE_RADIUS: 25,
     BOSS_RADIUS: 60,
     PATTERN_SPEEDS: {
-        FAST: 40,
-        NORMAL: 60,
-        SLOW: 90
+        VERY_FAST: 30, // 0.25s (극한의 반응 속도)
+        FAST: 40,      // 0.33s (숙련자 반응 속도)
+        NORMAL: 60,    // 0.50s (표준)
+        SLOW: 90       // 0.75s (여유)
     }
 };
 
@@ -62,32 +64,49 @@ export const AUGMENT_DATA = {
 
 export const WAVE_DATA = {
     1: [
-        { type: "Enemy 1", hp: 100, atk: 10, y: 150, patterns: ["NORMAL"] },
-        { type: "Enemy 2", hp: 100, atk: 10, y: 350, patterns: ["NORMAL", "FAST"] }
+        { type: "Standard Soldier", hp: 100, atk: 10, y: 150, patterns: { steps: [{ type: "TELEGRAPH", duration: 60, action: "ATTACK" }] } },
+        { type: "Fast Scout", hp: 80, atk: 12, y: 350, patterns: { steps: [{ type: "TELEGRAPH", duration: 40, action: "ATTACK" }, { type: "TELEGRAPH", duration: 40, action: "ATTACK" }] } }
     ],
     2: [
-        { type: "Enemy A", hp: 80, atk: 9, y: 150, patterns: ["FAST"] },
-        { type: "Enemy B", hp: 120, atk: 8, y: 350, patterns: ["NORMAL", "SLOW"] }
+        { type: "Heavy Guard", hp: 200, atk: 15, y: 150, patterns: { steps: [{ type: "TELEGRAPH", duration: 80, action: "ATTACK", damageMult: 1.2 }] } },
+        { type: "Agile Assasin", hp: 100, atk: 8, y: 350, patterns: { steps: [{ type: "TELEGRAPH", duration: 30, action: "ATTACK" }, { type: "TELEGRAPH", duration: 30, action: "ATTACK" }, { type: "TELEGRAPH", duration: 30, action: "ATTACK" }] } }
     ],
     3: { type: "EVENT" },
     4: [
-        { type: "Enemy A", hp: 85, atk: 9, y: 100, patterns: ["FAST"] },
-        { type: "Enemy B", hp: 105, atk: 8, y: 250, patterns: ["NORMAL", "FAST"] },
-        { type: "Enemy C", hp: 130, atk: 7, y: 400, patterns: ["NORMAL", "FAST", "SLOW"] }
+        { type: "Elite Unit A", hp: 150, atk: 12, y: 100, patterns: { steps: [{ type: "TELEGRAPH", duration: 45, action: "ATTACK" }, { type: "TELEGRAPH", duration: 60, action: "ATTACK" }] } },
+        { type: "Elite Unit B", hp: 150, atk: 12, y: 250, patterns: { steps: [{ type: "TELEGRAPH", duration: 60, action: "ATTACK" }, { type: "TELEGRAPH", duration: 45, action: "ATTACK" }] } },
+        { type: "Elite Unit C", hp: 200, atk: 10, y: 400, patterns: { steps: [{ type: "TELEGRAPH", duration: 90, action: "ATTACK", damageMult: 1.5 }] } }
     ],
     5: [
-        { type: "Enemy A", hp: 70, atk: 10, y: 80, patterns: ["FAST"] },
-        { type: "Enemy B", hp: 75, atk: 10, y: 180, patterns: ["NORMAL"] },
-        { type: "Enemy C", hp: 110, atk: 9, y: 280, patterns: ["NORMAL", "FAST"] },
-        { type: "Enemy D", hp: 140, atk: 8, y: 380, patterns: ["NORMAL", "FAST", "SLOW"] }
+        { type: "Shadow Master", hp: 300, atk: 15, y: 225, patterns: { steps: [{ type: "TELEGRAPH", duration: 40, action: "ATTACK" }, { type: "TELEGRAPH", duration: 30, action: "ATTACK" }, { type: "TELEGRAPH", duration: 20, action: "ATTACK" }, { type: "TELEGRAPH", duration: 60, action: "ATTACK", damageMult: 2.0 }] } }
     ],
     6: [
         {
-            type: "BOSS", hp: 780, atk: 12, y: 225,
+            type: "BOSS", hp: 1200, atk: 18, y: 225,
             multiPatterns: [
-                ["NORMAL", "FAST", "SLOW"],
-                ["FAST", "NORMAL", "FAST", "SLOW"],
-                ["SLOW", "NORMAL", "FAST"]
+                {
+                    id: "phase1",
+                    steps: [
+                        { type: "TELEGRAPH", duration: 60, action: "ATTACK" },
+                        { type: "TELEGRAPH", duration: 45, action: "ATTACK" },
+                        { type: "TELEGRAPH", duration: 30, action: "ATTACK" }
+                    ]
+                },
+                {
+                    id: "heavy_slam",
+                    steps: [
+                        { type: "TELEGRAPH", duration: 90, action: "ATTACK", damageMult: 2.5, unparriable: true }
+                    ]
+                },
+                {
+                    id: "fury_swipes",
+                    steps: [
+                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" },
+                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" },
+                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" },
+                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" }
+                    ]
+                }
             ]
         }
     ]

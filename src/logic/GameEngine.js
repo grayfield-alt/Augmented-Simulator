@@ -16,6 +16,8 @@ export class GameEngine {
             comboCount: 0,
             parryTimer: 0,
             isParrying: false,
+            dashTimer: 0,
+            isDashing: false,
             actionsUsed: { atk: false, spin: false, heavy: false },
             augBuffs: {
                 atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
@@ -42,20 +44,36 @@ export class GameEngine {
         this.history = [];
     }
 
+    // Helper to process scripted patterns or fallback to legacy speed strings
+    processPattern(p) {
+        if (typeof p === 'string') {
+            return {
+                steps: [{ type: "TELEGRAPH", duration: MONSTER_CONFIG.PATTERN_SPEEDS[p], action: "ATTACK" }]
+            };
+        }
+        if (Array.isArray(p)) {
+            return {
+                steps: p.map(step => {
+                    if (typeof step === 'string') {
+                        return { type: "TELEGRAPH", duration: MONSTER_CONFIG.PATTERN_SPEEDS[step], action: "ATTACK" };
+                    }
+                    return step;
+                })
+            };
+        }
+        return p; // Already a script object
+    }
+
     getMonsters(round) {
         const data = WAVE_DATA[round];
         if (!data || data.type === "EVENT") return [];
 
         return data.map(t => {
-            let patterns = [];
+            let patternScripts = [];
             if (t.multiPatterns) {
-                patterns = t.multiPatterns.map(p => ({
-                    hits: p.map(s => MONSTER_CONFIG.PATTERN_SPEEDS[s])
-                }));
+                patternScripts = t.multiPatterns.map(p => this.processPattern(p));
             } else {
-                patterns = [{
-                    hits: t.patterns.map(s => MONSTER_CONFIG.PATTERN_SPEEDS[s])
-                }];
+                patternScripts = [this.processPattern(t.patterns)];
             }
 
             return {
@@ -72,17 +90,17 @@ export class GameEngine {
                 color: t.type === "BOSS" ? "#ff0000" : "#ff4a4a",
                 state: "IDLE",
                 timer: 0,
-                patterns: patterns,
+                patterns: patternScripts,
                 currentPatternIdx: 0,
-                currentPattern: patterns[0],
-                patternStep: 0,
+                currentScript: patternScripts[0],
+                stepIdx: 0,
                 hitTriggered: false
             };
         });
     }
 
     getNextAugments(tier = "Common") {
-        const list = AUGMENT_DATA[tier];
+        const list = AUGMENT_DATA[tier] || AUGMENT_DATA["Common"];
         return [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
     }
 
