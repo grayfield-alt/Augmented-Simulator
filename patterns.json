@@ -1,0 +1,50 @@
+[
+    {
+        "id": "standard_warrior",
+        "name": "Standard Warrior",
+        "patterns": [
+            {
+                "id": "p1",
+                "steps": [
+                    {
+                        "type": "TELEGRAPH",
+                        "duration": 60,
+                        "action": "ATTACK"
+                    },
+                    {
+                        "type": "TELEGRAPH",
+                        "duration": 40,
+                        "action": "ATTACK"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "boss_venom",
+        "name": "Venom Boss",
+        "patterns": [
+            {
+                "id": "triple_threat",
+                "steps": [
+                    {
+                        "type": "TELEGRAPH",
+                        "duration": 40,
+                        "action": "ATTACK"
+                    },
+                    {
+                        "type": "TELEGRAPH",
+                        "duration": 60,
+                        "action": "ATTACK"
+                    },
+                    {
+                        "type": "TELEGRAPH",
+                        "duration": 90,
+                        "action": "ATTACK",
+                        "damageMult": 1.5
+                    }
+                ]
+            }
+        ]
+    }
+]
