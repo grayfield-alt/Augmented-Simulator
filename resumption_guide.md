@@ -1,31 +1,30 @@
-# Augmented Simulator - 집에서 작업 이어하기 가이드
+# 증강 시뮬레이터 - 작업 재개 가이드 (한글판)
 
-현재 `augmented_simulator` 프로젝트의 작업 상태와 집에 가서 이어서 하는 방법을 안내해 드립니다.
+이 가이드는 `augmented_simulator` 프로젝트의 현재 상태와 다른 환경에서 작업을 이어서 하는 방법을 안내합니다.
 
-## 1. 현재 대화 정보
-- **Conversation ID**: `4fc72d59-0275-4075-9a2e-e8df240ce6c2`
-- **현재 진행 상태**:
-    - 전투 메커니즘 (`combat.js`) 및 시뮬레이터 연동 완료.
-    - 증강(Augments) 시스템 (`augments.js`, `augments.json`) 구현.
-    - 드래곤 보스 패턴 및 엔진 통합 문서 작성 완료.
+## 1. 현재 개발 상태
+- **전투 메커니즘**: `CombatEngine.js`를 통한 통합 완료.
+- **증강 시스템**: `augments.js` 및 `augments.json` 구현 완료.
+- **몬스터 데이터**: `constants.js` 내의 `WAVE_DATA` 및 `patterns.json` 한글화 완료.
+- **아키텍처**: 클린 아키텍처 기반의 코드 구조 형성 및 지침 등록 완료.
 
-## 2. 집에서 이어서 하는 방법
-집에서 Antigravity를 실행한 후 다음 단계를 따라주세요.
+## 2. 작업 이어서 하기
+새로운 환경에서 Antigravity를 실행한 후 다음 단계를 따르세요.
 
-### Step 1: 저장소 클론
+### 1단계: 저장소 가져오기
 ```bash
 git clone https://github.com/grayfield-alt/Augmented-Simulator.git
 cd Augmented-Simulator
 ```
 
-### Step 2: AI에게 맥락 제공하기
-새 대화를 시작할 때 다음 메시지를 복사해서 입력해 주세요:
+### 2단계: AI에게 맥락 제공
+새 대화를 시작할 때 다음 메시지를 복사하여 입력해 주세요:
 
-> "기존 대화(`4fc72d59-0275-4075-9a2e-e8df240ce6c2`)에서 진행하던 증강 시뮬레이터 작업을 이어서 하고 싶어. 현재 `augmented_simulator` 폴더를 워크스페이스로 설정해줘. Git에서 최신 코드를 받았으니, `task.md`와 `implementation_plan.md`를 참고해서 다음 단계를 알려줘. UI 안정화와 **Stage 7 고대 드래곤**까지 구현된 상태야."
+> "기존 대화에서 진행하던 증강 시뮬레이터 작업을 이어서 하고 싶어. 현재 프로젝트의 `skills.md`와 `task.md`를 먼저 읽고, 모든 답변과 문서를 한국어로 작성해줘. 클린 아키텍처 지침을 준수하며 다음 단계를 제안해줘."
 
 ## 3. 주요 파일 위치
-- 핵심 로직: `simulator.js`, `combat.js`, `augments.js`
-- 데이터: `augments.json`, `patterns.json`
-- 기술 문서: `engine_integration.md`
+- **핵심 로직**: `src/logic/GameEngine.js`, `src/logic/CombatEngine.js`
+- **데이터 설정**: `src/logic/constants.js`, `augments.json`, `patterns.json`
+- **지침 문서**: `skills.md`, `README.md`, `engine_integration.md`
 
 이 가이드는 `resumption_guide.md` 파일로 프로젝트 루트에 저장되어 있습니다.

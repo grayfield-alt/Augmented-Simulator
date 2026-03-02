@@ -1,14 +1,14 @@
-# Engine Integration Guide
+# 엔진 연동 가이드
 
-This guide explains how to import the `augments.json` data into your game engine and implement the corresponding logic with minimal code changes.
+이 가이드는 `augments.json` 데이터를 게임 엔진으로 가져오고 최소한의 코드 변경으로 해당 로직을 구현하는 방법을 설명합니다.
 
-## Recommended Engine: Unity
+## 권장 엔진: Unity
 
-Unity's **ScriptableObjects** provide the cleanest way to map JSON data to game logic.
+Unity의 **ScriptableObjects**를 사용하면 JSON 데이터를 게임 로직에 가장 깔끔하게 매핑할 수 있습니다.
 
-### 1. Data Structure (C#)
+### 1. 데이터 구조 (C#)
 
-Create a class that matches the JSON structure.
+JSON 구조와 일치하는 클래스를 생성합니다.
 
 ```csharp
 using UnityEngine;
@@ -28,9 +28,9 @@ public class AugmentData
 }
 ```
 
-### 2. Logic Mapping (C#)
+### 2. 로직 매핑 (C#)
 
-Implement a simple factory or switch-case to handle the `logicType`.
+`logicType`을 처리하기 위한 간단한 팩토리 또는 switch-case를 구현합니다.
 
 ```csharp
 public class AugmentLogic
@@ -55,11 +55,11 @@ public class AugmentLogic
 }
 ```
 
-## Import Workflow
+## 가져오기 워크플로우
 
-1.  **Export**: Ensure your `augments.json` is updated in the simulator.
-2.  **Import**: In Unity, use `JsonUtility.FromJson<AugmentDataList>(jsonString)` or a dedicated tool like **Newtonsoft JSON** to populate your ScriptableObjects.
-3.  **Validate**: Since the logic types are strings, you can add new types in both the simulator and the engine without breaking existing data.
+1.  **내보내기**: 시뮬레이터에서 `augments.json`이 최신 상태인지 확인합니다.
+2.  **가져오기**: Unity에서 `JsonUtility.FromJson<AugmentDataList>(jsonString)` 또는 **Newtonsoft JSON**과 같은 전용 도구를 사용하여 ScriptableObjects에 데이터를 채웁니다.
+3.  **검증**: 로직 유형이 문자열이므로 기존 데이터를 손상시키지 않고 시뮬레이터와 엔진 모두에서 새로운 유형을 추가할 수 있습니다.
 
-## Unreal Note
-If using Unreal, you can create a **PrimaryDataAsset** with the same fields and use **DataTable** to import the JSON file directly. The logic would then be implemented in a C++ `FunctionLibrary` or a base `Augment` class.
+## Unreal 관련 참고사항
+Unreal을 사용하는 경우 동일한 필드를 가진 **PrimaryDataAsset**을 생성하고 **DataTable**을 사용하여 JSON 파일을 직접 가져올 수 있습니다. 로직은 C++ `FunctionLibrary` 또는 기본 `Augment` 클래스에서 구현됩니다.

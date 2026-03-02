@@ -64,47 +64,47 @@ export const AUGMENT_DATA = {
 
 export const WAVE_DATA = {
     1: [
-        { type: "Standard Soldier", hp: 100, atk: 10, y: 150, patterns: { steps: [{ type: "TELEGRAPH", duration: 60, action: "ATTACK" }] } },
-        { type: "Fast Scout", hp: 80, atk: 12, y: 350, patterns: { steps: [{ type: "TELEGRAPH", duration: 40, action: "ATTACK" }, { type: "TELEGRAPH", duration: 40, action: "ATTACK" }] } }
+        { type: "일반 병사", hp: 100, atk: 10, y: 150, patterns: { steps: [{ type: "전조", duration: 60, action: "공격" }] } },
+        { type: "민첩한 정찰병", hp: 80, atk: 12, y: 350, patterns: { steps: [{ type: "전조", duration: 40, action: "공격" }, { type: "전조", duration: 40, action: "공격" }] } }
     ],
     2: [
-        { type: "Heavy Guard", hp: 200, atk: 15, y: 150, patterns: { steps: [{ type: "TELEGRAPH", duration: 80, action: "ATTACK", damageMult: 1.2 }] } },
-        { type: "Agile Assasin", hp: 100, atk: 8, y: 350, patterns: { steps: [{ type: "TELEGRAPH", duration: 30, action: "ATTACK" }, { type: "TELEGRAPH", duration: 30, action: "ATTACK" }, { type: "TELEGRAPH", duration: 30, action: "ATTACK" }] } }
+        { type: "중장갑 근위병", hp: 200, atk: 15, y: 150, patterns: { steps: [{ type: "전조", duration: 80, action: "공격", damageMult: 1.2 }] } },
+        { type: "날렵한 암살자", hp: 100, atk: 8, y: 350, patterns: { steps: [{ type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 30, action: "공격" }] } }
     ],
-    3: { type: "EVENT" },
+    3: { type: "이벤트" },
     4: [
-        { type: "Elite Unit A", hp: 150, atk: 12, y: 100, patterns: { steps: [{ type: "TELEGRAPH", duration: 45, action: "ATTACK" }, { type: "TELEGRAPH", duration: 60, action: "ATTACK" }] } },
-        { type: "Elite Unit B", hp: 150, atk: 12, y: 250, patterns: { steps: [{ type: "TELEGRAPH", duration: 60, action: "ATTACK" }, { type: "TELEGRAPH", duration: 45, action: "ATTACK" }] } },
-        { type: "Elite Unit C", hp: 200, atk: 10, y: 400, patterns: { steps: [{ type: "TELEGRAPH", duration: 90, action: "ATTACK", damageMult: 1.5 }] } }
+        { type: "정예 부대 A", hp: 150, atk: 12, y: 100, patterns: { steps: [{ type: "전조", duration: 45, action: "공격" }, { type: "전조", duration: 60, action: "공격" }] } },
+        { type: "정예 부대 B", hp: 150, atk: 12, y: 250, patterns: { steps: [{ type: "전조", duration: 60, action: "공격" }, { type: "전조", duration: 45, action: "공격" }] } },
+        { type: "정예 부대 C", hp: 200, atk: 10, y: 400, patterns: { steps: [{ type: "전조", duration: 90, action: "공격", damageMult: 1.5 }] } }
     ],
     5: [
-        { type: "Shadow Master", hp: 300, atk: 15, y: 225, patterns: { steps: [{ type: "TELEGRAPH", duration: 40, action: "ATTACK" }, { type: "TELEGRAPH", duration: 30, action: "ATTACK" }, { type: "TELEGRAPH", duration: 20, action: "ATTACK" }, { type: "TELEGRAPH", duration: 60, action: "ATTACK", damageMult: 2.0 }] } }
+        { type: "그림자 마스터", hp: 300, atk: 15, y: 225, patterns: { steps: [{ type: "전조", duration: 40, action: "공격" }, { type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 20, action: "공격" }, { type: "전조", duration: 60, action: "공격", damageMult: 2.0 }] } }
     ],
     6: [
         {
-            type: "BOSS", hp: 1200, atk: 18, y: 225,
+            type: "보스", hp: 1200, atk: 18, y: 225,
             multiPatterns: [
                 {
-                    id: "phase1",
+                    id: "1페이즈",
                     steps: [
-                        { type: "TELEGRAPH", duration: 60, action: "ATTACK" },
-                        { type: "TELEGRAPH", duration: 45, action: "ATTACK" },
-                        { type: "TELEGRAPH", duration: 30, action: "ATTACK" }
+                        { type: "전조", duration: 60, action: "공격" },
+                        { type: "전조", duration: 45, action: "공격" },
+                        { type: "전조", duration: 30, action: "공격" }
                     ]
                 },
                 {
-                    id: "heavy_slam",
+                    id: "강력한 내려치기",
                     steps: [
-                        { type: "TELEGRAPH", duration: 90, action: "ATTACK", damageMult: 2.5, unparriable: true }
+                        { type: "전조", duration: 90, action: "공격", damageMult: 2.5, unparriable: true }
                     ]
                 },
                 {
-                    id: "fury_swipes",
+                    id: "광란의 할퀴기",
                     steps: [
-                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" },
-                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" },
-                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" },
-                        { type: "TELEGRAPH", duration: 25, action: "ATTACK" }
+                        { type: "전조", duration: 25, action: "공격" },
+                        { type: "전조", duration: 25, action: "공격" },
+                        { type: "전조", duration: 25, action: "공격" },
+                        { type: "전조", duration: 25, action: "공격" }
                     ]
                 }
             ]
@@ -112,17 +112,17 @@ export const WAVE_DATA = {
     ],
     7: [
         {
-            type: "ANCIENT DRAGON",
+            type: "고대 드래곤",
             hp: 3000,
             atk: 35,
             y: 225,
             radius: 100,
             patterns: {
                 steps: [
-                    { type: "TELEGRAPH", duration: 80, action: "ATTACK" },
-                    { type: "TELEGRAPH", duration: 40, action: "ATTACK" },
-                    { type: "TELEGRAPH", duration: 20, action: "ATTACK" },
-                    { type: "TELEGRAPH", duration: 60, action: "ATTACK", unparriable: true }
+                    { type: "전조", duration: 80, action: "공격" },
+                    { type: "전조", duration: 40, action: "공격" },
+                    { type: "전조", duration: 20, action: "공격" },
+                    { type: "전조", duration: 60, action: "공격", unparriable: true }
                 ]
             }
         }
