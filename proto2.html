@@ -837,7 +837,7 @@
             <div id="hit-icons-container"></div>
             <!-- Removed #monster-debugger from here -->
             <div id="bottom-ui"
-                style="pointer-events: auto; position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; z-index: 1001;">
+                style="pointer-events: auto; position: absolute; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; z-index: 1001;">
                 <div class="cost-info">
                     <span class="ap-text">AP: <span id="p-ap">0</span></span>
                 </div>
@@ -1984,12 +1984,22 @@
             }
         }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (!gameStarted) return;
+        let canvasShake = 0;
+        function shakeCanvas(amt) { canvasShake = amt; }
 
+        function draw() {
+            ctx.save();
+            if (canvasShake > 0) {
+                ctx.translate(Math.random() * canvasShake - canvasShake / 2, Math.random() * canvasShake - canvasShake / 2);
+                canvasShake *= 0.9;
+                if (canvasShake < 0.5) canvasShake = 0;
+            }
+            ctx.clearRect(-100, -100, canvas.width + 200, canvas.height + 200);
+            if (!gameStarted) { ctx.restore(); return; }
+
+            // 1. Draw Monsters
             monsters.forEach((m) => {
-                let color = m.color; // 기본 레드로 복구 (#ff4a4a)
+                let color = m.color;
                 if (m.state === "TELEGRAPH") {
                     const set = m.settings || monsterSettings;
                     const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
@@ -2002,7 +2012,7 @@
                 ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 몬스터 HP 수치만 표시 (이름 제외)
+                // 몬스터 HP 수치만 표시
                 ctx.fillStyle = "#fff";
                 ctx.font = "bold 14px Inter";
                 ctx.textAlign = "center";
@@ -2018,33 +2028,20 @@
                 }
             });
 
-            // 데미지 텍스트
+            // 2. Draw Damage Texts
             damageTexts.forEach(dt => {
                 ctx.fillStyle = dt.color;
                 ctx.font = "bold 24px Inter";
                 ctx.fillText(dt.text, dt.x, dt.y);
             });
-        }
 
-        let canvasShake = 0;
-        function shakeCanvas(amt) { canvasShake = amt; }
-
-        function draw() {
-            ctx.save();
-            if (canvasShake > 0) {
-                ctx.translate(Math.random() * canvasShake - canvasShake / 2, Math.random() * canvasShake - canvasShake / 2);
-                canvasShake *= 0.9;
-                if (canvasShake < 0.5) canvasShake = 0;
-            }
-            ctx.clearRect(-100, -100, canvas.width + 200, canvas.height + 200);
-            if (!gameStarted) { ctx.restore(); return; }
+            // 3. Draw Player & Ghosts
             Player.ghosts.forEach(g => {
                 ctx.fillStyle = `rgba(74, 158, 255, ${g.a})`;
                 ctx.beginPath(); ctx.arc(g.x, g.y, Player.radius, 0, Math.PI * 2); ctx.fill();
             });
 
             if (Player.isParrying) {
-                // 패링 태세 시각 효과 (노란색 오라)
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = "#FFD700";
                 ctx.strokeStyle = "#FFD700";
@@ -2053,19 +2050,20 @@
                 ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
                 ctx.stroke();
             } else if (Player.dashTimer > 0) {
-                // 대시 태세 시각 효과 (회색 테두리)
                 ctx.strokeStyle = "#aaa";
                 ctx.lineWidth = 2;
                 ctx.setLineDash([5, 5]);
                 ctx.beginPath();
                 ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
                 ctx.stroke();
+                ctx.setLineDash([]); // Reset dash
             }
 
             ctx.fillStyle = Player.color;
             ctx.beginPath();
             ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2);
             ctx.fill();
+
             ctx.restore();
         }
 
