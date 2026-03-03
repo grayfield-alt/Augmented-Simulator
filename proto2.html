@@ -624,212 +624,223 @@
 </head>
 
 <body>
-    <!-- Lobby UI -->
-    <div id="lobby-overlay">
-        <div class="lobby-title">Augmented<br>Simulator</div>
-        <div class="lobby-menu">
-            <button class="lobby-btn primary" onclick="startGame()">⚔️ 전투 시작</button>
-            <button class="lobby-btn" onclick="openInventory()">🧪 몬스터 연구소</button>
-            <button class="lobby-btn" onclick="openStageEditor()">🗺️ 스테이지 에디터</button>
-            <button class="lobby-btn" onclick="toggleGuide(true)">❓ 가이드</button>
-        </div>
-        <p style="margin-top: 40px; color: #444; font-size: 12px;">v2.5 Portrait Optimized</p>
-    </div>
-
-    <canvas id="gameCanvas"></canvas>
-
-    <!-- Inventory / Lab Overlay -->
-    <div id="inventory-overlay">
-        <div class="section-header">
-            <h2 style="color: #facc15; margin:0;">🧪 몬스터 연구소</h2>
-            <button class="guide-close-btn" onclick="closeOverlay('inventory-overlay')">닫기</button>
-        </div>
-        <div style="margin-bottom: 20px;">
-            <button class="action-atk" style="width:100%;" onclick="openMonsterCreator()">+ 새로운 커스텀 몬스터 제작</button>
-        </div>
-        <div id="complete-inventory-list" class="inventory-grid">
-            <!-- Combined list of default and custom monsters -->
-        </div>
-    </div>
-
-    <!-- Stage Editor Overlay -->
-    <div id="stage-editor-overlay">
-        <div class="section-header">
-            <h2 style="color: #4db8ff; margin:0;">🗺️ 스테이지 에디터</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="action-heavy" onclick="resetStagesToDefault()">🔄 초기화</button>
-                <button class="guide-close-btn" onclick="closeOverlay('stage-editor-overlay')">닫기</button>
+    <div id="game-container"
+        style="position: relative; width: 100vw; height: 100vh; overflow: hidden; background: #000;">
+        <!-- Lobby UI -->
+        <div id="lobby-overlay">
+            <div class="lobby-title">Augmented<br>Simulator</div>
+            <div class="lobby-menu">
+                <button class="lobby-btn primary" onclick="startGame()">⚔️ 전투 시작</button>
+                <button class="lobby-btn" onclick="openInventory()">🧪 몬스터 연구소</button>
+                <button class="lobby-btn" onclick="openStageEditor()">🗺️ 스테이지 에디터</button>
+                <button class="lobby-btn" onclick="toggleGuide(true)">❓ 가이드</button>
             </div>
+            <p style="margin-top: 40px; color: #444; font-size: 12px;">v2.5 Portrait Optimized</p>
         </div>
-        <p style="color: #888; font-size: 13px; margin-bottom: 15px;">라운드를 선택하여 몬스터를 배치하세요.</p>
-        <div id="full-stage-list">
-            <!-- Stages 1, 2, 4, 5, 6 -->
-        </div>
-    </div>
-    <div id="guide-overlay">
-        <div class="guide-content">
-            <h2>🎮 게임 가이드</h2>
 
-            <h3>1. 방어 (적의 턴)</h3>
-            <ul>
-                <li>적의 공격이 들어올 때 **화면 아무 곳이나 클릭**하여 패링을 시도하세요.</li>
-                <li>**PERFECT**: 적중 직전 방어 (AP +2 수급)</li>
-                <li>**GOOD**: 조금 빠른 방어 (AP +1 수급)</li>
-            </ul>
+        <canvas id="gameCanvas"></canvas>
 
-            <h3>2. 공격 (플레이어 턴)</h3>
-            <ul>
-                <li>**공격 (2 AP)**: 단일 적 공격. 스킬 선택 후 대상을 클릭하세요.</li>
-                <li>**회전 베기 (3 AP)**: 모든 적 공격. 즉시 발동됩니다.</li>
-                <li>**강타 (5 AP)**: 높은 피해의 강공격. 스킬 선택 후 대상을 클릭하세요.</li>
-                <li>각 스킬은 한 턴에 **최대 1회**만 사용할 수 있습니다.</li>
-            </ul>
-
-            <h3>3. 증강 및 이벤트</h3>
-            <ul>
-                <li>라운드를 클리어할 때마다 강력한 **증강(Augment)**을 골라 빌드를 완성하세요.</li>
-                <li>3라운드는 강력한 보너스나 회복을 얻는 **이벤트 라운드**입니다.</li>
-            </ul>
-
-            <h3>4. 적 공격 정보</h3>
-            <ul>
-                <li>화면 우하단의 **초록색 아이콘**은 현재 공격하는 적의 남은 연타 횟수입니다.</li>
-                <li>적에게 한 대 맞거나 방어할 때마다 하나씩 어두워지니 박자를 놓치지 마세요!</li>
-                <li>**Boss Round**의 최종 보스는 무려 3가지 패턴을 섞어서 사용하니 주의하세요!</li>
-            </ul>
-        </div>
-        <button class="guide-close-btn" onclick="toggleGuide(false)">닫기</button>
-    </div>
-    <div id="augment-overlay">
-        <h2 style="color:#fff; margin-bottom: 20px;">Choose an Augment</h2>
-        <div id="augment-cards" class="augment-container"></div>
-        <button id="btn-reroll" class="reroll-btn" onclick="rerollAugments()">Reroll (1 Remaining)</button>
-    </div>
-    <div id="event-overlay">
-        <h2 style="color:#fff; margin-bottom: 30px;">Round 3: Event Option</h2>
-        <div class="event-container">
-            <div class="event-card" onclick="selectEventOption(1)">
-                <h3>🎁 선물</h3>
-                <p>Common 증강 1개 선택</p>
+        <!-- Inventory / Lab Overlay -->
+        <div id="inventory-overlay">
+            <div class="section-header">
+                <h2 style="color: #facc15; margin:0;">🧪 몬스터 연구소</h2>
+                <button class="guide-close-btn" onclick="closeOverlay('inventory-overlay')">닫기</button>
             </div>
-            <div class="event-card" onclick="selectEventOption(2)">
-                <h3>🍕 휴식</h3>
-                <p>HP 회복 35%</p>
+            <div style="margin-bottom: 20px;">
+                <button class="action-atk" style="width:100%;" onclick="openMonsterCreator()">+ 새로운 커스텀 몬스터
+                    제작</button>
             </div>
-        </div>
-    </div>
-    <div id="game-over-overlay">
-        <h1 style="color:#ff4a4a; font-size: 64px; margin-bottom: 20px;">GAME OVER</h1>
-        <p style="color:#ccc; margin-bottom: 20px;">전사하셨습니다...</p>
-        <button class="retry-btn" onclick="retryGame()">🔄 Retry?</button>
-    </div>
-
-    <!-- --- Editor Mode Overlay --- -->
-    <div id="editor-overlay">
-        <div class="editor-header">
-            <h2 style="color: #fff; margin:0;">🧪 몬스터 연구소 & 스테이지 에디터</h2>
-            <div style="display: flex; gap: 10px;">
-                <button class="action-exc" onclick="saveToStorage()">💾 전체 저장</button>
-                <button class="guide-close-btn" onclick="toggleEditor(false)">❌ 닫기</button>
+            <div id="complete-inventory-list" class="inventory-grid">
+                <!-- Combined list of default and custom monsters -->
             </div>
         </div>
 
-        <div class="editor-content">
-            <!-- Monster Library Section -->
-            <div class="editor-section">
-                <h4>
-                    <span>📁 몬스터 라이브러리</span>
-                    <button class="btn-sm action-atk" onclick="openMonsterCreator()">+ 신규 몬스터</button>
-                </h4>
-                <div id="monster-library-list" style="height: 300px; overflow-y: auto;">
-                    <p style="opacity:0.5; font-size:12px;">저장된 몬스터가 없습니다.</p>
+        <!-- Stage Editor Overlay -->
+        <div id="stage-editor-overlay">
+            <div class="section-header">
+                <h2 style="color: #4db8ff; margin:0;">🗺️ 스테이지 에디터</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="action-heavy" onclick="resetStagesToDefault()">🔄 초기화</button>
+                    <button class="guide-close-btn" onclick="closeOverlay('stage-editor-overlay')">닫기</button>
                 </div>
             </div>
+            <p style="color: #888; font-size: 13px; margin-bottom: 15px;">라운드를 선택하여 몬스터를 배치하세요.</p>
+            <div id="full-stage-list">
+                <!-- Stages 1, 2, 4, 5, 6 -->
+            </div>
+        </div>
+        <div id="guide-overlay">
+            <div class="guide-content">
+                <h2>🎮 게임 가이드</h2>
 
-            <!-- Stage Editor Section -->
-            <div class="editor-section">
-                <h4><span>🗺️ 스테이지 배치 (Round 1~6)</span></h4>
-                <div id="stage-editor-list" style="height: 300px; overflow-y: auto;">
-                    <!-- Stage Slots will be generated here -->
+                <h3>1. 방어 (적의 턴)</h3>
+                <ul>
+                    <li>적의 공격이 들어올 때 **화면 아무 곳이나 클릭**하여 패링을 시도하세요.</li>
+                    <li>**PERFECT**: 적중 직전 방어 (AP +2 수급)</li>
+                    <li>**GOOD**: 조금 빠른 방어 (AP +1 수급)</li>
+                </ul>
+
+                <h3>2. 공격 (플레이어 턴)</h3>
+                <ul>
+                    <li>**공격 (2 AP)**: 단일 적 공격. 스킬 선택 후 대상을 클릭하세요.</li>
+                    <li>**회전 베기 (3 AP)**: 모든 적 공격. 즉시 발동됩니다.</li>
+                    <li>**강타 (5 AP)**: 높은 피해의 강공격. 스킬 선택 후 대상을 클릭하세요.</li>
+                    <li>각 스킬은 한 턴에 **최대 1회**만 사용할 수 있습니다.</li>
+                </ul>
+
+                <h3>3. 증강 및 이벤트</h3>
+                <ul>
+                    <li>라운드를 클리어할 때마다 강력한 **증강(Augment)**을 골라 빌드를 완성하세요.</li>
+                    <li>3라운드는 강력한 보너스나 회복을 얻는 **이벤트 라운드**입니다.</li>
+                </ul>
+
+                <h3>4. 적 공격 정보</h3>
+                <ul>
+                    <li>화면 우하단의 **초록색 아이콘**은 현재 공격하는 적의 남은 연타 횟수입니다.</li>
+                    <li>적에게 한 대 맞거나 방어할 때마다 하나씩 어두워지니 박자를 놓치지 마세요!</li>
+                    <li>**Boss Round**의 최종 보스는 무려 3가지 패턴을 섞어서 사용하니 주의하세요!</li>
+                </ul>
+            </div>
+            <button class="guide-close-btn" onclick="toggleGuide(false)">닫기</button>
+        </div>
+        <div id="augment-overlay">
+            <h2 style="color:#fff; margin-bottom: 20px;">Choose an Augment</h2>
+            <div id="augment-cards" class="augment-container"></div>
+            <button id="btn-reroll" class="reroll-btn" onclick="rerollAugments()">Reroll (1 Remaining)</button>
+        </div>
+        <div id="event-overlay">
+            <h2 style="color:#fff; margin-bottom: 30px;">Round 3: Event Option</h2>
+            <div class="event-container">
+                <div class="event-card" onclick="selectEventOption(1)">
+                    <h3>🎁 선물</h3>
+                    <p>Common 증강 1개 선택</p>
+                </div>
+                <div class="event-card" onclick="selectEventOption(2)">
+                    <h3>🍕 휴식</h3>
+                    <p>HP 회복 35%</p>
                 </div>
             </div>
         </div>
+        <div id="game-over-overlay">
+            <h1 style="color:#ff4a4a; font-size: 64px; margin-bottom: 20px;">GAME OVER</h1>
+            <p style="color:#ccc; margin-bottom: 20px;">전사하셨습니다...</p>
+            <button class="retry-btn" onclick="retryGame()">🔄 Retry?</button>
+        </div>
 
-        <div id="monster-creator-panel"
-            style="display:none; margin-top:20px; background:#2a2a2a; padding:15px; border-radius:8px; border:1px solid #ff4a4a;">
-            <h4 id="creator-title">🛠️ 몬스터 생성/수정</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div>
-                    <label>몬스터 이름: <input type="text" id="lib-name" value="신규 몬스터"></label><br>
-                    <label>HP: <input type="number" id="lib-hp" value="100"></label><br>
-                    <label>ATK: <input type="number" id="lib-atk" value="10"></label>
+        <!-- --- Editor Mode Overlay --- -->
+        <div id="editor-overlay">
+            <div class="editor-header">
+                <h2 style="color: #fff; margin:0;">🧪 몬스터 연구소 & 스테이지 에디터</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="action-exc" onclick="saveToStorage()">💾 전체 저장</button>
+                    <button class="guide-close-btn" onclick="toggleEditor(false)">❌ 닫기</button>
                 </div>
-                <div>
-                    <div
-                        style="grid-column: span 2; padding: 10px; background: #333; border-radius: 4px; border: 1px solid #444;">
-                        <p style="margin:0 0 10px 0; font-size: 12px; color: #facc15;">📉 세부 밸런스 설정</p>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div>
-                                <label style="font-size:11px;">전조 시간 배율: <span
-                                        id="lib-val-telegraph">1.0</span>x</label><br>
-                                <input type="range" id="lib-telegraph" min="0.1" max="3.0" step="0.1" value="1.0"
-                                    oninput="document.getElementById('lib-val-telegraph').innerText=this.value">
-                            </div>
-                            <div>
-                                <label style="font-size:11px;">후딜레이 배율: <span
-                                        id="lib-val-postdelay">1.0</span>x</label><br>
-                                <input type="range" id="lib-postdelay" min="0.1" max="3.0" step="0.1" value="1.0"
-                                    oninput="document.getElementById('lib-val-postdelay').innerText=this.value">
-                            </div>
-                            <div>
-                                <label style="font-size:11px;">히트 스톱: <span id="lib-val-hitstop">3</span>f</label><br>
-                                <input type="range" id="lib-hitstop" min="0" max="20" step="1" value="3"
-                                    oninput="document.getElementById('lib-val-hitstop').innerText=this.value">
+            </div>
+
+            <div class="editor-content">
+                <!-- Monster Library Section -->
+                <div class="editor-section">
+                    <h4>
+                        <span>📁 몬스터 라이브러리</span>
+                        <button class="btn-sm action-atk" onclick="openMonsterCreator()">+ 신규 몬스터</button>
+                    </h4>
+                    <div id="monster-library-list" style="height: 300px; overflow-y: auto;">
+                        <p style="opacity:0.5; font-size:12px;">저장된 몬스터가 없습니다.</p>
+                    </div>
+                </div>
+
+                <!-- Stage Editor Section -->
+                <div class="editor-section">
+                    <h4><span>🗺️ 스테이지 배치 (Round 1~6)</span></h4>
+                    <div id="stage-editor-list" style="height: 300px; overflow-y: auto;">
+                        <!-- Stage Slots will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="monster-creator-panel"
+                style="display:none; margin-top:20px; background:#2a2a2a; padding:15px; border-radius:8px; border:1px solid #ff4a4a;">
+                <h4 id="creator-title">🛠️ 몬스터 생성/수정</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label>몬스터 이름: <input type="text" id="lib-name" value="신규 몬스터"></label><br>
+                        <label>HP: <input type="number" id="lib-hp" value="100"></label><br>
+                        <label>ATK: <input type="number" id="lib-atk" value="10"></label>
+                    </div>
+                    <div>
+                        <div
+                            style="grid-column: span 2; padding: 10px; background: #333; border-radius: 4px; border: 1px solid #444;">
+                            <p style="margin:0 0 10px 0; font-size: 12px; color: #facc15;">📉 세부 밸런스 설정</p>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label style="font-size:11px;">전조 시간 배율: <span
+                                            id="lib-val-telegraph">1.0</span>x</label><br>
+                                    <input type="range" id="lib-telegraph" min="0.1" max="3.0" step="0.1" value="1.0"
+                                        oninput="document.getElementById('lib-val-telegraph').innerText=this.value">
+                                </div>
+                                <div>
+                                    <label style="font-size:11px;">후딜레이 배율: <span
+                                            id="lib-val-postdelay">1.0</span>x</label><br>
+                                    <input type="range" id="lib-postdelay" min="0.1" max="3.0" step="0.1" value="1.0"
+                                        oninput="document.getElementById('lib-val-postdelay').innerText=this.value">
+                                </div>
+                                <div>
+                                    <label style="font-size:11px;">히트 스톱: <span
+                                            id="lib-val-hitstop">3</span>f</label><br>
+                                    <input type="range" id="lib-hitstop" min="0" max="20" step="1" value="3"
+                                        oninput="document.getElementById('lib-val-hitstop').innerText=this.value">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div style="margin-top:10px; text-align:right;">
-                <button class="btn-sm start-btn" onclick="confirmMonsterSave()">적용 및 저장</button>
-                <button class="btn-sm guide-close-btn"
-                    onclick="document.getElementById('monster-creator-panel').style.display='none'">취소</button>
+                <div style="margin-top:10px; text-align:right;">
+                    <button class="btn-sm start-btn" onclick="confirmMonsterSave()">적용 및 저장</button>
+                    <button class="btn-sm guide-close-btn"
+                        onclick="document.getElementById('monster-creator-panel').style.display='none'">취소</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="ui-layer">
-        <div id="vignette" class="vignette"></div>
-        <div id="top-status"
-            style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none;">
-            <div style="display: flex; gap: 20px; pointer-events: auto;">
-                <div class="status-box">HP: <span id="p-hp" class="hp-text">100</span></div>
-                <div class="status-box">ATK: <span id="p-atk" class="atk-text">50</span></div>
-                <div class="status-box">DEF: <span id="p-def" class="def-text">0</span></div>
+        <div id="ui-layer">
+            <div id="vignette" class="vignette"></div>
+            <div id="top-status"
+                style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none;">
+                <div style="display: flex; gap: 20px; pointer-events: auto;">
+                    <div class="status-box">HP: <span id="p-hp" class="hp-text">100</span></div>
+                    <div class="status-box">ATK: <span id="p-atk" class="atk-text">50</span></div>
+                    <div class="status-box">DEF: <span id="p-def" class="def-text">0</span></div>
+                </div>
+                <button class="btn-sm action-str" style="pointer-events: auto; margin-right: 15px;"
+                    onclick="toggleEditor(true)">⚙️ 에디터 모드</button>
             </div>
-            <button class="btn-sm action-str" style="pointer-events: auto; margin-right: 15px;"
-                onclick="toggleEditor(true)">⚙️ 에디터 모드</button>
-        </div>
-        <div id="turn-indicator">Monster's Turn</div>
-        <div id="msg-container">
-            <div id="message">PERFECT!</div>
-        </div>
-        <div id="hit-icons-container"></div>
-        <!-- Removed #monster-debugger from here -->
-        <div id="bottom-ui">
-            <div class="cost-info">
-                <span class="ap-text">AP: <span id="p-ap">0</span></span>
+            <div id="turn-indicator">Monster's Turn</div>
+            <div id="msg-container">
+                <div id="message">PERFECT!</div>
             </div>
-            <div class="actions">
-                <button id="btn-atk" class="action-atk" disabled>1. 공격 (2 AP)</button>
-                <button id="btn-spin" class="action-spin" style="background: #4a4;" disabled>2. 회전 베기 (3
-                    AP)</button>
-                <button id="btn-heavy" class="action-heavy" style="background: #a84;" disabled>3. 강타 (5 AP)</button>
-                <button id="btn-end" style="background: #a33;" disabled>턴 종료</button>
+            <div id="hit-icons-container"></div>
+            <!-- Removed #monster-debugger from here -->
+            <div id="bottom-ui">
+                <div class="cost-info">
+                    <span class="ap-text">AP: <span id="p-ap">0</span></span>
+                </div>
+                <!-- Player Actions (shown during Player Turn) -->
+                <div id="player-actions" class="actions" style="display: none;">
+                    <button id="btn-atk" class="action-atk">공격 (2 AP)</button>
+                    <button id="btn-spin" class="action-spin" style="background: #4a4;">회전 베기 (3 AP)</button>
+                    <button id="btn-heavy" class="action-heavy" style="background: #a84;">강타 (5 AP)</button>
+                    <button id="btn-end" style="background: #a33;">턴 종료</button>
+                </div>
+                <!-- Monster Turn Actions (shown during Monster Turn) -->
+                <div id="monster-actions" class="actions" style="display: flex;">
+                    <button id="btn-parry" class="action-str" style="flex: 2; height: 60px; font-size: 20px;">🛡️ 패링
+                        / 방어</button>
+                    <button id="btn-dash" class="action-atk"
+                        style="flex: 1; height: 60px; font-size: 20px; background: #666;">💨 회피</button>
+                </div>
             </div>
         </div>
-    </div>
-    </div>
+    </div> <!-- End of game-container -->
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -1690,7 +1701,12 @@
             selectedSkill = null;
             Player.actionsUsed = { atk: false, spin: false, heavy: false };
             isEndingTurnAutomatically = false;
-            roundStartTimer = 25; // 턴 전환 대기
+            roundStartTimer = 25;
+
+            // UI Toggle
+            document.getElementById('player-actions').style.display = "none";
+            document.getElementById('monster-actions').style.display = "flex";
+
             monsters.forEach(m => {
                 if (m.hp > 0) {
                     m.state = "IDLE";
@@ -1906,6 +1922,10 @@
                 currentTurn = "PLAYER";
                 ui.turn.innerText = "Player's Turn";
                 ui.hitIcons.innerHTML = "";
+
+                // UI Toggle
+                document.getElementById('player-actions').style.display = "flex";
+                document.getElementById('monster-actions').style.display = "none";
             }
         }
 
@@ -2021,6 +2041,47 @@
             update(dt);
             draw();
             requestAnimationFrame(gameLoop);
+        }
+
+        function init() {
+            loadFromStorage();
+            window.addEventListener('resize', resizeCanvas);
+            canvas.addEventListener('mousedown', handleInput);
+
+            ui.btns.atk.onclick = () => startSkill("atk");
+            ui.btns.spin.onclick = executeSpinSlash;
+            ui.btns.heavy.onclick = () => startSkill("heavy");
+            ui.btns.end.onclick = endPlayerTurn;
+
+            resizeCanvas();
+        }
+
+        function executeDash() {
+            if (Player.dashTimer > 0) return;
+            Player.dashTimer = 20;
+            showFeedback("DASH!", "#aaa");
+        }
+
+        function init() {
+            loadFromStorage();
+            window.addEventListener('resize', resizeCanvas);
+            canvas.addEventListener('mousedown', handleInput);
+
+            // Player Actions
+            ui.btns.atk.onclick = () => startSkill("atk");
+            ui.btns.spin.onclick = executeSpinSlash;
+            ui.btns.heavy.onclick = () => startSkill("heavy");
+            ui.btns.end.onclick = endPlayerTurn;
+
+            // Monster Turn Actions
+            document.getElementById('btn-parry').onmousedown = (e) => {
+                e.preventDefault();
+                Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                Player.isParrying = true;
+            };
+            document.getElementById('btn-dash').onclick = executeDash;
+
+            resizeCanvas();
         }
 
         init();
