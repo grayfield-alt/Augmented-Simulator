@@ -45,6 +45,8 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            display: none;
+            /* Hidden by default */
         }
 
         .vignette {
@@ -401,41 +403,7 @@
             pointer-events: none;
         }
 
-        #monster-debugger {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 220px;
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 12px;
-            color: #fff;
-            font-size: 12px;
-            z-index: 500;
-            pointer-events: auto;
-        }
-
-        #monster-debugger h3 {
-            margin: 0 0 10px 0;
-            color: #ff4a4a;
-            font-size: 14px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
-        }
-
-        .db-row {
-            margin-bottom: 8px;
-        }
-
-        .db-row label {
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        .db-row input {
-            width: 100%;
-        }
+        /* Removed floating monster-debugger */
 
         /* --- Editor UI --- */
         #editor-overlay {
@@ -797,9 +765,29 @@
                     <label>ATK: <input type="number" id="lib-atk" value="10"></label>
                 </div>
                 <div>
-                    <label>전조 배율: <input type="number" id="lib-telegraph" value="1.0" step="0.1"></label><br>
-                    <label>딜레이 배율: <input type="number" id="lib-postdelay" value="1.0" step="0.1"></label><br>
-                    <label>히트 스톱: <input type="number" id="lib-hitstop" value="3"></label>
+                    <div
+                        style="grid-column: span 2; padding: 10px; background: #333; border-radius: 4px; border: 1px solid #444;">
+                        <p style="margin:0 0 10px 0; font-size: 12px; color: #facc15;">📉 세부 밸런스 설정</p>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label style="font-size:11px;">전조 시간 배율: <span
+                                        id="lib-val-telegraph">1.0</span>x</label><br>
+                                <input type="range" id="lib-telegraph" min="0.1" max="3.0" step="0.1" value="1.0"
+                                    oninput="document.getElementById('lib-val-telegraph').innerText=this.value">
+                            </div>
+                            <div>
+                                <label style="font-size:11px;">후딜레이 배율: <span
+                                        id="lib-val-postdelay">1.0</span>x</label><br>
+                                <input type="range" id="lib-postdelay" min="0.1" max="3.0" step="0.1" value="1.0"
+                                    oninput="document.getElementById('lib-val-postdelay').innerText=this.value">
+                            </div>
+                            <div>
+                                <label style="font-size:11px;">히트 스톱: <span id="lib-val-hitstop">3</span>f</label><br>
+                                <input type="range" id="lib-hitstop" min="0" max="20" step="1" value="3"
+                                    oninput="document.getElementById('lib-val-hitstop').innerText=this.value">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div style="margin-top:10px; text-align:right;">
@@ -827,27 +815,7 @@
             <div id="message">PERFECT!</div>
         </div>
         <div id="hit-icons-container"></div>
-        <div id="monster-debugger">
-            <h3>👾 몬스터 세팅</h3>
-            <div class="db-row">
-                <label>전조 시간 배율: <span id="val-telegraph">1.0</span>x</label>
-                <input type="range" id="in-telegraph" min="0.1" max="3.0" step="0.1" value="1.0">
-            </div>
-            <div class="db-row">
-                <label>공격 후 딜레이 배율: <span id="val-postdelay">1.0</span>x</label>
-                <input type="range" id="in-postdelay" min="0.1" max="3.0" step="0.1" value="1.0">
-            </div>
-            <div class="db-row">
-                <label>타이밍 가변성: ±<span id="val-variance">0</span>f</label>
-                <input type="range" id="in-variance" min="0" max="30" step="1" value="0">
-            </div>
-            <div class="db-row">
-                <label>피격 경직 (Hit Stop): <span id="val-hitstop">3</span>f</label>
-                <input type="range" id="in-hitstop" min="0" max="20" step="1" value="3">
-            </div>
-            <button style="width:100%; font-size:10px; padding:5px; background:#444; margin-top:5px;"
-                onclick="console.log(JSON.stringify(monsterSettings))">설정 로그 출력 (JSON)</button>
-        </div>
+        <!-- Removed #monster-debugger from here -->
         <div id="bottom-ui">
             <div class="cost-info">
                 <span class="ap-text">AP: <span id="p-ap">0</span></span>
@@ -940,6 +908,7 @@
             overlayEvent: document.getElementById('event-overlay'),
             overlayGuide: document.getElementById('guide-overlay'),
             overlayGameOver: document.getElementById('game-over-overlay'),
+            uiLayer: document.getElementById('ui-layer'),
             btnReroll: document.getElementById('btn-reroll'),
             btns: {
                 atk: document.getElementById('btn-atk'),
@@ -1161,9 +1130,12 @@
         function toggleEditor(show) {
             document.getElementById('editor-overlay').style.display = show ? "flex" : "none";
             if (show) {
-                gameStarted = false; // Stop game loop logic if needed, or just pause
+                gameStarted = false;
                 renderLibrary();
                 renderStageEditor();
+            } else if (!gameStarted && !ui.lobby.style.display.includes("flex")) {
+                // If we closed editor and not in game, show lobby
+                ui.lobby.style.display = "flex";
             }
         }
 
@@ -1181,6 +1153,10 @@
                 document.getElementById('lib-telegraph').value = m.telegraph;
                 document.getElementById('lib-postdelay').value = m.postdelay;
                 document.getElementById('lib-hitstop').value = m.hitstop;
+
+                document.getElementById('lib-val-telegraph').innerText = m.telegraph;
+                document.getElementById('lib-val-postdelay').innerText = m.postdelay;
+                document.getElementById('lib-val-hitstop').innerText = m.hitstop;
             } else {
                 document.getElementById('creator-title').innerText = "🛠️ 신규 몬스터 생성";
                 document.getElementById('lib-name').value = "신규 몬스터";
@@ -1189,6 +1165,10 @@
                 document.getElementById('lib-telegraph').value = 1.0;
                 document.getElementById('lib-postdelay').value = 1.0;
                 document.getElementById('lib-hitstop').value = 3;
+
+                document.getElementById('lib-val-telegraph').innerText = "1.0";
+                document.getElementById('lib-val-postdelay').innerText = "1.0";
+                document.getElementById('lib-val-hitstop').innerText = "3";
             }
         }
 
@@ -1327,6 +1307,7 @@
             resizeCanvas();
             gameStarted = true;
             ui.lobby.style.display = "none";
+            ui.uiLayer.style.display = "block"; // Show Battle UI
             lastTimestamp = performance.now();
             spawnWave(currentRound);
             requestAnimationFrame(gameLoop);
