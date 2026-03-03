@@ -64,7 +64,7 @@ export class GameEngine {
         return p; // Already a script object
     }
 
-    getMonsters(round) {
+    getMonsters(round, customSettings = null) {
         const data = WAVE_DATA[round];
         if (!data || data.type === "EVENT") return [];
 
@@ -79,7 +79,7 @@ export class GameEngine {
             const isDragon = t.type === "ANCIENT DRAGON";
             const isBoss = t.type === "BOSS" || isDragon;
 
-            return {
+            const baseMonster = {
                 id: Math.random().toString(36).substr(2, 9),
                 name: t.type,
                 homeX: 600,
@@ -97,8 +97,28 @@ export class GameEngine {
                 currentPatternIdx: 0,
                 currentScript: patternScripts[0],
                 stepIdx: 0,
-                hitTriggered: false
+                hitTriggered: false,
+                settings: {
+                    telegraphMult: 1.0,
+                    postDelayMult: 1.0,
+                    variance: 0,
+                    hitStop: 3,
+                    shakeScale: 1.0
+                }
             };
+
+            if (customSettings) {
+                baseMonster.settings = { ...baseMonster.settings, ...customSettings };
+            }
+
+            return baseMonster;
+        });
+    }
+
+    updateMonsterSettings(monsters, newSettings) {
+        monsters.forEach(m => {
+            m.settings = { ...m.settings, ...newSettings };
+            // Re-process patterns if needed, or simply let the next pattern pick up new settings
         });
     }
 

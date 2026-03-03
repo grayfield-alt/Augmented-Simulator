@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GameEngine } from './logic/GameEngine';
 import { PLAYER_CONFIG, MONSTER_CONFIG, WAVE_DATA } from './logic/constants';
 import Dashboard from './components/Dashboard';
+import MonsterDebugger from './components/MonsterDebugger';
 import {
   Heart, Shield, Zap, Target, Swords, Trophy,
   BarChart2, Settings, History, Info
@@ -23,6 +24,14 @@ export default function App() {
   const [isTargeting, setIsTargeting] = useState(false);
   const [damageTexts, setDamageTexts] = useState([]);
   const [isVignetteActive, setIsVignetteActive] = useState(false); // Added: Vignette state
+  const [monsterSettings, setMonsterSettings] = useState({
+    telegraphMult: 1.0,
+    postDelayMult: 1.0,
+    variance: 0,
+    hitStop: 3,
+    shakeScale: 1.0
+  });
+  const hitStopTimerRef = useRef(0);
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -144,6 +153,14 @@ export default function App() {
       if (!lastTimeRef.current) lastTimeRef.current = time;
       const elapsed = time - lastTimeRef.current;
       lastTimeRef.current = time;
+
+      // Hit Stop logic
+      if (hitStopTimerRef.current > 0) {
+        hitStopTimerRef.current -= 1; // Decrease by 1 frame approx
+        animationRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
       const dt = (Math.min(elapsed, 100) / 16.66) * 2.0;
 
       update(dt);
@@ -161,7 +178,9 @@ export default function App() {
   const updateMonsterTurn = (m, dt) => {
     if (m.state === "IDLE") {
       m.timer += dt;
-      if (m.timer > 60) { // proto.html 기준 60 (dt*2 적용 시 0.5초)
+      const settings = m.settings || monsterSettings;
+      const idleDuration = 60 * settings.postDelayMult;
+      if (m.timer > idleDuration) { // proto.html 기준 60 (dt*2 적용 시 0.5초)
         m.state = "TELEGRAPH";
         m.timer = 0;
         m.startX = m.homeX;
@@ -170,7 +189,10 @@ export default function App() {
     } else if (m.state === "TELEGRAPH") {
       m.timer += dt;
       const step = m.currentScript.steps[m.stepIdx];
-      const waitFrames = step.duration;
+      const settings = m.settings || monsterSettings;
+      const baseDuration = step.duration;
+      // 가변성(Variance) 적용 (패턴 시작 시 한 번만 계산하는 게 좋지만, 여기서는 배율 적용)
+      const waitFrames = (baseDuration * settings.telegraphMult) + settings.variance;
 
       // 100% 피델리티: TELEGRAPH 상태에서의 미세한 흔들림 (proto.html L1104)
       const prepRatio = Math.min(m.timer / waitFrames, 1);
@@ -266,6 +288,10 @@ export default function App() {
       engine.player.hp = Math.max(0, engine.player.hp - finalDmg);
       addDamageText(150, 225 - 40, `-${finalDmg}`, "#ff4a4a");
       triggerVignette();
+
+      const settings = m.settings || monsterSettings;
+      hitStopTimerRef.current = settings.hitStop;
+
       if (engine.player.hp <= 0) setGameState('game_over');
     }
     setPlayer({ ...engine.player });
@@ -306,7 +332,14 @@ export default function App() {
     setCurrentTurn("MONSTER");
     setGameState("fighting");
     setPlayer({ ...engine.player });
+    // 초기 설정 주입
+    engine.updateMonsterSettings(newMonsters, monsterSettings);
     setView('play');
+  };
+
+  const updateGlobalMonsterSettings = (newSettings) => {
+    setMonsterSettings(newSettings);
+    engine.updateMonsterSettings(monsters, newSettings);
   };
 
   const executeSkill = (type) => {
@@ -500,6 +533,11 @@ export default function App() {
               {combatLog.map((log, i) => <div key={i} className="opacity-60 mb-1">{log}</div>)}
               {combatLog.length === 0 && <div className="opacity-20 italic">전투 로그가 여기에 표시됩니다...</div>}
             </div>
+
+            <MonsterDebugger
+              monsters={monsters}
+              onUpdateSettings={updateGlobalMonsterSettings}
+            />
           </div>
         )}
 

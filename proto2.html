@@ -385,6 +385,132 @@
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             pointer-events: none;
         }
+
+        #monster-debugger {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 220px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-size: 12px;
+            z-index: 500;
+            pointer-events: auto;
+        }
+
+        #monster-debugger h3 {
+            margin: 0 0 10px 0;
+            color: #ff4a4a;
+            font-size: 14px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .db-row {
+            margin-bottom: 8px;
+        }
+
+        .db-row label {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .db-row input {
+            width: 100%;
+        }
+
+        /* --- Editor UI --- */
+        #editor-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111;
+            z-index: 600;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            pointer-events: auto;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .editor-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .editor-section {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .editor-section h4 {
+            margin: 0 0 10px 0;
+            color: #facc15;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .monster-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #2a2a2a;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .stage-box {
+            background: #2a2a2a;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        .stage-monster-pill {
+            display: inline-flex;
+            align-items: center;
+            background: #444;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin: 2px;
+            font-size: 11px;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .tab-btn {
+            background: #333;
+            color: #888;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab-btn.active {
+            background: #ff4a4a;
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -455,18 +581,99 @@
             <p style="color:#ccc; margin-bottom: 20px;">전사하셨습니다...</p>
             <button class="retry-btn" onclick="retryGame()">🔄 Retry?</button>
         </div>
+
+        <!-- --- Editor Mode Overlay --- -->
+        <div id="editor-overlay">
+            <div class="editor-header">
+                <h2 style="color: #fff; margin:0;">🧪 몬스터 연구소 & 스테이지 에디터</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="action-exc" onclick="saveToStorage()">💾 전체 저장</button>
+                    <button class="guide-close-btn" onclick="toggleEditor(false)">❌ 닫기</button>
+                </div>
+            </div>
+
+            <div class="editor-content">
+                <!-- Monster Library Section -->
+                <div class="editor-section">
+                    <h4>
+                        <span>📁 몬스터 라이브러리</span>
+                        <button class="btn-sm action-atk" onclick="openMonsterCreator()">+ 신규 몬스터</button>
+                    </h4>
+                    <div id="monster-library-list" style="height: 300px; overflow-y: auto;">
+                        <p style="opacity:0.5; font-size:12px;">저장된 몬스터가 없습니다.</p>
+                    </div>
+                </div>
+
+                <!-- Stage Editor Section -->
+                <div class="editor-section">
+                    <h4><span>🗺️ 스테이지 배치 (Round 1~6)</span></h4>
+                    <div id="stage-editor-list" style="height: 300px; overflow-y: auto;">
+                        <!-- Stage Slots will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="monster-creator-panel"
+                style="display:none; margin-top:20px; background:#2a2a2a; padding:15px; border-radius:8px; border:1px solid #ff4a4a;">
+                <h4 id="creator-title">🛠️ 몬스터 생성/수정</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label>몬스터 이름: <input type="text" id="lib-name" value="신규 몬스터"></label><br>
+                        <label>HP: <input type="number" id="lib-hp" value="100"></label><br>
+                        <label>ATK: <input type="number" id="lib-atk" value="10"></label>
+                    </div>
+                    <div>
+                        <label>전조 배율: <input type="number" id="lib-telegraph" value="1.0" step="0.1"></label><br>
+                        <label>딜레이 배율: <input type="number" id="lib-postdelay" value="1.0" step="0.1"></label><br>
+                        <label>히트 스톱: <input type="number" id="lib-hitstop" value="3"></label>
+                    </div>
+                </div>
+                <div style="margin-top:10px; text-align:right;">
+                    <button class="btn-sm start-btn" onclick="confirmMonsterSave()">적용 및 저장</button>
+                    <button class="btn-sm guide-close-btn"
+                        onclick="document.getElementById('monster-creator-panel').style.display='none'">취소</button>
+                </div>
+            </div>
+        </div>
+
         <div id="ui-layer">
             <div id="vignette" class="vignette"></div>
-            <div id="top-status">
-                <div class="status-box">HP: <span id="p-hp" class="hp-text">100</span></div>
-                <div class="status-box">ATK: <span id="p-atk" class="atk-text">50</span></div>
-                <div class="status-box">DEF: <span id="p-def" class="def-text">0</span></div>
+            <div id="top-status"
+                style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none;">
+                <div style="display: flex; gap: 20px; pointer-events: auto;">
+                    <div class="status-box">HP: <span id="p-hp" class="hp-text">100</span></div>
+                    <div class="status-box">ATK: <span id="p-atk" class="atk-text">50</span></div>
+                    <div class="status-box">DEF: <span id="p-def" class="def-text">0</span></div>
+                </div>
+                <button class="btn-sm action-str" style="pointer-events: auto; margin-right: 15px;"
+                    onclick="toggleEditor(true)">⚙️ 에디터 모드</button>
             </div>
             <div id="turn-indicator">Monster's Turn</div>
             <div id="msg-container">
                 <div id="message">PERFECT!</div>
             </div>
             <div id="hit-icons-container"></div>
+            <div id="monster-debugger">
+                <h3>👾 몬스터 세팅</h3>
+                <div class="db-row">
+                    <label>전조 시간 배율: <span id="val-telegraph">1.0</span>x</label>
+                    <input type="range" id="in-telegraph" min="0.1" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="db-row">
+                    <label>공격 후 딜레이 배율: <span id="val-postdelay">1.0</span>x</label>
+                    <input type="range" id="in-postdelay" min="0.1" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="db-row">
+                    <label>타이밍 가변성: ±<span id="val-variance">0</span>f</label>
+                    <input type="range" id="in-variance" min="0" max="30" step="1" value="0">
+                </div>
+                <div class="db-row">
+                    <label>피격 경직 (Hit Stop): <span id="val-hitstop">3</span>f</label>
+                    <input type="range" id="in-hitstop" min="0" max="20" step="1" value="3">
+                </div>
+                <button style="width:100%; font-size:10px; padding:5px; background:#444; margin-top:5px;"
+                    onclick="console.log(JSON.stringify(monsterSettings))">설정 로그 출력 (JSON)</button>
+            </div>
             <div id="bottom-ui">
                 <div class="cost-info">
                     <span class="ap-text">AP: <span id="p-ap">0</span></span>
@@ -672,6 +879,7 @@
                 this.currentPatternIdx = 0;
                 this.currentPattern = patterns[0];
                 this.patternStep = 0;
+                this.settings = { ...monsterSettings };
             }
             nextPattern() {
                 this.currentPatternIdx = (this.currentPatternIdx + 1) % this.patterns.length;
@@ -731,6 +939,158 @@
         let roundStartTimer = 0;
         let lastTimestamp = 0;
 
+        let monsterSettings = {
+            telegraphMult: 1.0,
+            postDelayMult: 1.0,
+            variance: 0,
+            hitStop: 3
+        };
+        let hitStopTimer = 0;
+
+        // --- Editor State & Storage ---
+        let monsterLibrary = []; // {id, name, hp, atk, telegraph, postdelay, hitstop}
+        let customStages = { // round -> [monsterIds]
+            1: [], 2: [], 4: [], 5: [], 6: []
+        };
+        let editingMonsterId = null;
+
+        function loadFromStorage() {
+            const savedLib = localStorage.getItem('monster_library');
+            const savedStages = localStorage.getItem('custom_stages');
+            if (savedLib) monsterLibrary = JSON.parse(savedLib);
+            if (savedStages) customStages = JSON.parse(savedStages);
+            renderLibrary();
+            renderStageEditor();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('monster_library', JSON.stringify(monsterLibrary));
+            localStorage.setItem('custom_stages', JSON.stringify(customStages));
+            showFeedback("전체 저장 완료!", "#4ade80");
+        }
+
+        // --- Editor UI Logic ---
+        function toggleEditor(show) {
+            document.getElementById('editor-overlay').style.display = show ? "flex" : "none";
+            if (show) {
+                gameStarted = false; // Stop game loop logic if needed, or just pause
+                renderLibrary();
+                renderStageEditor();
+            }
+        }
+
+        function openMonsterCreator(id = null) {
+            editingMonsterId = id;
+            const panel = document.getElementById('monster-creator-panel');
+            panel.style.display = 'block';
+
+            if (id) {
+                const m = monsterLibrary.find(x => x.id === id);
+                document.getElementById('creator-title').innerText = "🛠️ 몬스터 수정";
+                document.getElementById('lib-name').value = m.name;
+                document.getElementById('lib-hp').value = m.hp;
+                document.getElementById('lib-atk').value = m.atk;
+                document.getElementById('lib-telegraph').value = m.telegraph;
+                document.getElementById('lib-postdelay').value = m.postdelay;
+                document.getElementById('lib-hitstop').value = m.hitstop;
+            } else {
+                document.getElementById('creator-title').innerText = "🛠️ 신규 몬스터 생성";
+                document.getElementById('lib-name').value = "신규 몬스터";
+                document.getElementById('lib-hp').value = 100;
+                document.getElementById('lib-atk').value = 10;
+                document.getElementById('lib-telegraph').value = 1.0;
+                document.getElementById('lib-postdelay').value = 1.0;
+                document.getElementById('lib-hitstop').value = 3;
+            }
+        }
+
+        function confirmMonsterSave() {
+            const mData = {
+                id: editingMonsterId || Date.now().toString(),
+                name: document.getElementById('lib-name').value,
+                hp: parseInt(document.getElementById('lib-hp').value),
+                atk: parseInt(document.getElementById('lib-atk').value),
+                telegraph: parseFloat(document.getElementById('lib-telegraph').value),
+                postdelay: parseFloat(document.getElementById('lib-postdelay').value),
+                hitstop: parseInt(document.getElementById('lib-hitstop').value)
+            };
+
+            if (editingMonsterId) {
+                const idx = monsterLibrary.findIndex(x => x.id === editingMonsterId);
+                monsterLibrary[idx] = mData;
+            } else {
+                monsterLibrary.push(mData);
+            }
+
+            document.getElementById('monster-creator-panel').style.display = 'none';
+            renderLibrary();
+        }
+
+        function deleteMonster(id) {
+            if (!confirm("이 몬스터를 삭제하시겠습니까?")) return;
+            monsterLibrary = monsterLibrary.filter(x => x.id !== id);
+            // Remove from stages too
+            for (let r in customStages) {
+                customStages[r] = customStages[r].filter(mid => mid !== id);
+            }
+            renderLibrary();
+            renderStageEditor();
+        }
+
+        function renderLibrary() {
+            const list = document.getElementById('monster-library-list');
+            if (monsterLibrary.length === 0) {
+                list.innerHTML = '<p style="opacity:0.5; font-size:12px;">저장된 몬스터가 없습니다.</p>';
+                return;
+            }
+            list.innerHTML = monsterLibrary.map(m => `
+                <div class="monster-list-item">
+                    <span><b>${m.name}</b> (HP:${m.hp} ATK:${m.atk})</span>
+                    <div>
+                        <button class="btn-sm action-str" onclick="addMonsterToStagePrompt('${m.id}')">배치</button>
+                        <button class="btn-sm action-atk" onclick="openMonsterCreator('${m.id}')">수정</button>
+                        <button class="btn-sm guide-close-btn" onclick="deleteMonster('${m.id}')">삭제</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addMonsterToStagePrompt(monsterId) {
+            const round = prompt("배치할 라운드를 입력하세요 (1, 2, 4, 5, 6)", "1");
+            if (customStages[round]) {
+                customStages[round].push(monsterId);
+                renderStageEditor();
+            } else if (round !== null) {
+                alert("유효한 라운드가 아닙니다.");
+            }
+        }
+
+        function removeFromStage(round, index) {
+            customStages[round].splice(index, 1);
+            renderStageEditor();
+        }
+
+        function renderStageEditor() {
+            const list = document.getElementById('stage-editor-list');
+            let html = '';
+            for (let r of [1, 2, 4, 5, 6]) {
+                const mIds = customStages[r] || [];
+                html += `
+                    <div class="stage-box">
+                        <div style="font-weight:bold; color:#4db8ff; margin-bottom:5px;">Round ${r}</div>
+                        <div id="stage-${r}-monsters">
+                            ${mIds.map((id, idx) => {
+                    const m = monsterLibrary.find(x => x.id === id);
+                    return m ? `<span class="stage-monster-pill">${m.name} <span style="margin-left:5px; cursor:pointer; color:#ff4a4a;" onclick="removeFromStage(${r}, ${idx})">×</span></span>` : '';
+                }).join('')}
+                            ${mIds.length === 0 ? '<span style="opacity:0.3; font-size:11px;">배치된 몬스터 없음</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
+        }
+
         // UI 캐싱 필드
         const uiCache = {
             hp: -1, atk: -1, def: -1, ap: -1, turn: "",
@@ -788,20 +1148,56 @@
                 showEventOverlay();
                 return;
             }
-            if (!WAVE_DATA[round]) {
+
+            let waveToSpawn = [];
+            // 커스텀 스테이지 데이터가 있으면 사용, 없으면 기존 데이터 사용
+            if (customStages[round] && customStages[round].length > 0 && monsterLibrary.length > 0) {
+                waveToSpawn = customStages[round].map(id => {
+                    const libM = monsterLibrary.find(x => x.id === id);
+                    if (!libM) return null;
+                    return {
+                        type: libM.name,
+                        hp: libM.hp,
+                        atk: libM.atk,
+                        y: 0, // Will be calculated
+                        patterns: ["NORMAL"], // Default pattern for logic
+                        customSettings: {
+                            telegraphMult: libM.telegraph,
+                            postDelayMult: libM.postdelay,
+                            variance: 0,
+                            hitStop: libM.hitstop
+                        }
+                    };
+                }).filter(x => x !== null);
+
+                // Y 좌표 자동 분산 배치
+                const count = waveToSpawn.length;
+                const spacing = 400 / (count + 1);
+                waveToSpawn.forEach((m, i) => m.y = spacing * (i + 1));
+            } else {
+                waveToSpawn = WAVE_DATA[round] || [];
+            }
+
+            if (waveToSpawn.length === 0) {
                 showFeedback("Game Clear!", "#FFD700");
                 return;
             }
 
-            monsters = WAVE_DATA[round].map(t => {
+            monsters = waveToSpawn.map(t => {
                 let patterns = [];
                 if (t.multiPatterns) {
                     patterns = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
-                } else {
+                } else if (t.patterns) {
                     patterns = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
+                } else {
+                    patterns = [{ hits: [30] }]; // Fallback
                 }
 
-                return new Monster(t.type, 600, t.y, t.hp, t.atk, patterns);
+                const mObj = new Monster(t.type, 600, t.y, t.hp, t.atk, patterns);
+                if (t.customSettings) {
+                    mObj.settings = { ...monsterSettings, ...t.customSettings };
+                }
+                return mObj;
             });
             currentMonsterIndex = 0;
             currentTurn = "MONSTER";
@@ -854,6 +1250,23 @@
             ui.btns.spin.onclick = () => executeSpinSlash(); // 즉시 시전
             ui.btns.heavy.onclick = () => startSkill("heavy");
             ui.btns.end.onclick = () => endPlayerTurn();
+            loadFromStorage();
+
+            // Monster Debugger Handlers
+            const ids = ['telegraph', 'postdelay', 'variance', 'hitstop'];
+            ids.forEach(id => {
+                const input = document.getElementById(`in-${id}`);
+                const valDisplay = document.getElementById(`val-${id}`);
+                input.oninput = (e) => {
+                    const val = parseFloat(e.target.value);
+                    valDisplay.innerText = (id === 'variance' || id === 'hitstop') ? val : val.toFixed(1);
+
+                    const keyMap = { telegraph: 'telegraphMult', postdelay: 'postDelayMult', variance: 'variance', hitstop: 'hitStop' };
+                    monsterSettings[keyMap[id]] = val;
+                    // Apply to active monsters
+                    monsters.forEach(m => m.settings = { ...monsterSettings });
+                };
+            });
         }
 
         function startSkill(skill) {
@@ -1067,6 +1480,13 @@
 
         function update(dt) {
             if (!gameStarted) return;
+
+            // Hit Stop
+            if (hitStopTimer > 0) {
+                hitStopTimer -= 1; // Approx 1 frame
+                return;
+            }
+
             // 파워 텍스트 업데이트
             for (let i = damageTexts.length - 1; i >= 0; i--) {
                 const dt_item = damageTexts[i];
@@ -1111,7 +1531,8 @@
 
             if (m.state === "IDLE") {
                 m.timer += dt;
-                if (m.timer > 30) {
+                const set = m.settings || monsterSettings;
+                if (m.timer > (30 * set.postDelayMult)) {
                     m.currentPattern = m.patterns[m.currentPatternIdx];
                     m.state = "TELEGRAPH";
                     m.timer = 0;
@@ -1120,7 +1541,8 @@
                 }
             } else if (m.state === "TELEGRAPH") {
                 m.timer += dt;
-                const waitFrames = m.currentPattern.hits[m.patternStep];
+                const set = m.settings || monsterSettings;
+                const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
                 const prepRatio = Math.min(m.timer / waitFrames, 1);
                 m.x = m.homeX + Math.sin(prepRatio * Math.PI) * 20;
                 if (m.timer >= waitFrames) { m.state = "ATTACK"; m.timer = 0; m.startX = m.x; m.startY = m.y; }
@@ -1165,6 +1587,10 @@
                         addDamageText(Player.x, Player.y - 40, `-${finalDmg}`, "#ff4a4a");
                         Player.state.perfStacks = 0;
                         triggerVignette();
+
+                        const set = m.settings || monsterSettings;
+                        hitStopTimer = set.hitStop;
+
                         if (Player.hp <= 0) gameOver();
                     }
                 }
@@ -1262,8 +1688,9 @@
             monsters.forEach((m) => {
                 let color = m.color; // 기본 레드로 복구 (#ff4a4a)
                 if (m.state === "TELEGRAPH") {
-                    const waitFrames = m.currentPattern.hits[m.patternStep];
-                    const alpha = m.timer / waitFrames;
+                    const set = m.settings || monsterSettings;
+                    const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
+                    const alpha = Math.min(m.timer / waitFrames, 1);
                     color = `rgb(${255}, ${74 + 181 * alpha}, ${74 + 181 * alpha})`;
                 }
 
