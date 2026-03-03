@@ -820,7 +820,7 @@
             </div>
             <div id="hit-icons-container"></div>
             <!-- Removed #monster-debugger from here -->
-            <div id="bottom-ui">
+            <div id="bottom-ui" style="pointer-events: auto;">
                 <div class="cost-info">
                     <span class="ap-text">AP: <span id="p-ap">0</span></span>
                 </div>
@@ -1058,28 +1058,28 @@
 
         const WAVE_DATA = {
             1: [
-                { type: "Enemy 1", hp: 100, atk: 10, y: 150, patterns: ["NORMAL"] },
-                { type: "Enemy 2", hp: 100, atk: 10, y: 350, patterns: ["NORMAL", "FAST"] }
+                { type: "Enemy 1", hp: 100, atk: 10, patterns: ["NORMAL"] },
+                { type: "Enemy 2", hp: 100, atk: 10, patterns: ["NORMAL"] }
             ],
             2: [
-                { type: "Enemy A", hp: 80, atk: 9, y: 150, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 120, atk: 8, y: 350, patterns: ["NORMAL", "SLOW"] }
+                { type: "Enemy A", hp: 120, atk: 12, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 150, atk: 15, patterns: ["NORMAL"] }
             ],
             3: [], // Event Round
             4: [
-                { type: "Enemy A", hp: 85, atk: 9, y: 100, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 105, atk: 8, y: 250, patterns: ["NORMAL", "FAST"] },
-                { type: "Enemy C", hp: 130, atk: 7, y: 400, patterns: ["NORMAL", "FAST", "SLOW"] }
+                { type: "Enemy A", hp: 150, atk: 15, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 180, atk: 18, patterns: ["NORMAL"] },
+                { type: "Enemy C", hp: 220, atk: 20, patterns: ["SLOW"] }
             ],
             5: [
-                { type: "Enemy A", hp: 70, atk: 10, y: 80, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 75, atk: 10, y: 180, patterns: ["NORMAL"] },
-                { type: "Enemy C", hp: 110, atk: 9, y: 280, patterns: ["NORMAL", "FAST"] },
-                { type: "Enemy D", hp: 140, atk: 8, y: 380, patterns: ["NORMAL", "FAST", "SLOW"] }
+                { type: "Enemy A", hp: 200, atk: 20, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 220, atk: 22, patterns: ["NORMAL"] },
+                { type: "Enemy C", hp: 250, atk: 25, patterns: ["SLOW"] },
+                { type: "Enemy D", hp: 300, atk: 28, patterns: ["FAST"] }
             ],
             6: [
                 {
-                    type: "BOSS", hp: 780, atk: 12, y: 225,
+                    type: "BOSS", hp: 800, atk: 25,
                     multiPatterns: [
                         ["NORMAL", "FAST", "SLOW"],
                         ["FAST", "NORMAL", "FAST", "SLOW"],
@@ -2063,25 +2063,34 @@
         }
 
         function init() {
-            loadFromStorage();
-            window.addEventListener('resize', resizeCanvas);
-            canvas.addEventListener('mousedown', handleInput);
+            try {
+                loadFromStorage();
+                window.addEventListener('resize', resizeCanvas);
+                canvas.addEventListener('mousedown', handleInput);
 
-            // Player Actions
-            ui.btns.atk.onclick = () => startSkill("atk");
-            ui.btns.spin.onclick = executeSpinSlash;
-            ui.btns.heavy.onclick = () => startSkill("heavy");
-            ui.btns.end.onclick = endPlayerTurn;
+                // Player Actions
+                if (ui.btns.atk) ui.btns.atk.onclick = () => startSkill("atk");
+                if (ui.btns.spin) ui.btns.spin.onclick = executeSpinSlash;
+                if (ui.btns.heavy) ui.btns.heavy.onclick = () => startSkill("heavy");
+                if (ui.btns.end) ui.btns.end.onclick = endPlayerTurn;
 
-            // Monster Turn Actions
-            document.getElementById('btn-parry').onmousedown = (e) => {
-                e.preventDefault();
-                Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                Player.isParrying = true;
-            };
-            document.getElementById('btn-dash').onclick = executeDash;
+                // Monster Turn Actions
+                const btnParry = document.getElementById('btn-parry');
+                const btnDash = document.getElementById('btn-dash');
 
-            resizeCanvas();
+                if (btnParry) {
+                    btnParry.onmousedown = (e) => {
+                        e.preventDefault();
+                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                        Player.isParrying = true;
+                    };
+                }
+                if (btnDash) btnDash.onclick = executeDash;
+
+                resizeCanvas();
+            } catch (e) {
+                console.error("Initialization Failed:", e);
+            }
         }
 
         init();
