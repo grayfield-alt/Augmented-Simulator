@@ -312,7 +312,23 @@
 
         .actions {
             display: flex;
+            flex-direction: column;
             gap: 10px;
+            align-items: flex-end;
+        }
+
+        .actions button {
+            width: 140px;
+            height: 50px;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Monster turn big buttons */
+        #monster-actions button {
+            width: 160px;
+            height: 70px;
+            font-size: 18px;
         }
 
         #hit-icons-container {
@@ -820,23 +836,28 @@
             </div>
             <div id="hit-icons-container"></div>
             <!-- Removed #monster-debugger from here -->
-            <div id="bottom-ui" style="pointer-events: auto;">
+            <div id="bottom-ui"
+                style="pointer-events: auto; position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; z-index: 1001;">
                 <div class="cost-info">
                     <span class="ap-text">AP: <span id="p-ap">0</span></span>
                 </div>
-                <!-- Player Actions (shown during Player Turn) -->
-                <div id="player-actions" class="actions" style="display: none;">
-                    <button id="btn-atk" class="action-atk">공격 (2 AP)</button>
-                    <button id="btn-spin" class="action-spin" style="background: #4a4;">회전 베기 (3 AP)</button>
-                    <button id="btn-heavy" class="action-heavy" style="background: #a84;">강타 (5 AP)</button>
-                    <button id="btn-end" style="background: #a33;">턴 종료</button>
+                <!-- Player Actions (vertical right) -->
+                <div id="player-actions" class="actions"
+                    style="display: none; flex-direction: column; gap: 10px; align-items: flex-end;">
+                    <button id="btn-atk" class="action-atk" style="width: 140px; height: 50px;">공격 (2 AP)</button>
+                    <button id="btn-spin" class="action-spin" style="background: #4a4; width: 140px; height: 50px;">회전
+                        베기 (3 AP)</button>
+                    <button id="btn-heavy" class="action-heavy" style="background: #a84; width: 140px; height: 50px;">강타
+                        (5 AP)</button>
+                    <button id="btn-end" style="background: #a33; width: 140px; height: 50px;">턴 종료</button>
                 </div>
-                <!-- Monster Turn Actions (shown during Monster Turn) -->
-                <div id="monster-actions" class="actions" style="display: flex;">
-                    <button id="btn-parry" class="action-str" style="flex: 2; height: 60px; font-size: 20px;">🛡️ 패링
-                        / 방어</button>
+                <!-- Monster Turn Actions (vertical right) -->
+                <div id="monster-actions" class="actions"
+                    style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
+                    <button id="btn-parry" class="action-str" style="width: 160px; height: 80px; font-size: 20px;">🛡️
+                        패링 / 방어</button>
                     <button id="btn-dash" class="action-atk"
-                        style="flex: 1; height: 60px; font-size: 20px; background: #666;">💨 회피</button>
+                        style="width: 140px; height: 60px; font-size: 16px; background: #666;">💨 회피</button>
                 </div>
             </div>
         </div>
@@ -931,10 +952,10 @@
 
         const CONFIG = {
             FPS: 60,
-            PARRY_STANCE_DURATION: 11,
-            PERFECT_WINDOW: 4,
-            ATTACK_DURATION: 6,
-            RETURN_DURATION: 10,
+            PARRY_STANCE_DURATION: 21,
+            PERFECT_WINDOW: 8,
+            ATTACK_DURATION: 15,
+            RETURN_DURATION: 20,
             K: 50
         };
 
@@ -1059,27 +1080,27 @@
         const WAVE_DATA = {
             1: [
                 { type: "Enemy 1", hp: 100, atk: 10, patterns: ["NORMAL"] },
-                { type: "Enemy 2", hp: 100, atk: 10, patterns: ["NORMAL"] }
+                { type: "Enemy 2", hp: 100, atk: 15, patterns: ["NORMAL", "FAST"] }
             ],
             2: [
-                { type: "Enemy A", hp: 120, atk: 12, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 150, atk: 15, patterns: ["NORMAL"] }
+                { type: "Enemy A", hp: 80, atk: 9, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 120, atk: 12, patterns: ["NORMAL", "SLOW"] }
             ],
             3: [], // Event Round
             4: [
                 { type: "Enemy A", hp: 150, atk: 15, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 180, atk: 18, patterns: ["NORMAL"] },
-                { type: "Enemy C", hp: 220, atk: 20, patterns: ["SLOW"] }
+                { type: "Enemy B", hp: 180, atk: 18, patterns: ["NORMAL", "FAST"] },
+                { type: "Enemy C", hp: 220, atk: 20, patterns: ["NORMAL", "FAST", "SLOW"] }
             ],
             5: [
-                { type: "Enemy A", hp: 200, atk: 20, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 220, atk: 22, patterns: ["NORMAL"] },
-                { type: "Enemy C", hp: 250, atk: 25, patterns: ["SLOW"] },
-                { type: "Enemy D", hp: 300, atk: 28, patterns: ["FAST"] }
+                { type: "Enemy A", hp: 120, atk: 15, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 150, atk: 18, patterns: ["NORMAL"] },
+                { type: "Enemy C", hp: 200, atk: 22, patterns: ["NORMAL", "FAST"] },
+                { type: "Enemy D", hp: 250, atk: 25, patterns: ["NORMAL", "FAST", "SLOW"] }
             ],
             6: [
                 {
-                    type: "BOSS", hp: 800, atk: 25,
+                    type: "BOSS", hp: 1200, atk: 30,
                     multiPatterns: [
                         ["NORMAL", "FAST", "SLOW"],
                         ["FAST", "NORMAL", "FAST", "SLOW"],
@@ -1090,9 +1111,9 @@
         };
 
         const PATTERN_SPEEDS = {
-            "FAST": 20,
-            "NORMAL": 30,
-            "SLOW": 45
+            "FAST": 40,
+            "NORMAL": 60,
+            "SLOW": 90
         };
 
         let monsters = [];
@@ -1376,12 +1397,15 @@
                 return;
             }
 
-            // Distribute Y coordinates dynamically for portrait
+            // Distribute X coordinates horizontally (Portrait Optimized)
             const count = waveToSpawn.length;
-            const spacing = (CANVAS_H * 0.45) / (count + 1);
+            const screenMargin = CANVAS_W * 0.1;
+            const availableWidth = CANVAS_W - (screenMargin * 2);
+            const spacing = count > 1 ? availableWidth / (count - 1) : 0;
+
             waveToSpawn.forEach((m, i) => {
-                m.x = CANVAS_W / 2;
-                m.y = (CANVAS_H * 0.08) + spacing * (i + 1);
+                m.x = count > 1 ? screenMargin + (spacing * i) : CANVAS_W / 2;
+                m.y = CANVAS_H * 0.25; // Fixed vertical position for top area
             });
 
             monsters = waveToSpawn.map(t => {
@@ -1539,11 +1563,15 @@
 
         function startSkill(skill) {
             const alive = monsters.filter(m => m.hp > 0);
+            if (alive.length === 0) return;
+
+            // If only 1 target remains, auto-attack
             if (alive.length === 1) {
                 if (skill === "atk") executeAttack(alive[0]);
                 else if (skill === "heavy") executeHeavyStrike(alive[0]);
                 return;
             }
+
             isTargeting = true;
             selectedSkill = skill;
             showFeedback("Select Target!", "#fff");
@@ -1974,11 +2002,11 @@
                 ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 몬스터 HP 수치 표시
+                // 몬스터 HP 수치만 표시 (이름 제외)
                 ctx.fillStyle = "#fff";
-                ctx.font = "bold 16px Inter";
+                ctx.font = "bold 14px Inter";
                 ctx.textAlign = "center";
-                ctx.fillText(`${m.type} [HP ${Math.ceil(m.hp)}]`, m.x, m.y - m.radius - 10);
+                ctx.fillText(`${Math.ceil(m.hp)}`, m.x, m.y - m.radius - 10);
 
                 // 타겟팅 하이라이트
                 if (isTargeting && m.hp > 0) {
@@ -1996,8 +2024,20 @@
                 ctx.font = "bold 24px Inter";
                 ctx.fillText(dt.text, dt.x, dt.y);
             });
+        }
 
+        let canvasShake = 0;
+        function shakeCanvas(amt) { canvasShake = amt; }
+
+        function draw() {
             ctx.save();
+            if (canvasShake > 0) {
+                ctx.translate(Math.random() * canvasShake - canvasShake / 2, Math.random() * canvasShake - canvasShake / 2);
+                canvasShake *= 0.9;
+                if (canvasShake < 0.5) canvasShake = 0;
+            }
+            ctx.clearRect(-100, -100, canvas.width + 200, canvas.height + 200);
+            if (!gameStarted) { ctx.restore(); return; }
             Player.ghosts.forEach(g => {
                 ctx.fillStyle = `rgba(74, 158, 255, ${g.a})`;
                 ctx.beginPath(); ctx.arc(g.x, g.y, Player.radius, 0, Math.PI * 2); ctx.fill();
