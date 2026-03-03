@@ -2,11 +2,12 @@
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Parry Roguelike Prototype</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Augmented Simulator - Portrait</title>
     <style>
         body {
-            background-color: #1a1a1a;
+            background-color: #111;
             color: #eee;
             margin: 0;
             display: flex;
@@ -16,25 +17,33 @@
             height: 100vh;
             overflow: hidden;
             font-family: 'Inter', system-ui, sans-serif;
+            touch-action: manipulation;
         }
 
         #game-container {
             position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
+            background: #000;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
         }
 
         canvas {
             background-color: #222;
-            border: 2px solid #444;
+            border: none;
             display: block;
+            width: 100%;
+            height: 100%;
         }
 
         #ui-layer {
             position: absolute;
             top: 0;
             left: 0;
-            width: 800px;
-            height: 500px;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
         }
 
@@ -83,20 +92,29 @@
 
         #bottom-ui {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            padding: 20px;
+            box-sizing: border-box;
+            gap: 10px;
             pointer-events: auto;
         }
 
         .cost-info {
-            font-size: 20px;
-            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .ap-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: #facc15;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
-            font-size: 24px;
-            font-weight: bold;
         }
 
         #augment-overlay {
@@ -321,24 +339,21 @@
             background: #222;
         }
 
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         button {
-            padding: 12px 20px;
-            font-size: 16px;
+            padding: 18px 10px;
+            font-size: 18px;
             font-weight: bold;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        button:disabled {
-            background: #444 !important;
-            opacity: 0.5;
-            cursor: not-allowed;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
         }
 
         .action-atk {
@@ -693,6 +708,24 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Layout Constants
+        let CANVAS_W = 400;
+        let CANVAS_H = 700;
+
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            CANVAS_W = canvas.width;
+            CANVAS_H = canvas.height;
+
+            // Relocate Player
+            Player.x = CANVAS_W / 2;
+            Player.y = CANVAS_H * 0.82;
+        }
+        window.addEventListener('resize', resizeCanvas);
+
         const AUGMENT_DATA = {
             "Common": [
                 { id: "c1", name: "날카로움", desc: "공격력 ×1.10", effect: p => p.augBuffs.atk *= 1.1 },
@@ -757,16 +790,16 @@
 
         const CONFIG = {
             FPS: 60,
-            PARRY_STANCE_DURATION: 11, // 0.18s
+            PARRY_STANCE_DURATION: 11,
             PERFECT_WINDOW: 4,
-            ATTACK_DURATION: 6, // 0.1s (Requested: 20-26f span)
+            ATTACK_DURATION: 6,
             RETURN_DURATION: 10,
-            K: 50 // 방어 상수
+            K: 50
         };
 
         const Player = {
-            x: 150,
-            y: 225,
+            x: 200,
+            y: 600,
             radius: 30,
             hp: 100,
             maxHp: 100,
@@ -862,17 +895,11 @@
 
         class Monster {
             constructor(type, x, y, hp, atk, patterns) {
-                this.name = type;
+                this.type = type;
                 this.homeX = x; this.homeY = y;
                 this.x = x; this.y = y;
-                // 보스(BOSS)일 경우 더 크고 위협적인 연출
-                if (type === "BOSS") {
-                    this.radius = 60;
-                    this.color = "#ff0000";
-                } else {
-                    this.radius = 25;
-                    this.color = "#ff4a4a";
-                }
+                this.radius = 35;
+                this.color = type.includes("BOSS") ? "#ff0000" : "#ff4a4a";
                 this.hp = hp; this.maxHp = hp; this.atk = atk;
                 this.state = "IDLE"; this.timer = 0;
                 this.patterns = patterns;
@@ -1136,6 +1163,7 @@
         }
 
         function startGame() {
+            resizeCanvas();
             gameStarted = true;
             ui.overlay.style.display = "none";
             lastTimestamp = performance.now();
@@ -1172,10 +1200,17 @@
 
                 // Y 좌표 자동 분산 배치
                 const count = waveToSpawn.length;
-                const spacing = 400 / (count + 1);
-                waveToSpawn.forEach((m, i) => m.y = spacing * (i + 1));
+                const spacing = (CANVAS_H * 0.45) / (count + 1);
+                waveToSpawn.forEach((m, i) => {
+                    m.x = CANVAS_W / 2;
+                    m.y = (CANVAS_H * 0.08) + spacing * (i + 1);
+                });
             } else {
-                waveToSpawn = WAVE_DATA[round] || [];
+                waveToSpawn = (WAVE_DATA[round] || []).map((t, i, arr) => {
+                    // 고정 데이터도 세로 비율에 맞게 재배치
+                    const spacing = (CANVAS_H * 0.45) / (arr.length + 1);
+                    return { ...t, x: CANVAS_W / 2, y: (CANVAS_H * 0.08) + spacing * (i + 1) };
+                });
             }
 
             if (waveToSpawn.length === 0) {
@@ -1193,7 +1228,7 @@
                     patterns = [{ hits: [30] }]; // Fallback
                 }
 
-                const mObj = new Monster(t.type, 600, t.y, t.hp, t.atk, patterns);
+                const mObj = new Monster(t.type, t.x, t.y, t.hp, t.atk, patterns);
                 if (t.customSettings) {
                     mObj.settings = { ...monsterSettings, ...t.customSettings };
                 }
@@ -1244,7 +1279,11 @@
         }
 
         function init() {
-            window.addEventListener('mousedown', handleInput);
+            canvas.addEventListener('mousedown', handleInput);
+            canvas.addEventListener('touchstart', e => {
+                e.preventDefault();
+                handleInput(e.touches[0]);
+            }, { passive: false });
             window.addEventListener('contextmenu', e => e.preventDefault());
             ui.btns.atk.onclick = () => startSkill("atk");
             ui.btns.spin.onclick = () => executeSpinSlash(); // 즉시 시전
@@ -1288,12 +1327,9 @@
                 return;
             }
             if (currentTurn === "MONSTER") {
-                if (e.button === 0) {
-                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                    Player.isParrying = true;
-                } else if (e.button === 2) {
-                    Player.dashTimer = 40;
-                }
+                // 모바일 터치 또는 좌클릭
+                Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                Player.isParrying = true;
             }
         }
 
@@ -1544,13 +1580,14 @@
                 const set = m.settings || monsterSettings;
                 const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
                 const prepRatio = Math.min(m.timer / waitFrames, 1);
-                m.x = m.homeX + Math.sin(prepRatio * Math.PI) * 20;
+                // Vertical Shake
+                m.y = m.homeY + Math.sin(prepRatio * Math.PI) * 15;
                 if (m.timer >= waitFrames) { m.state = "ATTACK"; m.timer = 0; m.startX = m.x; m.startY = m.y; }
             } else if (m.state === "ATTACK") {
                 m.timer += dt;
                 let t = m.timer / CONFIG.ATTACK_DURATION;
-                m.x = m.startX + (Player.x + Player.radius - m.startX) * (t * t);
-                m.y = m.startY + (Player.y - m.startY) * (t * t);
+                m.x = m.startX + (Player.x - m.startX) * (t * t);
+                m.y = m.startY + (Player.y - Player.radius - m.startY) * (t * t);
 
                 // 판정 타이밍 (0~2프레임 오차 허용을 위해 범위 체크)
                 if (m.timer >= CONFIG.ATTACK_DURATION - 2 && m.timer < CONFIG.ATTACK_DURATION && !m.hitTriggered) {
@@ -1701,9 +1738,9 @@
 
                 // 몬스터 HP 수치 표시
                 ctx.fillStyle = "#fff";
-                ctx.font = "14px bold Inter";
+                ctx.font = "bold 16px Inter";
                 ctx.textAlign = "center";
-                ctx.fillText(`HP ${Math.ceil(m.hp)}`, m.x, m.y + m.radius + 20);
+                ctx.fillText(`${m.type} [HP ${Math.ceil(m.hp)}]`, m.x, m.y - m.radius - 10);
 
                 // 타겟팅 하이라이트
                 if (isTargeting && m.hp > 0) {
