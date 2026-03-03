@@ -4,22 +4,25 @@ export const PLAYER_CONFIG = {
     INITIAL_DEF: 0,
     INITIAL_AP: 0,
     RADIUS: 30,
-    PARRY_STANCE_DURATION: 21,
-    DASH_DURATION: 50, // 회피 지속 시간 (리턴 없음)
-    PERFECT_WINDOW: 8,
+    PARRY_STANCE_DURATION: 20, // 빡빡한 타이밍을 위해 20프레임으로 조정
+    DASH_DURATION: 50,
+    PERFECT_WINDOW: 6, // 퍼펙트 판정도 더 정밀하게 (8 -> 6)
     ATTACK_DURATION: 15,
     RETURN_DURATION: 20,
-    K: 50 // Defense constant
+    K: 50
 };
 
 export const MONSTER_CONFIG = {
     BASE_RADIUS: 25,
     BOSS_RADIUS: 60,
+    CUE_FRAME: 14, // 전조 시작 후 신호 발생 시점
+    REACTION_WINDOW: 26, // 신호 후 타격까지의 '빡빡한' 시간 (사용자 요청)
     PATTERN_SPEEDS: {
-        VERY_FAST: 30, // 0.25s (극한의 반응 속도)
-        FAST: 40,      // 0.33s (숙련자 반응 속도)
-        NORMAL: 60,    // 0.50s (표준)
-        SLOW: 90       // 0.75s (여유)
+        EXTREME: 26,   // 0.43s (최고 난이도, 신호 즉시 타격)
+        VERY_FAST: 35, // 0.58s
+        FAST: 45,      // 0.75s
+        NORMAL: 60,    // 1.00s
+        SLOW: 90       // 1.50s
     }
 };
 
