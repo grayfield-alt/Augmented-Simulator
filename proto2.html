@@ -836,28 +836,21 @@
             </div>
             <div id="hit-icons-container"></div>
             <!-- Removed #monster-debugger from here -->
-            <div id="bottom-ui"
-                style="pointer-events: auto; position: absolute; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; z-index: 1001;">
+            <div id="bottom-ui" style="pointer-events: auto; position: absolute; bottom: 110px; right: 20px; display: none; flex-direction: column; gap: 12px; align-items: flex-end; z-index: 1001;">
                 <div class="cost-info">
                     <span class="ap-text">AP: <span id="p-ap">0</span></span>
                 </div>
                 <!-- Player Actions (vertical right) -->
-                <div id="player-actions" class="actions"
-                    style="display: none; flex-direction: column; gap: 10px; align-items: flex-end;">
-                    <button id="btn-atk" class="action-atk" style="width: 140px; height: 50px;">공격 (2 AP)</button>
-                    <button id="btn-spin" class="action-spin" style="background: #4a4; width: 140px; height: 50px;">회전
-                        베기 (3 AP)</button>
-                    <button id="btn-heavy" class="action-heavy" style="background: #a84; width: 140px; height: 50px;">강타
-                        (5 AP)</button>
-                    <button id="btn-end" style="background: #a33; width: 140px; height: 50px;">턴 종료</button>
+                <div id="player-actions" class="actions" style="display: none; flex-direction: column; gap: 10px; align-items: flex-end;">
+                    <button id="btn-atk" class="action-atk" style="width: 140px; height: 55px; font-weight: bold; font-size: 16px;">공격 (2 AP)</button>
+                    <button id="btn-spin" class="action-spin" style="background: #4a4; width: 140px; height: 55px; font-weight: bold; font-size: 16px;">회전 베기 (3 AP)</button>
+                    <button id="btn-heavy" class="action-heavy" style="background: #a84; width: 140px; height: 55px; font-weight: bold; font-size: 16px;">강타 (5 AP)</button>
+                    <button id="btn-end" style="background: #a33; width: 140px; height: 55px; font-weight: bold; font-size: 16px;">턴 종료</button>
                 </div>
                 <!-- Monster Turn Actions (vertical right) -->
-                <div id="monster-actions" class="actions"
-                    style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
-                    <button id="btn-parry" class="action-str" style="width: 160px; height: 80px; font-size: 20px;">🛡️
-                        패링 / 방어</button>
-                    <button id="btn-dash" class="action-atk"
-                        style="width: 140px; height: 60px; font-size: 16px; background: #666;">💨 회피</button>
+                <div id="monster-actions" class="actions" style="display: none; flex-direction: column; gap: 10px; align-items: flex-end;">
+                    <button id="btn-parry" class="action-str" style="width: 165px; height: 90px; font-size: 24px; font-weight: bold; border: 3px solid #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3);">🛡️ 패링 / 방어</button>
+                    <button id="btn-dash" class="action-atk" style="width: 145px; height: 70px; font-size: 20px; background: #666; font-weight: bold;">💨 회피</button>
                 </div>
             </div>
         </div>
@@ -962,7 +955,7 @@
         const Player = {
             x: 200,
             y: 600,
-            radius: 36,
+            radius: 42,
             hp: 100,
             maxHp: 100,
             atk: 50,
@@ -1001,6 +994,8 @@
         let forcedTier = null;
 
         function showAugmentSelection(tier = null) {
+            currentTurn = "NONE";
+            updateInterfaceVisibility();
             ui.overlayAug.style.display = "flex";
             rerollAvailable = true;
             ui.btnReroll.disabled = false;
@@ -1060,7 +1055,7 @@
                 this.type = type;
                 this.homeX = x; this.homeY = y;
                 this.x = x; this.y = y;
-                this.radius = 42;
+                this.radius = 50;
                 this.color = type.includes("BOSS") ? "#ff0000" : "#ff4a4a";
                 this.hp = hp; this.maxHp = hp; this.atk = atk;
                 this.state = "IDLE"; this.timer = 0;
@@ -1346,20 +1341,20 @@
         }
 
         function spawnWave(round) {
+            currentTurn = "NONE";
+            updateInterfaceVisibility();
+            
             if (round === 3) {
                 showEventOverlay();
                 return;
             }
 
             let waveToSpawn = [];
-
-            // 1. Check Custom Stages First
+            // ... (rest of logic unchanged)
             if (customStages[round] && customStages[round].length > 0) {
                 waveToSpawn = customStages[round].map(id => {
-                    // Try to find in library
                     let libM = monsterLibrary.find(x => x.id === id);
                     if (!libM) {
-                        // Try to find in system defaults
                         const defaults = {
                             "def_1": { name: "Enemy 1", hp: 100, atk: 10 },
                             "def_2": { name: "Enemy 2", hp: 100, atk: 10 },
@@ -1370,7 +1365,6 @@
                         const d = defaults[id];
                         if (d) libM = { ...d, telegraph: 1.0, postdelay: 1.0, hitstop: 3 };
                     }
-
                     if (!libM) return null;
                     return {
                         type: libM.name,
@@ -1387,7 +1381,6 @@
                 }).filter(x => x !== null);
             }
 
-            // 2. Fallback to Default WAVE_DATA if no custom or custom failed
             if (waveToSpawn.length === 0) {
                 waveToSpawn = (WAVE_DATA[round] || []).map(t => ({ ...t }));
             }
@@ -1397,31 +1390,28 @@
                 return;
             }
 
-            // Distribute X coordinates horizontally (Portrait Optimized)
+            // Distribute X coordinates horizontally (Portrait Optimized & Centered)
             const count = waveToSpawn.length;
-            const screenMargin = CANVAS_W * 0.2;
+            const screenMargin = CANVAS_W * 0.3; // Increased margin to center more
             const availableWidth = CANVAS_W - (screenMargin * 2);
             const spacing = count > 1 ? availableWidth / (count - 1) : 0;
 
             waveToSpawn.forEach((m, i) => {
                 m.x = count > 1 ? screenMargin + (spacing * i) : CANVAS_W / 2;
-                m.y = CANVAS_H * 0.25; // Fixed vertical position for top area
+                m.y = CANVAS_H * 0.25; 
             });
 
             monsters = waveToSpawn.map(t => {
-                let patterns = [];
+                let p_arr = [];
                 if (t.multiPatterns) {
-                    patterns = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
+                    p_arr = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
                 } else if (t.patterns) {
-                    patterns = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
+                    p_arr = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
                 } else {
-                    patterns = [{ hits: [30] }];
+                    p_arr = [{ hits: [30] }];
                 }
-
-                const mObj = new Monster(t.type, t.x, t.y, t.hp, t.atk, patterns);
-                if (t.customSettings) {
-                    mObj.settings = { ...monsterSettings, ...t.customSettings };
-                }
+                const mObj = new Monster(t.type, t.x, t.y, t.hp, t.atk, p_arr);
+                if (t.customSettings) mObj.settings = { ...monsterSettings, ...t.customSettings };
                 return mObj;
             });
 
@@ -1436,9 +1426,12 @@
             Player.state.killsThisTurn = 0;
             Player.state.firstAttackThisTurn = true;
             updateHitIcons();
+            updateInterfaceVisibility();
         }
 
         function showEventOverlay() {
+            currentTurn = "NONE";
+            updateInterfaceVisibility();
             ui.overlayEvent.style.display = "flex";
         }
 
@@ -1732,8 +1725,7 @@
             roundStartTimer = 25;
 
             // UI Toggle
-            document.getElementById('player-actions').style.display = "none";
-            document.getElementById('monster-actions').style.display = "flex";
+            updateInterfaceVisibility();
 
             monsters.forEach(m => {
                 if (m.hp > 0) {
@@ -1952,12 +1944,28 @@
                 ui.hitIcons.innerHTML = "";
 
                 // UI Toggle
-                document.getElementById('player-actions').style.display = "flex";
-                document.getElementById('monster-actions').style.display = "none";
+                updateInterfaceVisibility();
             }
         }
 
+        function updateInterfaceVisibility() {
+            const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver];
+            const isAnyOverlayVisible = overlays.some(o => o.style.display === "flex" || o.style.display === "block");
+            
+            const bottomUI = document.getElementById('bottom-ui');
+            if (isAnyOverlayVisible || !gameStarted || currentTurn === "NONE") {
+                bottomUI.style.display = "none";
+                return;
+            }
+            
+            bottomUI.style.display = "flex";
+            document.getElementById('player-actions').style.display = currentTurn === "PLAYER" ? "flex" : "none";
+            document.getElementById('monster-actions').style.display = currentTurn === "MONSTER" ? "flex" : "none";
+        }
+
         function updateUI() {
+            updateInterfaceVisibility();
+            
             if (uiCache.hp !== Player.hp) { ui.hp.innerText = Player.hp; uiCache.hp = Player.hp; }
             if (uiCache.atk !== Player.atk) { ui.atk.innerText = Player.atk; uiCache.atk = Player.atk; }
             if (uiCache.def !== Player.def) { ui.def.innerText = Player.def; uiCache.def = Player.def; }
@@ -1965,10 +1973,11 @@
             const fAp = Math.floor(Player.ap);
             if (uiCache.ap !== fAp) { ui.ap.innerText = fAp; uiCache.ap = fAp; }
 
-            const atkD = currentTurn !== "PLAYER" || Player.ap < 2 || Player.actionsUsed.atk;
-            const spinD = currentTurn !== "PLAYER" || Player.ap < 3 || Player.actionsUsed.spin;
-            const heavyD = currentTurn !== "PLAYER" || Player.ap < 5 || Player.actionsUsed.heavy;
-            const endD = currentTurn !== "PLAYER";
+            const isPlayer = currentTurn === "PLAYER";
+            const atkD = !isPlayer || Player.ap < 2 || Player.actionsUsed.atk;
+            const spinD = !isPlayer || Player.ap < 3 || Player.actionsUsed.spin;
+            const heavyD = !isPlayer || Player.ap < 5 || Player.actionsUsed.heavy;
+            const endD = !isPlayer;
 
             if (uiCache.atkBtn !== atkD) { ui.btns.atk.disabled = atkD; uiCache.atkBtn = atkD; }
             if (uiCache.spinBtn !== spinD) { ui.btns.spin.disabled = spinD; uiCache.spinBtn = spinD; }
@@ -1976,7 +1985,7 @@
             if (uiCache.endBtn !== endD) { ui.btns.end.disabled = endD; uiCache.endBtn = endD; }
 
             // AP 부족 시 자동 턴 종료 체크
-            if (currentTurn === "PLAYER" && !isEndingTurnAutomatically && atkD && spinD && heavyD) {
+            if (isPlayer && !isEndingTurnAutomatically && atkD && spinD && heavyD) {
                 isEndingTurnAutomatically = true;
                 setTimeout(() => {
                     if (currentTurn === "PLAYER") endPlayerTurn();
