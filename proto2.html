@@ -962,7 +962,7 @@
         const Player = {
             x: 200,
             y: 600,
-            radius: 30,
+            radius: 36,
             hp: 100,
             maxHp: 100,
             atk: 50,
@@ -1060,7 +1060,7 @@
                 this.type = type;
                 this.homeX = x; this.homeY = y;
                 this.x = x; this.y = y;
-                this.radius = 35;
+                this.radius = 42;
                 this.color = type.includes("BOSS") ? "#ff0000" : "#ff4a4a";
                 this.hp = hp; this.maxHp = hp; this.atk = atk;
                 this.state = "IDLE"; this.timer = 0;
@@ -1399,7 +1399,7 @@
 
             // Distribute X coordinates horizontally (Portrait Optimized)
             const count = waveToSpawn.length;
-            const screenMargin = CANVAS_W * 0.1;
+            const screenMargin = CANVAS_W * 0.2;
             const availableWidth = CANVAS_W - (screenMargin * 2);
             const spacing = count > 1 ? availableWidth / (count - 1) : 0;
 
