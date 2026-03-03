@@ -25,7 +25,7 @@
 
 | **기능 분류** | **파일/폴더 경로** | **핵심 역할** |
 | :--- | :--- | :--- |
-| **웹 배포 주소** | **[바로가기](https://grayfield-alt.github.io/Augmented-Simulator/)** | **GitHub Pages 실시간 배포 경로** |
+| **웹 배포 주소** | **[바로가기(Proto2)](https://grayfield-alt.github.io/Augmented-Simulator/proto2.html)** | **GitHub Pages 실시간 배포 경로** |
 | **핵심 로직** | `src/logic/GameEngine.js` | 게임의 핵심 루틴 및 상태 관리 |
 | | `src/logic/constants.js` | 몬스터 데이터, 웨이브 설정 (한글화 완료) |
 | **컴포넌트** | `src/App.jsx` | 메인 UI 및 렌더링 루프 제어 |

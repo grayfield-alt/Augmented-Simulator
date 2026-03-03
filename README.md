@@ -1,6 +1,6 @@
 # Augmented Simulator Web (한글판)
 
-**🚀 웹 배포 주소: [https://grayfield-alt.github.io/Augmented-Simulator/](https://grayfield-alt.github.io/Augmented-Simulator/)**
+**🚀 웹 배포 주소 (Proto2): [https://grayfield-alt.github.io/Augmented-Simulator/proto2.html](https://grayfield-alt.github.io/Augmented-Simulator/proto2.html)**
 
 이것은 증강 시뮬레이터의 대화형 웹 버전입니다.
 
