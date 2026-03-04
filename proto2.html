@@ -11,107 +11,81 @@
         rel="stylesheet">
     <style>
         :root {
-            --primary: hsl(45, 93%, 47%);
-            --primary-glow: hsla(45, 93%, 47%, 0.4);
-            --danger: hsl(0, 84%, 60%);
-            --info: hsl(200, 95%, 60%);
-            --success: hsl(142, 71%, 45%);
-            --bg-dark: hsl(220, 20%, 5%);
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg: #0a0a0c;
+            --primary: #fae133;
+            --danger: #ff4a4a;
+            --info: #4a9eff;
+            --success: #4ade80;
             --font-main: 'Inter', system-ui, -apple-system, sans-serif;
             --font-title: 'Outfit', sans-serif;
         }
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
 
+        html {
+            font-size: 16px;
+        }
+
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg);
             color: #fff;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             font-family: var(--font-main);
-            touch-action: manipulation;
+            display: flex;
+            justify-content: center;
         }
 
         #game-container {
-            position: relative;
             width: 100%;
+            max-width: 25.75rem;
+            /* ~412px */
             height: 100%;
-            max-width: 500px;
-            background: #000;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            background: #000;
+            position: relative;
         }
 
-        canvas {
-            background-color: #0a0a0a;
-            display: block;
-            width: 100%;
-            height: 100%;
-            touch-action: none;
-        }
-
-        /* --- Global Glass Styles --- */
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-        }
-
-        /* --- Top Status Bar --- */
-        #top-status {
-            position: absolute;
-            top: env(safe-area-inset-top, 20px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            padding: 12px 20px;
+        /* 1. HUD */
+        header#top-status {
+            flex: 0 0 auto;
+            padding: 0.75rem 1rem;
+            background: rgba(15, 15, 20, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
-            pointer-events: none;
+        }
+
+        .status-group {
+            display: flex;
+            gap: 1rem;
         }
 
         .status-item {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 2px;
         }
 
         .status-label {
-            font-size: 10px;
+            font-size: 0.625rem;
             font-weight: 700;
+            color: #666;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
         }
 
         .status-value {
             font-family: var(--font-title);
-            font-size: 16px;
-            /* Slightly smaller for PC spacing */
-            font-weight: 800;
-        }
-
-        @media (min-height: 800px) {
-            .status-value {
-                font-size: 20px;
-            }
+            font-size: 1.125rem;
+            font-weight: 900;
         }
 
         .hp-text {
@@ -126,267 +100,28 @@
             color: var(--info);
         }
 
-        /* --- Bottom UI & Actions --- */
-        #bottom-ui {
-            position: absolute !important;
-            bottom: clamp(20px, 5vh, 60px) !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            width: 90% !important;
-            max-width: 450px !important;
-            pointer-events: none !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            /* Centering all UI */
-            justify-content: center !important;
-            gap: 16px !important;
-            z-index: 10000 !important;
-        }
-
-        .ap-container {
-            align-self: center !important;
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            padding: 8px 20px;
-            pointer-events: none;
-            margin-bottom: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            /* Darker for contrast */
-            box-shadow: 0 0 20px rgba(250, 204, 21, 0.2);
-        }
-
-        .ap-label {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--primary);
-            opacity: 0.8;
-        }
-
-        .ap-text {
-            font-family: var(--font-title);
-            font-size: 32px;
-            font-weight: 900;
-            color: var(--primary);
-            line-height: 1;
-        }
-
-        .actions-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: auto;
-        }
-
-        .btn-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        /* --- Premium Buttons --- */
-        button {
+        /* 2. Play Area */
+        main#play-area {
+            flex: 1 1 auto;
             position: relative;
-            padding: 16px;
-            font-family: var(--font-title);
-            font-size: 16px;
-            font-weight: 800;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: var(--glass);
-            color: #fff;
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            white-space: nowrap;
+            background: #000;
             overflow: hidden;
         }
 
-        button:active {
-            transform: scale(0.96);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            filter: grayscale(1);
-        }
-
-        .action-atk {
-            border-left: 4px solid var(--info);
-            background: rgba(0, 153, 255, 0.1);
-        }
-
-        .action-str {
-            border-left: 4px solid var(--primary);
-            background: rgba(250, 204, 21, 0.1);
-        }
-
-        .action-exc {
-            border-left: 4px solid var(--danger);
-            background: rgba(255, 74, 74, 0.1);
-        }
-
-        .action-parry {
-            background: #fff;
-            color: #000;
-            font-size: 20px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
-        }
-
-        .action-dash {
-            background: #333;
-            color: #fff;
-            border-color: #444;
-        }
-
-        /* --- Overlays --- */
-        .overlay {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            background: rgba(0, 0, 0, 0.95) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            display: none;
-            flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
-            padding: 20px !important;
-            z-index: 99999 !important;
-            /* Absolute dominance */
-        }
-
-        #guide-overlay,
-        #lobby-overlay,
-        #augment-overlay,
-        #event-overlay,
-        #inventory-overlay,
-        #stage-editor-overlay,
-        #game-over-overlay,
-        #editor-overlay {
-            z-index: 99999 !important;
-        }
-
-        /* --- Lobby --- */
-        #lobby-overlay {
-            display: flex;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-        }
-
-        .lobby-title {
-            font-family: var(--font-title);
-            font-size: 42px;
-            font-weight: 900;
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 50px;
-            line-height: 1;
-            letter-spacing: -1px;
-            text-transform: uppercase;
-        }
-
-        .lobby-menu {
-            position: relative !important;
-            z-index: 1000 !important;
-            /* Lower than root overlays */
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 12px !important;
-            width: 100% !important;
-            max-width: 280px !important;
-        }
-
-        /* --- Augments --- */
-        .augment-container,
-        .event-container {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 12px !important;
-            width: 100% !important;
-            max-width: 400px !important;
-        }
-
-        .augment-card {
-            padding: 20px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-            transition: all 0.3s ease;
-        }
-
-        .augment-card h3 {
-            margin: 0 0 8px 0;
-            font-family: var(--font-title);
-            font-size: 20px;
-        }
-
-        .augment-card p {
-            margin: 0;
-            font-size: 14px;
-            opacity: 0.7;
-            line-height: 1.5;
-        }
-
-        /* --- Hit Icons --- */
-        #hit-icons-container {
+        canvas#gameCanvas {
             position: absolute;
-            top: 100px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 10;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
-        .hit-icon {
-            width: 12px;
-            height: 12px;
-            background: var(--success);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--success);
-            transition: all 0.3s;
-        }
-
-        .hit-icon.used {
-            background: #222;
-            box-shadow: none;
-            opacity: 0.5;
-        }
-
-        /* --- Messages --- */
-        #turn-indicator {
+        #visual-overlays {
             position: absolute;
-            top: 22%;
-            /* Relative to top */
-            left: 50%;
-            transform: translateX(-50%);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            opacity: 0.5;
-            z-index: 5;
+            inset: 0;
             pointer-events: none;
-        }
-
-        #message {
-            font-family: var(--font-title);
-            font-size: clamp(32px, 8vw, 54px);
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            z-index: 2;
         }
 
         #msg-container {
@@ -394,75 +129,219 @@
             top: 30%;
             left: 50%;
             transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 1000;
+            width: 100%;
+            text-align: center;
+        }
+
+        #message {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 3. Footer Control Area */
+        footer#bottom-ui {
+            flex: 0 0 auto;
+            padding: 1.25rem;
+            padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+            background: rgba(10, 10, 12, 0.98);
+            border-top: 2px solid rgba(250, 225, 51, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            z-index: 100;
+            pointer-events: auto;
+        }
+
+        .ap-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0.75rem;
+        }
+
+        .ap-label {
+            font-size: 0.8125rem;
+            font-weight: 800;
+            color: #444;
+        }
+
+        .ap-text {
+            font-family: var(--font-title);
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        button {
+            min-height: 3rem;
+            /* 최소 48px */
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-family: var(--font-title);
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex: 1 1 45%;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            opacity: 0.8;
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-wide {
+            flex: 1 1 100%;
+            height: 3.5rem;
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
         }
     </style>
 </head>
 
 <body>
     <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-
-        <div id="ui-layer">
-            <div id="vignette" class="vignette"></div>
-
-            <div id="top-status" class="glass-panel" style="width: 96%; margin: 0 auto; padding: 10px 12px; gap: 10px;">
+        <header id="top-status">
+            <div class="status-group">
                 <div class="status-item">
                     <span class="status-label">Vitality</span>
                     <span id="p-hp" class="status-value hp-text">100</span>
                 </div>
-                <div class="status-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px;">
+                <div class="status-item">
                     <span class="status-label">Power</span>
                     <span id="p-atk" class="status-value atk-text">50</span>
                 </div>
-                <div class="status-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px;">
+                <div class="status-item">
                     <span class="status-label">Defense</span>
                     <span id="p-def" class="status-value def-text">0</span>
                 </div>
-                <button class="btn-sm action-parry"
-                    style="pointer-events: auto; padding: 8px 12px; font-size: 10px; border-radius: 8px; background: white; color: black; margin-left: auto;"
-                    onclick="toggleEditor(true)">⚙️ EDIT</button>
             </div>
+            <button class="btn-secondary" style="min-height: 2rem; padding: 0 0.5rem; font-size: 0.75rem;"
+                onclick="toggleEditor(true)">⚙️ EDIT</button>
+        </header>
 
-            <div id="turn-indicator">Player's Turn</div>
-
-            <div id="hit-icons-container"></div>
-
-            <div id="bottom-ui">
-                <div class="ap-container glass-panel">
-                    <span class="ap-label">ENERGY</span>
-                    <span id="p-ap" class="ap-text">0</span>
+        <main id="play-area">
+            <canvas id="gameCanvas"></canvas>
+            <div id="visual-overlays">
+                <div id="vignette" class="vignette"></div>
+                <div id="hit-icons-container" style="position: absolute; top: 1rem; right: 1rem;"></div>
+                <div id="msg-container">
+                    <div id="message"></div>
                 </div>
+                <div id="turn-indicator"
+                    style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 0.75rem; letter-spacing: 2px; color: #444; font-weight: 800; text-transform: uppercase; pointer-events: none;">
+                    Player's Turn</div>
+            </div>
+        </main>
 
-                <div id="player-actions" class="actions-group">
-                    <div class="btn-grid">
-                        <button id="btn-atk" class="action-atk" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
-                        <button id="btn-spin" class="action-str"
-                            style="background: rgba(74, 222, 128, 0.1); border-left-color: var(--success);"
-                            onclick="executeSpinSlash()">🌀 회전 베기 (3)</button>
-                    </div>
-                    <button id="btn-heavy" class="action-exc" style="width: 100%;" onclick="startSkill('heavy')">💥 강력한
-                        강타 (5)</button>
-                    <button id="btn-end"
-                        style="width: 100%; background: rgba(255,255,255,0.05); color: #888; border: none; padding: 10px; font-size: 12px; margin-top: 4px;"
-                        onclick="endPlayerTurn()">턴 종료</button>
+        <footer id="bottom-ui">
+            <div class="ap-wrapper">
+                <span class="ap-label">ENERGY</span>
+                <span id="p-ap" class="ap-text">0</span>
+            </div>
+
+            <div id="player-actions" class="btn-stack">
+                <div class="btn-row">
+                    <button class="btn-primary" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
+                    <button class="btn-secondary" onclick="executeSpinSlash()">🌀 회전 베기 (3)</button>
                 </div>
-
-                <script>
-                    (function () {
-                        const isMob = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                        document.getElementById('pc-guide').style.display = isMob ? 'none' : 'block';
-                        document.getElementById('mobile-buttons').style.display = isMob ? 'flex' : 'none';
-                    })();
-                </script>
+                <button class="btn-primary btn-wide" onclick="startSkill('heavy')">💥 강력한 강타 (5)</button>
+                <button class="btn-secondary btn-wide" style="min-height: 2.25rem; font-size: 0.8rem; opacity: 0.5;"
+                    onclick="endPlayerTurn()">턴 종료</button>
             </div>
 
-            <div id="msg-container">
-                <div id="message"></div>
+            <div id="monster-actions" class="btn-stack" style="display: none;">
+                <div id="pc-guide" class="pulse"
+                    style="text-align: center; color: #888; font-size: 0.875rem; display: none;">L-Click: Parry |
+                    R-Click: Dodge</div>
+                <div id="mobile-buttons" class="btn-row" style="display: none;">
+                    <button id="btn-parry" class="btn-secondary btn-wide" style="background: #fff; color: #000;">🛡️
+                        PARRY NOW</button>
+                    <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
+                </div>
             </div>
-            <!-- Removed independent Editor button, integrated into top-status below -->
-        </div>
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            const isMob = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            document.getElementById('pc-guide').style.display = isMob ? 'none' : 'block';
+            document.getElementById('mobile-buttons').style.display = isMob ? 'flex' : 'none';
+        })();
+    </script>
+    </div>
+
+    <div id="msg-container">
+        <div id="message"></div>
+    </div>
+    <!-- Removed independent Editor button, integrated into top-status below -->
+    </div>
     </div>
 
     <!-- Overlays Moved to Body for Z-Index Priority -->
@@ -1844,68 +1723,94 @@
 
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-        function handleInput(e) {
-            if (!gameStarted) return;
-            if (currentTurn === "PLAYER") {
-                if (isTargeting) handleTargeting(e);
-                return;
-            }
-            if (currentTurn === "MONSTER") {
-                e.preventDefault();
-                // Left Click (0) -> Parry, Right Click (2) -> Dash
-                if (e.button === 0) {
-                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                    Player.isParrying = true;
-                } else if (e.button === 2) {
-                    executeDash();
-                } else if (e.type === 'touchstart') {
-                    // Mobile touch also triggers parry via huge button
-                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                    Player.isParrying = true;
-                }
-            }
+        function resizeCanvas() {
+            const root = document.getElementById('game-container');
+            const hud = document.getElementById('top-status');
+            const footer = document.getElementById('bottom-ui');
+            const playArea = document.getElementById('play-area');
+
+            // Flex 레이아웃이므로 자동 계산된 부모 크기 사용
+            const rootW = root.clientWidth;
+            const rootH = root.clientHeight;
+            const hudH = hud.offsetHeight;
+            const footerH = footer.offsetHeight;
+
+            // 캔버스 크기를 남은 영역(Play Area)에 맞춤
+            const playAreaH = rootH - hudH - footerH;
+
+            canvas.width = rootW;
+            canvas.height = playAreaH;
+            CANVAS_W = canvas.width;
+            CANVAS_H = canvas.height;
+
+            // 좌표계 업데이트 (플레이어 위치는 Play Area 하단 중심)
+            Player.x = CANVAS_W / 2;
+            Player.y = CANVAS_H * 0.85;
+
+            // 몬스터 배경 위치 재확인
+            monsters.forEach(m => {
+                m.homeX = CANVAS_W / 2;
+                m.homeY = CANVAS_H * 0.2;
+                if (m.state === "IDLE") { m.x = m.homeX; m.y = m.homeY; }
+            });
         }
 
         function init() {
             try {
                 loadFromStorage();
                 window.addEventListener('resize', resizeCanvas);
+
+                // 전역 컨텍스트 메뉴 차단 (PC 우클릭 조작을 위해 필수)
+                window.addEventListener('contextmenu', e => e.preventDefault());
+
+                // 입력 핸들링 (캔버스 본체)
                 canvas.addEventListener('mousedown', handleInput);
                 canvas.addEventListener('touchstart', handleInput, { passive: false });
-                window.addEventListener('contextmenu', (e) => e.preventDefault());
 
-                // Player Actions
-                if (ui.btns.atk) ui.btns.atk.onclick = () => startSkill("atk");
-                if (ui.btns.spin) ui.btns.spin.onclick = executeSpinSlash;
-                if (ui.btns.heavy) ui.btns.heavy.onclick = () => startSkill("heavy");
-                if (ui.btns.end) ui.btns.end.onclick = endPlayerTurn;
-
-                // Monster Turn Actions
+                // 조작 가이드 / 버튼 설정
+                const pcGuide = document.getElementById('pc-guide');
+                const mobBtns = document.getElementById('mobile-buttons');
                 const btnParry = document.getElementById('btn-parry');
                 const btnDash = document.getElementById('btn-dash');
 
-                if (btnParry) {
-                    btnParry.addEventListener('mousedown', (e) => {
-                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                        Player.isParrying = true;
-                    });
-                    btnParry.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                        Player.isParrying = true;
-                    }, { passive: false });
-                }
-                if (btnDash) btnDash.onclick = executeDash;
-
-                // Environmental Check - Remove buttons on PC to use mouse clicks
-                if (!isMobile) {
-                    // PC에서 버튼을 숨기고 가이드를 보여줄 수도 있음
-                    // btnParry.style.display = 'none';
+                if (isMobile) {
+                    if (mobBtns) mobBtns.style.display = 'flex';
+                    if (pcGuide) pcGuide.style.display = 'none';
+                    if (btnParry) {
+                        btnParry.addEventListener('touchstart', (e) => {
+                            e.preventDefault();
+                            Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                            Player.isParrying = true;
+                        }, { passive: false });
+                    }
+                    if (btnDash) btnDash.onclick = executeDash;
+                } else {
+                    if (pcGuide) pcGuide.style.display = 'block';
+                    if (mobBtns) mobBtns.style.display = 'none';
                 }
 
                 resizeCanvas();
+                requestAnimationFrame(gameLoop);
             } catch (e) {
-                console.error("Initialization Failed:", e);
+                console.error("Critical Init Error:", e);
+            }
+        }
+
+        function handleInput(e) {
+            if (!gameStarted || currentTurn !== "MONSTER") return;
+            // canvas 영역 클릭 시만 반응
+            if (e.target !== canvas) return;
+
+            e.preventDefault();
+
+            // PC 마우스 조작
+            if (!isMobile) {
+                if (e.button === 0) { // 좌클릭 (Parry)
+                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                    Player.isParrying = true;
+                } else if (e.button === 2) { // 우클릭 (Dash)
+                    executeDash();
+                }
             }
         }
 
