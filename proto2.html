@@ -1057,21 +1057,34 @@
             currentTurn = "NONE";
             updateInterfaceVisibility();
 
-            if (round === 3) {
+            // 상점/이벤트 구간 (3, 7, 12, 16 스테이지)
+            const eventRounds = [3, 7, 12, 16];
+            if (eventRounds.includes(round)) {
                 showEventOverlay();
                 return;
             }
 
             // [개선] 몬스터 정렬 및 배치 로직
             monsters = [];
-            let ids = customStages[round] || ["def_1"];
+            let ids = customStages[round];
+
+            // 데이터가 없는 스테이지라면 이전 데이터 재활용 또는 폴백
+            if (!ids || ids.length === 0) {
+                if (round > 20) {
+                    showFeedback("🎉 모든 구역 정복!", "#FFD700");
+                    gameStarted = false;
+                    return;
+                }
+                ids = ["mon_tuto_1"];
+            }
+
             let count = ids.length;
 
             ids.forEach((id, i) => {
                 let m = createMonsterFromId(id);
                 if (!m) return;
 
-                // X축 균등 배분 (1: 0.5, 2: 0.28/0.72, 3: 0.18/0.5/0.82)
+                // X축 균등 배분 (Portrait 최적화: 겹침 방지)
                 let xRatio = 0.5;
                 if (count === 2) xRatio = (i === 0) ? 0.28 : 0.72;
                 else if (count === 3) xRatio = [0.18, 0.5, 0.82][i];
@@ -1087,6 +1100,11 @@
 
             // 시뮬레이션용 로그 (상태 기록)
             console.log(`[SIM] WAVE ${round} Started. Monsters: ${count}`);
+
+            currentMonsterIndex = 0;
+            currentTurn = "PLAYER"; // 몬스터 배치 완료 후 플레이어 턴으로 시작
+            Player.ap = Math.min(Player.maxAp, Player.ap + 3); // 턴 시작 AP 소폭 보정
+            updateInterfaceVisibility();
         }
 
         function createMonsterFromId(id) {
@@ -1175,14 +1193,18 @@
         }
 
         function winRound() {
-            if (currentRound === 6) {
-                showFeedback("VICTORY!", "#FFD700");
+            // 최종 보스 클리어 체크
+            if (currentRound >= 20) {
+                showFeedback("심연을 정복했습니다!", "#FFD700");
                 gameStarted = false;
-                // 승리 시 더 이상 진행 안 함
                 return;
             }
+
             currentRound++;
-            if (currentRound === 3) {
+
+            // 다음 라운드가 이벤트 라운드인지 확인
+            const eventRounds = [3, 7, 12, 16];
+            if (eventRounds.includes(currentRound)) {
                 showEventOverlay();
             } else {
                 showAugmentSelection();
@@ -1275,7 +1297,52 @@
 
         function resetStagesToDefault() {
             if (!confirm("모든 스테이지 배치를 초기 상태로 되돌리시겠습니까?")) return;
-            customStages = { 1: [], 2: [], 4: [], 5: [], 6: [] };
+            // --- 확장된 몬스터 라이브러리 (학습 -> 다수 -> 엘리트 -> 보스 순환용) ---
+            const monsterLibrary = [
+                // 1. 학습용 (단일)
+                { id: "mon_tuto_1", name: "나무 허수아비", hp: 120, atk: 10, telegraph: 1.5, postdelay: 1.2, hitstop: 3 },
+                { id: "mon_tuto_2", name: "녹슨 기갑병", hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4 },
+
+                // 2. 다수 구성용 (약한 적들)
+                { id: "mon_swarm_1", name: "그림자 슬라임", hp: 80, atk: 8, telegraph: 1.0, postdelay: 0.8, hitstop: 2 },
+                { id: "mon_swarm_2", name: "떠도는 불꽃", hp: 60, atk: 12, telegraph: 0.9, postdelay: 1.2, hitstop: 2 },
+
+                // 3. 엘리트 (단일/쌍)
+                { id: "mon_elite_1", name: "침묵의 집행자", hp: 600, atk: 22, telegraph: 0.8, postdelay: 1.0, hitstop: 5 },
+                { id: "mon_elite_2", name: "고대의 기사", hp: 850, atk: 28, telegraph: 0.7, postdelay: 1.1, hitstop: 6 },
+                { id: "mon_elite_3", name: "광기어린 암살자", hp: 450, atk: 35, telegraph: 0.6, postdelay: 0.8, hitstop: 4 },
+
+                // 4. 보스 급
+                { id: "mon_boss_1", name: "폐허의 제왕", hp: 2500, atk: 40, telegraph: 0.65, postdelay: 1.3, hitstop: 8 },
+                { id: "mon_boss_final", name: "심연의 지배자", hp: 5000, atk: 55, telegraph: 0.55, postdelay: 1.4, hitstop: 10 },
+
+                // 5. 성장 체감용 (강한 단일몹)
+                { id: "mon_growth_1", name: "거대 바위 골렘", hp: 1200, atk: 30, telegraph: 1.1, postdelay: 1.5, hitstop: 8 },
+                { id: "mon_growth_2", name: "정예 방패병", hp: 1500, atk: 18, telegraph: 1.0, postdelay: 1.0, hitstop: 6 }
+            ];
+
+            // --- 순환형 난이도 스테이지 설계 (20단계 이상) ---
+            let customStages = {
+                1: ["mon_tuto_1"],                               // 1. 학습
+                2: ["mon_tuto_2"],                               // 2. 학습 심화
+                4: ["mon_swarm_1", "mon_swarm_1"],               // 4. 다수 (성장 시범)
+                5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"],// 5. 다수 (분기)
+                6: ["mon_elite_1"],                              // 6. 첫 엘리트
+                7: ["mon_growth_1"],                             // 7. 성장 체감 (보너스 느낌)
+                8: ["mon_swarm_1", "mon_swarm_2", "mon_elite_1"],// 8. 혼합 구성
+                9: ["mon_elite_2"],                              // 9. 중간 보스급 엘리트
+                10: ["mon_boss_1"],                              // 10. 1차 보스
+                11: ["mon_growth_2"],                             // 11. 강화된 성장 체감 (강력해진 유저)
+                12: ["mon_elite_1", "mon_elite_1"],               // 12. 엘리트 듀오
+                13: ["mon_elite_2", "mon_elite_3"],               // 13. 엘리트 듀오 (변칙)
+                14: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_1"],// 14. 물량전
+                15: ["mon_elite_3"],                              // 15. 속도형 엘리트
+                16: ["mon_growth_1", "mon_growth_2"],             // 16. 거대 몹 듀오
+                17: ["mon_elite_2", "mon_elite_2", "mon_elite_2"],// 17. 극한의 3인 엘리트
+                18: ["mon_boss_1", "mon_elite_1"],                // 18. 보스 + 엘리트
+                19: ["mon_growth_2"],                             // 19. 최종 결전 전 숨고르기
+                20: ["mon_boss_final"]                            // 20. 최종 보스
+            };
             localStorage.removeItem('custom_stages');
             renderFullStageEditor();
             showFeedback("초기화 완료!", "#4db8ff");
