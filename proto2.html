@@ -152,16 +152,24 @@
         /* 3. Footer Control Area */
         footer#bottom-ui {
             flex: 0 0 280px;
-            /* 하단 UI 영역 높이 고정 (가변 방지) */
-            padding: 1.25rem;
-            padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+            /* 하단 UI 영역 높이 완전 고정 (가변 방지) */
+            position: relative;
             background: rgba(10, 10, 12, 0.98);
             border-top: 2px solid rgba(250, 225, 51, 0.2);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        /* 턴 전환 시 요소들이 공간을 차지하지 않고 중앙 정렬되도록 함 */
+        .ui-stack-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
-            z-index: 100;
-            pointer-events: auto;
+            justify-content: center;
+            padding: 1.25rem;
+            padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
         }
 
         .ap-wrapper {
@@ -172,12 +180,14 @@
             padding: 0.5rem;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .ap-label {
             font-size: 0.8125rem;
             font-weight: 800;
-            color: #444;
+            color: #666;
+            /* 색상 가독성 개선 */
         }
 
         .ap-text {
@@ -188,9 +198,26 @@
         }
 
         .btn-stack {
+            position: absolute;
+            /* 영역 가변 방지를 위해 절대 좌표 사용 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -30%);
+            width: 85%;
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #player-actions {
+            z-index: 10;
+        }
+
+        #monster-actions {
+            z-index: 5;
+            transform: translate(-50%, -10%);
+            /* 위치 미세 조정 */
         }
 
         .btn-row {
@@ -316,33 +343,39 @@
                 </div>
             </main>
 
-            <!-- 3. Footer Control Area: 하단 에너지 바 및 스킬 버튼 -->
+            <!-- 3. Footer Control Area -->
             <footer id="bottom-ui">
-                <div class="ap-wrapper">
-                    <span class="ap-label">ENERGY</span>
-                    <span id="p-ap" class="ap-text">0</span>
-                </div>
-
-                <div id="player-actions" class="btn-stack">
-                    <div class="btn-row">
-                        <button id="btn-atk" class="btn-primary" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
-                        <button id="btn-spin" class="btn-secondary" onclick="executeSpinSlash()">🌀 회전 베기 (3)</button>
+                <div class="ui-stack-container">
+                    <div class="ap-wrapper">
+                        <span class="ap-label">ENERGY</span>
+                        <span id="p-ap" class="ap-text">0</span>
                     </div>
-                    <button id="btn-heavy" class="btn-primary btn-wide" onclick="startSkill('heavy')">💥 강력한 강타
-                        (5)</button>
-                    <button id="btn-end" class="btn-secondary btn-wide"
-                        style="min-height: 2.25rem; font-size: 0.8rem; opacity: 0.5;" onclick="endPlayerTurn()">턴
-                        종료</button>
-                </div>
 
-                <div id="monster-actions" class="btn-stack" style="display: none;">
-                    <div id="pc-guide" class="pulse"
-                        style="text-align: center; color: #888; font-size: 0.875rem; display: none;">L-Click: Parry |
-                        R-Click: Dodge</div>
-                    <div id="mobile-buttons" class="btn-row" style="display: none;">
-                        <button id="btn-parry" class="btn-secondary btn-wide" style="background: #fff; color: #000;">🛡️
-                            PARRY NOW</button>
-                        <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
+                    <div id="player-actions" class="btn-stack">
+                        <div class="btn-row">
+                            <button id="btn-atk" class="btn-primary" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
+                            <button id="btn-spin" class="btn-secondary" onclick="executeSpinSlash()">🌀 회전 베기
+                                (3)</button>
+                        </div>
+                        <button id="btn-heavy" class="btn-primary btn-wide" onclick="startSkill('heavy')">💥 강력한 강타
+                            (5)</button>
+                        <button id="btn-end" class="btn-secondary btn-wide"
+                            style="min-height: 2.25rem; font-size: 0.8rem; opacity: 0.5;" onclick="endPlayerTurn()">턴
+                            종료</button>
+                    </div>
+
+                    <div id="monster-actions" class="btn-stack"
+                        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -10%); width: 85%;">
+                        <div id="pc-guide" class="pulse"
+                            style="text-align: center; color: #888; font-size: 0.875rem; display: none;">L-Click: Parry
+                            |
+                            R-Click: Dodge</div>
+                        <div id="mobile-buttons" class="btn-row" style="display: none;">
+                            <button id="btn-parry" class="btn-secondary btn-wide"
+                                style="background: #fff; color: #000;">🛡️
+                                PARRY NOW</button>
+                            <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
+                        </div>
                     </div>
                 </div>
             </footer>
@@ -708,19 +741,32 @@
         }
 
         class Monster {
-            constructor(type, x, y, hp, atk, patterns) {
+            constructor(type, hp, atk, telegraph, postdelay, hitstop) {
                 this.type = type;
-                this.homeX = x; this.homeY = y;
-                this.x = x; this.y = y;
+                this.homeX = 0; this.homeY = 0; // Will be set by spawnWave
+                this.x = 0; this.y = 0;
                 this.radius = 50;
                 this.color = type.includes("BOSS") ? "#ff0000" : "#ff4a4a";
                 this.hp = hp; this.maxHp = hp; this.atk = atk;
                 this.state = "IDLE"; this.timer = 0;
-                this.patterns = patterns;
+                // Default patterns for custom monsters
+                this.patterns = [{ hits: [PATTERN_SPEEDS["NORMAL"]] }];
+                if (type.includes("BOSS")) {
+                    this.patterns = [
+                        { hits: [PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["SLOW"]] },
+                        { hits: [PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["SLOW"]] },
+                        { hits: [PATTERN_SPEEDS["SLOW"], PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"]] }
+                    ];
+                }
                 this.currentPatternIdx = 0;
-                this.currentPattern = patterns[0];
+                this.currentPattern = this.patterns[0];
                 this.patternStep = 0;
-                this.settings = { ...monsterSettings };
+                this.settings = {
+                    telegraphMult: telegraph,
+                    postDelayMult: postdelay,
+                    variance: 0,
+                    hitStop: hitstop
+                };
             }
             nextPattern() {
                 this.currentPatternIdx = (this.currentPatternIdx + 1) % this.patterns.length;
@@ -764,6 +810,8 @@
             8: [{ type: "Rhythm Crasher", hp: 1500, atk: 25, patterns: ["SLOW", "SLOW", "FAST"] }],
             9: [{ type: "Cymbals Duo", hp: 1800, atk: 20, patterns: ["FAST", "FAST", "NORMAL"] }],
             10: [{ type: "Fake Knight", hp: 2500, atk: 35, patterns: ["SLOW", "SLOW", "NORMAL"] }]
+            // Note: WAVE_DATA is now only used if customStages is empty for a round.
+            // The Monster constructor now handles pattern assignment based on type.
         };
 
         const PATTERN_SPEEDS = {
@@ -1014,89 +1062,98 @@
                 return;
             }
 
-            let waveToSpawn = [];
-            // ... (rest of logic unchanged)
-            if (customStages[round] && customStages[round].length > 0) {
-                waveToSpawn = customStages[round].map(id => {
-                    let libM = monsterLibrary.find(x => x.id === id);
-                    if (!libM) {
-                        const defaults = {
-                            "def_1": { name: "Enemy 1", hp: 100, atk: 10 },
-                            "def_2": { name: "Enemy 2", hp: 100, atk: 10 },
-                            "def_A": { name: "Enemy A", hp: 80, atk: 9 },
-                            "def_B": { name: "Enemy B", hp: 120, atk: 8 },
-                            "def_BOSS": { name: "BOSS", hp: 780, atk: 12 }
-                        };
-                        const d = defaults[id];
-                        if (d) libM = { ...d, telegraph: 1.0, postdelay: 1.0, hitstop: 3 };
-                    }
-                    if (!libM) return null;
-                    return {
-                        type: libM.name,
-                        hp: libM.hp,
-                        atk: libM.atk,
-                        patterns: id === "def_BOSS" ? ["NORMAL", "FAST", "SLOW"] : ["NORMAL"],
-                        customSettings: {
-                            telegraphMult: libM.telegraph || 1.0,
-                            postDelayMult: libM.postdelay || 1.0,
-                            variance: 0,
-                            hitStop: libM.hitstop || 3
-                        }
-                    };
-                }).filter(x => x !== null);
-            }
+            // [개선] 몬스터 정렬 및 배치 로직
+            monsters = [];
+            let ids = customStages[round] || ["def_1"];
+            let count = ids.length;
 
-            if (waveToSpawn.length === 0) {
-                waveToSpawn = (WAVE_DATA[round] || []).map(t => ({ ...t }));
-            }
+            ids.forEach((id, i) => {
+                let m = createMonsterFromId(id);
+                if (!m) return;
 
-            if (waveToSpawn.length === 0) {
-                showFeedback("Game Clear!", "#FFD700");
-                return;
-            }
+                // X축 균등 배분 (1: 0.5, 2: 0.28/0.72, 3: 0.18/0.5/0.82)
+                let xRatio = 0.5;
+                if (count === 2) xRatio = (i === 0) ? 0.28 : 0.72;
+                else if (count === 3) xRatio = [0.18, 0.5, 0.82][i];
 
-            // Distribute X coordinates horizontally (Portrait Optimized & Centered)
-            const count = waveToSpawn.length;
-            const screenMargin = CANVAS_W * 0.3; // Increased margin to center more
-            const availableWidth = CANVAS_W - (screenMargin * 2);
-            const spacing = count > 1 ? availableWidth / (count - 1) : 0;
-
-            // Safe Area for Monsters
-            const safeTop = 100;
-            const safeBottom = 350;
-            const playableH = CANVAS_H - safeTop - safeBottom;
-
-            waveToSpawn.forEach((m, i) => {
-                m.x = count > 1 ? screenMargin + (spacing * i) : CANVAS_W / 2;
-                m.y = safeTop + (playableH * 0.15); // Top alignment within playable area
+                m.homeX = CANVAS_W * xRatio;
+                m.homeY = CANVAS_H * 0.22;
+                m.x = m.homeX;
+                m.y = m.homeY;
+                monsters.push(m);
             });
 
-            monsters = waveToSpawn.map(t => {
-                let p_arr = [];
-                if (t.multiPatterns) {
-                    p_arr = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
-                } else if (t.patterns) {
-                    p_arr = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
-                } else {
-                    p_arr = [{ hits: [30] }];
-                }
-                const mObj = new Monster(t.type, t.x, t.y, t.hp, t.atk, p_arr);
-                if (t.customSettings) mObj.settings = { ...monsterSettings, ...t.customSettings };
-                return mObj;
-            });
+            updateMessage(`WAVE ${round}`, 1200);
 
-            currentMonsterIndex = 0;
-            currentTurn = "MONSTER";
-            roundStartTimer = 40;
-            isEndingTurnAutomatically = false;
-            ui.turn.innerText = (round === 6) ? "Boss Round" : `Round ${round}`;
-            showFeedback((round === 6) || waveToSpawn[0].type.includes("BOSS") ? "Boss Appearance!" : `Wave ${round}`, "#fff");
+            // 시뮬레이션용 로그 (상태 기록)
+            console.log(`[SIM] WAVE ${round} Started. Monsters: ${count}`);
+        }
 
-            Player.ap += Player.augBuffs.startAp;
-            Player.state.killsThisTurn = 0;
-            Player.state.firstAttackThisTurn = true;
-            updateHitIcons();
-            updateInterfaceVisibility();
+        function createMonsterFromId(id) {
+            let libM = monsterLibrary.find(x => x.id === id);
+            if (!libM) {
+                const defaults = {
+                    "def_1": { name: "연습용 허수아비", hp: 100, atk: 10, telegraph: 1.2, postdelay: 1.0, hitstop: 3 },
+                    "def_2": { name: "강화 허수아비", hp: 150, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3 },
+                    "def_BOSS": { name: "최초의 시련", hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
+                };
+                let d = defaults[id] || defaults["def_1"];
+                libM = { ...d };
+            }
+            return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
+        }
+
+        if (waveToSpawn.length === 0) {
+            waveToSpawn = (WAVE_DATA[round] || []).map(t => ({ ...t }));
+        }
+
+        if (waveToSpawn.length === 0) {
+            showFeedback("Game Clear!", "#FFD700");
+            return;
+        }
+
+        // Distribute X coordinates horizontally (Portrait Optimized & Centered)
+        const count = waveToSpawn.length;
+        const screenMargin = CANVAS_W * 0.3; // Increased margin to center more
+        const availableWidth = CANVAS_W - (screenMargin * 2);
+        const spacing = count > 1 ? availableWidth / (count - 1) : 0;
+
+        // Safe Area for Monsters
+        const safeTop = 100;
+        const safeBottom = 350;
+        const playableH = CANVAS_H - safeTop - safeBottom;
+
+        waveToSpawn.forEach((m, i) => {
+            m.x = count > 1 ? screenMargin + (spacing * i) : CANVAS_W / 2;
+            m.y = safeTop + (playableH * 0.15); // Top alignment within playable area
+        });
+
+        monsters = waveToSpawn.map(t => {
+            let p_arr = [];
+            if (t.multiPatterns) {
+                p_arr = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
+            } else if (t.patterns) {
+                p_arr = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
+            } else {
+                p_arr = [{ hits: [30] }];
+            }
+            const mObj = new Monster(t.type, t.x, t.y, t.hp, t.atk, p_arr);
+            if (t.customSettings) mObj.settings = { ...monsterSettings, ...t.customSettings };
+            return mObj;
+        });
+
+        currentMonsterIndex = 0;
+        currentTurn = "MONSTER";
+        roundStartTimer = 40;
+        isEndingTurnAutomatically = false;
+        ui.turn.innerText = (round === 6) ? "Boss Round" : `Round ${round}`;
+        showFeedback((round === 6) || waveToSpawn[0].type.includes("BOSS") ? "Boss Appearance!" : `Wave ${round}`, "#fff");
+
+        Player.ap += Player.augBuffs.startAp;
+        Player.state.killsThisTurn = 0;
+        Player.state.firstAttackThisTurn = true;
+        updateHitIcons();
+        updateInterfaceVisibility();
         }
 
         function showEventOverlay() {
