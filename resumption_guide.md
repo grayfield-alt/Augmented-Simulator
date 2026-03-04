@@ -38,9 +38,19 @@
 
 ---
 
-## 💡 다음 작업 시 안티그라비티에게 하는 말
-집에서 새로운 안티그라비티 세션을 시작할 때, 채팅창에 아래 문구를 복사해서 입력해 주세요:
+## 💡 다음 작업 시 안티그라비티(AI) 필수 수행 절차
+새로운 세션을 시작할 때, AI는 반드시 다음 순서로 프로젝트를 파악해야 합니다:
 
-> **"Augmented Simulator 프로젝트 작업을 이어서 할 거야. `task.md`와 `resumption_guide.md`를 읽고 현재 진행 상황을 파악한 뒤, 이어서 작업해줘."**
+1. **필수 문서 숙지**: 다음 문서들을 최우선으로 읽고 지침을 적용합니다.
+   - [PROJECT_RULES.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/PROJECT_RULES.md): 언어 및 코딩 규칙
+   - [skills.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/skills.md): 에이전트 핵심 지침
+   - [MONSTERS.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/MONSTERS.md): 몬스터 데이터 규격
+   - [AUGMENTS.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/AUGMENTS.md): 증강 상세 스펙
+
+2. **진행 상황 파악**:
+   - `task.md`를 통해 현재 할 일과 완료된 일을 확인합니다.
+   - `resumption_guide.md`를 읽고 세션 간 맥락을 파악합니다.
+
+> **"Augmented Simulator 프로젝트 작업을 재개할게. `PROJECT_RULES.md`, `skills.md`, `MONSTERS.md`, `AUGMENTS.md`를 모두 정독하고 나서, `task.md`의 다음 작업을 진행해줘."**
 
 이 문구 하나면 안티그라비티가 모든 맥락을 이해하고 즉시 작업을 재개할 것입니다.
