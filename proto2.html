@@ -266,8 +266,9 @@
 
 <body>
     <div id="game-container">
-        <div id="ui-layer" style="display: none;">
-            <!-- 1. HUD -->
+        <!-- Battle Screen: 전투 중 모든 HUD, 플레이 영역, 하단 조작계가 표시되는 영역 -->
+        <div id="battle-screen" style="display: none; height: 100%; flex-direction: column;">
+            <!-- 1. HUD: Vitality, Power, Defense 등 상태 표시부 -->
             <header id="top-status">
                 <div class="status-group">
                     <div class="status-item">
@@ -287,10 +288,11 @@
                     onclick="toggleEditor(true)">⚙️ EDIT</button>
             </header>
 
-            <!-- 2. Play Area -->
-            <main id="play-area">
-                <canvas id="gameCanvas"></canvas>
-                <div id="visual-overlays">
+            <!-- 2. Play Area: 실제 게임 캐릭터와 이펙트가 그려지는 Canvas 영역 -->
+            <main id="play-area" style="flex: 1; position: relative;">
+                <canvas id="gameCanvas"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+                <div id="visual-overlays" style="position: absolute; inset: 0; pointer-events: none; z-index: 2;">
                     <div id="vignette" class="vignette"></div>
                     <div id="hit-icons-container"
                         style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
@@ -304,7 +306,7 @@
                 </div>
             </main>
 
-            <!-- 3. Footer Control Area -->
+            <!-- 3. Footer Control Area: 하단 에너지 바 및 스킬 버튼 -->
             <footer id="bottom-ui">
                 <div class="ap-wrapper">
                     <span class="ap-label">ENERGY</span>
@@ -333,6 +335,7 @@
                         <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
                     </div>
                 </div>
+            </footer>
         </div>
     </div>
 
@@ -560,22 +563,22 @@
         };
 
         const ui = {
+            lobby: document.getElementById('lobby-overlay'),
+            battleScreen: document.getElementById('battle-screen'),
+            overlayAug: document.getElementById('augment-overlay'),
+            overlayEvent: document.getElementById('event-overlay'),
+            overlayGameOver: document.getElementById('game-over-overlay'),
+            inventory: document.getElementById('inventory-overlay'),
+            stageEditor: document.getElementById('stage-editor-overlay'),
+            overlayGuide: document.getElementById('guide-overlay'),
             hp: document.getElementById('p-hp'),
             atk: document.getElementById('p-atk'),
             def: document.getElementById('p-def'),
             ap: document.getElementById('p-ap'),
-            turn: document.getElementById('turn-indicator'),
             msg: document.getElementById('message'),
+            turn: document.getElementById('turn-indicator'),
             vignette: document.getElementById('vignette'),
             hitIcons: document.getElementById('hit-icons-container'),
-            lobby: document.getElementById('lobby-overlay'),
-            inventory: document.getElementById('inventory-overlay'),
-            stageEditor: document.getElementById('stage-editor-overlay'),
-            overlayAug: document.getElementById('augment-overlay'),
-            overlayEvent: document.getElementById('event-overlay'),
-            overlayGuide: document.getElementById('guide-overlay'),
-            overlayGameOver: document.getElementById('game-over-overlay'),
-            uiLayer: document.getElementById('ui-layer'),
             btnReroll: document.getElementById('btn-reroll'),
             btns: {
                 atk: document.getElementById('btn-atk'),
@@ -979,8 +982,8 @@
         }
 
         function startGame() {
-            // 1. UI 레이어를 먼저 표시하여 요소들의 높이/너비 계산이 가능하게 함
-            ui.uiLayer.style.display = "block";
+            // 1. 전투 화면 컨테이너를 먼저 표시 (flex 적용)
+            ui.battleScreen.style.display = "flex";
             ui.lobby.style.display = "none";
 
             // 2. 레이아웃 확정 후 캔버스 리사이징 및 좌표 초기화
@@ -1614,12 +1617,19 @@
             const isAnyOverlayVisible = overlays.some(o => o.style.display === "flex" || o.style.display === "block");
 
             const bottomUI = document.getElementById('bottom-ui');
+            const topHUD = document.getElementById('top-status');
+
             if (isAnyOverlayVisible || !gameStarted || currentTurn === "NONE") {
-                bottomUI.style.display = "none";
+                if (bottomUI) bottomUI.style.opacity = "0";
+                if (topHUD) topHUD.style.opacity = "0";
+                if (bottomUI) bottomUI.style.pointerEvents = "none";
                 return;
             }
 
-            bottomUI.style.display = "flex";
+            if (bottomUI) bottomUI.style.opacity = "1";
+            if (topHUD) topHUD.style.opacity = "1";
+            if (bottomUI) bottomUI.style.pointerEvents = "auto";
+
             document.getElementById('player-actions').style.display = currentTurn === "PLAYER" ? "flex" : "none";
             document.getElementById('monster-actions').style.display = currentTurn === "MONSTER" ? "flex" : "none";
         }
