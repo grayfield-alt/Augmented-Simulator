@@ -63,8 +63,9 @@
 
         /* 1. HUD */
         header#top-status {
-            flex: 0 0 auto;
-            padding: 0.75rem 1rem;
+            flex: 0 0 60px;
+            /* 높이 고정 */
+            padding: 0 1rem;
             background: rgba(15, 15, 20, 0.95);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
@@ -150,7 +151,8 @@
 
         /* 3. Footer Control Area */
         footer#bottom-ui {
-            flex: 0 0 auto;
+            flex: 0 0 280px;
+            /* 하단 UI 영역 높이 고정 (가변 방지) */
             padding: 1.25rem;
             padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
             background: rgba(10, 10, 12, 0.98);
@@ -1786,26 +1788,24 @@
 
         function resizeCanvas() {
             const root = document.getElementById('game-container');
-            const hud = document.getElementById('top-status');
-            const footer = document.getElementById('bottom-ui');
             const playArea = document.getElementById('play-area');
 
             if (!root || !playArea) return;
 
-            // 1. 고정된 물리적 픽셀 크기 설정 (그리기 해상도 안정화)
-            // 논리 해상도를 400x700 정도로 고정하여 기기별 편차 제거
-            canvas.width = 412;
-            canvas.height = 700;
+            // 1. 실제 렌더링된 컨테이너의 크기를 정확히 파악
+            const rect = playArea.getBoundingClientRect();
+
+            // 2. 캔버스의 내부 해상도를 CSS 크기와 1:1로 일치시켜 왜곡 방지
+            canvas.width = rect.width || 412;
+            canvas.height = rect.height || 500;
 
             CANVAS_W = canvas.width;
             CANVAS_H = canvas.height;
 
-            // 2. 캐릭터 좌표 재설정 (전체 캔버스 크기 대비 백분율로 고정)
-            // 플레이어: 하단에서 15% 위 (전체 높이의 85% 지점)
+            // 3. 캐릭터 좌표 설정 (캔버스 크기 대비 백분율 유지)
             Player.x = CANVAS_W / 2;
             Player.y = CANVAS_H * 0.85;
 
-            // 몬스터: 상단에서 20% 지점
             monsters.forEach(m => {
                 m.homeX = CANVAS_W / 2;
                 m.homeY = CANVAS_H * 0.22;
@@ -1815,7 +1815,7 @@
                 }
             });
 
-            // 3. CSS 크기 조정 (부모 영역을 꽉 채우도록)
+            // 4. CSS 스케일링으로 인한 찌그러짐 방지 (auto 설정)
             canvas.style.width = "100%";
             canvas.style.height = "100%";
         }
