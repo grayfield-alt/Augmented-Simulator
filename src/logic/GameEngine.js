@@ -91,13 +91,13 @@ export class GameEngine {
                 maxHp: t.hp,
                 atk: t.atk,
                 color: isDragon ? "#8b0000" : (isBoss ? "#ff0000" : "#ff4a4a"),
-                state: "IDLE",
-                timer: 0,
-                patterns: patternScripts,
+                patterns: t.patterns,
+                grade: t.grade || "NORMAL",
+                currentType: "basic", // "basic" 또는 "skills"
                 currentPatternIdx: 0,
-                currentScript: patternScripts[0],
                 stepIdx: 0,
                 hitTriggered: false,
+                cueActive: false,
                 settings: {
                     telegraphMult: 1.0,
                     postDelayMult: 1.0,

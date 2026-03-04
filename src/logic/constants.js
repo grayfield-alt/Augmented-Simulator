@@ -15,7 +15,6 @@ export const PLAYER_CONFIG = {
 export const MONSTER_CONFIG = {
     BASE_RADIUS: 25,
     BOSS_RADIUS: 60,
-    CUE_FRAME: 14, // 전조 시작 후 신호 발생 시점
     REACTION_WINDOW: 26, // 신호 후 타격까지의 '빡빡한' 시간 (사용자 요청)
     PATTERN_SPEEDS: {
         EXTREME: 26,   // 0.43s (최고 난이도, 신호 즉시 타격)
@@ -67,111 +66,95 @@ export const AUGMENT_DATA = {
 
 export const WAVE_DATA = {
     1: [
-        { type: "일반 병사", hp: 100, atk: 10, y: 150, patterns: { steps: [{ type: "전조", duration: 60, action: "공격" }] } },
-        { type: "민첩한 정찰병", hp: 80, atk: 12, y: 350, patterns: { steps: [{ type: "전조", duration: 40, action: "공격" }, { type: "전조", duration: 40, action: "공격" }] } }
+        { type: "일반 병사", grade: "NORMAL", hp: 100, atk: 10, y: 150, patterns: { basic: [{ id: "공격", steps: [{ type: "전조", duration: 60, action: "공격" }] }] } },
+        { type: "민첩한 정찰병", grade: "NORMAL", hp: 80, atk: 12, y: 350, patterns: { basic: [{ id: "2연타", steps: [{ type: "전조", duration: 40, action: "공격" }, { type: "전조", duration: 40, action: "공격" }] }] } }
     ],
     2: [
-        { type: "중장갑 근위병", hp: 200, atk: 15, y: 150, patterns: { steps: [{ type: "전조", duration: 80, action: "공격", damageMult: 1.2 }] } },
-        { type: "날렵한 암살자", hp: 100, atk: 8, y: 350, patterns: { steps: [{ type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 30, action: "공격" }] } }
+        { type: "중장갑 근위병", grade: "NORMAL", hp: 200, atk: 15, y: 150, patterns: { basic: [{ id: "묵직한 공격", steps: [{ type: "전조", duration: 80, action: "공격", damageMult: 1.2 }] }] } },
+        { type: "날렵한 암살자", grade: "NORMAL", hp: 100, atk: 8, y: 350, patterns: { basic: [{ id: "3연타", steps: [{ type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 30, action: "공격" }] }] } }
     ],
     3: { type: "이벤트" },
     4: [
-        { type: "정예 부대 A", hp: 150, atk: 12, y: 100, patterns: { steps: [{ type: "전조", duration: 45, action: "공격" }, { type: "전조", duration: 60, action: "공격" }] } },
-        { type: "정예 부대 B", hp: 150, atk: 12, y: 250, patterns: { steps: [{ type: "전조", duration: 60, action: "공격" }, { type: "전조", duration: 45, action: "공격" }] } },
-        { type: "정예 부대 C", hp: 200, atk: 10, y: 400, patterns: { steps: [{ type: "전조", duration: 90, action: "공격", damageMult: 1.5 }] } }
+        { type: "정예 부대 A", grade: "NORMAL", hp: 150, atk: 12, y: 100, patterns: { basic: [{ id: "엇박 공격", steps: [{ type: "전조", duration: 45, action: "공격" }, { type: "전조", duration: 60, action: "공격" }] }] } },
+        { type: "정예 부대 B", grade: "NORMAL", hp: 150, atk: 12, y: 250, patterns: { basic: [{ id: "엇박 공격", steps: [{ type: "전조", duration: 60, action: "공격" }, { type: "전조", duration: 45, action: "공격" }] }] } },
+        { type: "정예 부대 C", grade: "NORMAL", hp: 200, atk: 10, y: 400, patterns: { basic: [{ id: "느린 공격", steps: [{ type: "전조", duration: 90, action: "공격", damageMult: 1.5 }] }] } }
     ],
     5: [
-        { type: "그림자 마스터", hp: 300, atk: 15, y: 225, patterns: { steps: [{ type: "전조", duration: 40, action: "공격" }, { type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 20, action: "공격" }, { type: "전조", duration: 60, action: "공격", damageMult: 2.0 }] } }
+        {
+            type: "그림자 마스터", grade: "ELITE", hp: 300, atk: 15, y: 225,
+            patterns: {
+                basic: [
+                    { id: "기본 베기", steps: [{ type: "전조", duration: 45, action: "공격" }] }
+                ],
+                skills: [
+                    { id: "그림자 연타", steps: [{ type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 25, action: "공격" }, { type: "전조", duration: 20, action: "공격" }, { type: "전조", duration: 60, action: "공격", damageMult: 2.0 }] }
+                ]
+            }
+        }
     ],
     6: [
         {
-            type: "보스", hp: 1200, atk: 18, y: 225,
-            multiPatterns: [
-                {
-                    id: "1페이즈",
-                    steps: [
-                        { type: "전조", duration: 60, action: "공격" },
-                        { type: "전조", duration: 45, action: "공격" },
-                        { type: "전조", duration: 30, action: "공격" }
-                    ]
-                },
-                {
-                    id: "강력한 내려치기",
-                    steps: [
-                        { type: "전조", duration: 90, action: "공격", damageMult: 2.5, unparriable: true }
-                    ]
-                },
-                {
-                    id: "광란의 할퀴기",
-                    steps: [
-                        { type: "전조", duration: 25, action: "공격" },
-                        { type: "전조", duration: 25, action: "공격" },
-                        { type: "전조", duration: 25, action: "공격" },
-                        { type: "전조", duration: 25, action: "공격" }
-                    ]
-                }
-            ]
+            type: "보스", grade: "BOSS", hp: 1200, atk: 18, y: 225,
+            patterns: {
+                basic: [
+                    { id: "보스 평타", steps: [{ type: "전조", duration: 60, action: "공격" }, { type: "전조", duration: 50, action: "공격" }] }
+                ],
+                skills: [
+                    { id: "강력한 내려치기", steps: [{ type: "전조", duration: 90, action: "공격", damageMult: 2.5, unparriable: true }] },
+                    { id: "광란의 할퀴기", steps: [{ type: "전조", duration: 25, action: "공격" }, { type: "전조", duration: 25, action: "공격" }, { type: "전조", duration: 25, action: "공격" }, { type: "전조", duration: 25, action: "공격" }] }
+                ]
+            }
         }
     ],
     7: [
         {
-            type: "고대 드래곤",
-            hp: 3000,
-            atk: 35,
-            y: 225,
-            radius: 100,
+            type: "고대 드래곤", grade: "BOSS", hp: 3000, atk: 35, y: 225, radius: 100,
             patterns: {
-                steps: [
-                    { type: "전조", duration: 80, action: "공격" },
-                    { type: "전조", duration: 40, action: "공격" },
-                    { type: "전조", duration: 20, action: "공격" },
-                    { type: "전조", duration: 60, action: "공격", unparriable: true }
+                basic: [
+                    { id: "드래곤 평타", steps: [{ type: "전조", duration: 70, action: "공격" }, { type: "전조", duration: 70, action: "공격" }] }
+                ],
+                skills: [
+                    { id: "드래곤 브레스", steps: [{ type: "전조", duration: 100, action: "공격", damageMult: 3.0, unparriable: true }] },
+                    { id: "꼬리 휘두르기", steps: [{ type: "전조", duration: 40, action: "공격" }, { type: "전조", duration: 30, action: "공격" }, { type: "전조", duration: 20, action: "공격" }] }
                 ]
             }
         }
     ],
     8: [
         {
-            type: "리듬 크래셔",
-            hp: 400,
-            atk: 20,
-            y: 225,
+            type: "리듬 크래셔", grade: "ELITE", hp: 400, atk: 20, y: 225,
             patterns: {
-                steps: [
-                    { type: "전조", duration: 60, action: "공격" }, // 정박
-                    { type: "전조", duration: 60, action: "공격" }, // 정박
-                    { type: "전조", duration: 26, action: "공격", damageMult: 1.5 } // 엇박 (급발진)
+                basic: [
+                    { id: "크래셔 평타", steps: [{ type: "전조", duration: 60, action: "공격" }] }
+                ],
+                skills: [
+                    { id: "급발진", steps: [{ type: "전조", duration: 60, action: "공격" }, { type: "전조", duration: 60, action: "공격" }, { type: "전조", duration: 26, action: "공격", damageMult: 1.5 }] }
                 ]
             }
         }
     ],
     9: [
         {
-            type: "심벌즈 듀오",
-            hp: 500,
-            atk: 15,
-            y: 225,
+            type: "심벌즈 듀오", grade: "ELITE", hp: 500, atk: 15, y: 225,
             patterns: {
-                steps: [
-                    { type: "전조", duration: 50, action: "공격" },
-                    { type: "전조", duration: 15, action: "공격" }, // "따닥" 하는 아주 빠른 연타
-                    { type: "전조", duration: 60, action: "공격" }
+                basic: [
+                    { id: "듀오 평타", steps: [{ type: "전조", duration: 55, action: "공격" }] }
+                ],
+                skills: [
+                    { id: "심벌즈 따닥", steps: [{ type: "전조", duration: 50, action: "공격" }, { type: "전조", duration: 15, action: "공격" }, { type: "전조", duration: 60, action: "공격" }] }
                 ]
             }
         }
     ],
     10: [
         {
-            type: "페이크 나이트",
-            hp: 800,
-            atk: 25,
-            y: 225,
-            radius: 40,
+            type: "페이크 나이트", grade: "ELITE", hp: 800, atk: 25, y: 225, radius: 40,
             patterns: {
-                steps: [
-                    { type: "전조", duration: 120, action: "공격", damageMult: 2.0 }, // 매우 긴 대기 시간으로 인내심 시험
-                    { type: "전조", duration: 40, action: "공격" },
-                    { type: "전조", duration: 30, action: "공격", unparriable: true }
+                basic: [
+                    { id: "나이트 평타", steps: [{ type: "전조", duration: 70, action: "공격" }] }
+                ],
+                skills: [
+                    { id: "페이크 강타", steps: [{ type: "전조", duration: 120, action: "공격", damageMult: 2.0 }, { type: "전조", duration: 40, action: "공격" }, { type: "전조", duration: 30, action: "공격", unparriable: true }] }
                 ]
             }
         }

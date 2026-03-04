@@ -1,0 +1,130 @@
+:root {
+    --font-main: 'Inter', sans-serif;
+    --primary: #FFD700;
+    --danger: #FF4444;
+    --bg-dark: #0a0a0a;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: var(--bg-dark);
+    color: #fff;
+    font-family: var(--font-main);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+header {
+    flex: 0 0 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    border-bottom: 1px solid #333;
+}
+
+.status-group {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #888;
+    font-weight: 700;
+}
+
+.status-value {
+    font-size: 1.25rem;
+    font-weight: 900;
+}
+
+main {
+    flex: 1 1 auto;
+    position: relative;
+    background: #000;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+footer {
+    flex: 0 0 auto;
+    padding: 1rem;
+    background: #111;
+    border-top: 1px solid #333;
+}
+
+.btn-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+button {
+    flex: 1;
+    min-height: 3rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #000;
+}
+
+.btn-secondary {
+    background: #333;
+    color: #fff;
+}
+
+.btn-wide {
+    width: 100%;
+}
+
+#turn-indicator {
+    position: absolute;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 900;
+    letter-spacing: 2px;
+    pointer-events: none;
+}

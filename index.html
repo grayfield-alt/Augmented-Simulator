@@ -1,13 +1,69 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Augmented Simulator | Premium Roguelite Engine</title>
-  </head>
-  <body class="bg-background">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AUGMENTED SIMULATOR V3</title>
+  <link rel="stylesheet" href="src/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="game-container">
+    <!-- 1. HUD -->
+    <header id="top-status">
+      <div class="status-group">
+        <div class="status-item">
+          <span class="status-label">Vitality</span>
+          <span id="p-hp" class="status-value hp-text">100</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Power</span>
+          <span id="p-atk" class="status-value atk-text">50</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Defense</span>
+          <span id="p-def" class="status-value def-text">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. Play Area -->
+    <main id="play-area">
+      <canvas id="gameCanvas"></canvas>
+      <div id="visual-overlays">
+        <div id="vignette" class="vignette"></div>
+        <div id="msg-container">
+          <div id="message"></div>
+        </div>
+        <div id="turn-indicator">Player's Turn</div>
+      </div>
+    </main>
+
+    <!-- 3. Footer Control Area -->
+    <footer id="bottom-ui">
+      <div class="ap-wrapper">
+        <span class="ap-label">ENERGY</span>
+        <span id="p-ap" class="ap-text">0</span>
+      </div>
+
+      <div id="player-actions" class="btn-stack">
+        <div class="btn-row">
+          <button class="btn-primary" onclick="window.gameAction('atk')">🗡️ 공격 (2)</button>
+          <button class="btn-secondary" onclick="window.gameAction('spin')">🌀 회전 베기 (3)</button>
+        </div>
+        <button class="btn-primary btn-wide" onclick="window.gameAction('heavy')">💥 강력한 강타 (5)</button>
+        <button class="btn-secondary btn-wide" style="opacity: 0.5;" onclick="window.gameAction('end')">턴 종료</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- V3 Script Entry -->
+  <script type="module" src="src/main.js"></script>
+</body>
+
 </html>

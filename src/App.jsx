@@ -92,6 +92,13 @@ export default function App() {
         } else {
           ctx.fillStyle = `rgb(${255}, ${74 + 181 * alpha}, ${74 + 181 * alpha})`;
         }
+
+        // 신호(Cue) 발생 시 하얀색으로 강조
+        if (m.cueActive) {
+          ctx.fillStyle = "#ffffff";
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = "#ffffff";
+        }
       }
 
       ctx.beginPath();
@@ -178,6 +185,12 @@ export default function App() {
 
   // --- Monster Logic ---
   const updateMonsterTurn = (m, dt) => {
+    // 현재 패턴 가져오기
+    const patternList = m.patterns[m.currentType] || m.patterns.basic;
+    const currentPattern = patternList[m.currentPatternIdx] || patternList[0];
+    const steps = currentPattern.steps;
+    const step = steps[m.stepIdx];
+
     if (m.state === "IDLE") {
       m.timer += dt;
       const settings = m.settings || monsterSettings;
@@ -190,7 +203,6 @@ export default function App() {
       }
     } else if (m.state === "TELEGRAPH") {
       m.timer += dt;
-      const step = m.currentScript.steps[m.stepIdx];
       const settings = m.settings || monsterSettings;
       const baseDuration = step.duration;
       // 가변성(Variance) 적용 (패턴 시작 시 한 번만 계산하는 게 좋지만, 여기서는 배율 적용)
@@ -207,11 +219,20 @@ export default function App() {
         m.drawColor = null;
       }
 
+      // [NEW] 26프레임 반응 기준용 Cue(신호) 발생 로직
+      const remainingTelegraph = waitFrames - m.timer;
+      if (remainingTelegraph + PLAYER_CONFIG.ATTACK_DURATION <= MONSTER_CONFIG.REACTION_WINDOW) {
+        m.cueActive = true;
+      } else {
+        m.cueActive = false;
+      }
+
       if (m.timer >= waitFrames) {
         m.state = "ATTACK";
         m.timer = 0;
         m.startX = m.x;
         m.startY = m.y;
+        m.cueActive = false; // 공격 시작 시 신호 종료
       }
     } else if (m.state === "ATTACK") {
       m.timer += dt;
@@ -222,7 +243,6 @@ export default function App() {
 
       if (m.timer >= PLAYER_CONFIG.ATTACK_DURATION - 2 && !m.hitTriggered) {
         m.hitTriggered = true;
-        const step = m.currentScript.steps[m.stepIdx];
         resolveParry(m, step);
       }
 
@@ -249,14 +269,28 @@ export default function App() {
 
       if (m.timer >= duration) {
         m.stepIdx++;
-        if (m.stepIdx < m.currentScript.steps.length) {
+        if (m.stepIdx < steps.length) {
           m.state = "TELEGRAPH";
           m.timer = 0;
         } else {
+          // 패턴 종료 후 다음 패턴 결정 (평타-스킬 순환)
           m.state = "DONE";
-          m.patternStep = 0; // Reset step for next pattern
-          m.currentPatternIdx = (m.currentPatternIdx + 1) % m.patterns.length;
-          m.currentPattern = m.patterns[m.currentPatternIdx];
+          m.stepIdx = 0;
+
+          if (m.grade === "ELITE" || m.grade === "BOSS") {
+            // 평타 후에는 스킬로, 스킬 후에는 평타로 교체 (또는 확률)
+            if (m.currentType === "basic" && m.patterns.skills && m.patterns.skills.length > 0) {
+              m.currentType = "skills";
+              m.currentPatternIdx = Math.floor(Math.random() * m.patterns.skills.length);
+            } else {
+              m.currentType = "basic";
+              m.currentPatternIdx = Math.floor(Math.random() * m.patterns.basic.length);
+            }
+          } else {
+            // 일반 몹은 평타 리스트 내에서 순환
+            m.currentPatternIdx = (m.currentPatternIdx + 1) % m.patterns.basic.length;
+          }
+
           nextMonsterOrTurn();
         }
       }
@@ -483,11 +517,12 @@ export default function App() {
 
               {/* Monster Pattern Icons (Dots) */}
               <div className="flex justify-center gap-2 py-2 bg-slate-900/40 rounded-xl border border-white/5">
-                {currentTurn === "MONSTER" && monsters[currentMonsterIdx] && monsters[currentMonsterIdx].currentScript.steps.map((step, idx) => (
+                {currentTurn === "MONSTER" && monsters[currentMonsterIdx] && (monsters[currentMonsterIdx].patterns[monsters[currentMonsterIdx].currentType][monsters[currentMonsterIdx].currentPatternIdx] || monsters[currentMonsterIdx].patterns.basic[0]).steps.map((step, idx) => (
                   <div key={idx}
                     className={`w-3 h-3 rounded-full border border-white/20 transition-all duration-300
                        ${idx < monsters[currentMonsterIdx].stepIdx ? 'opacity-20 scale-75' : 'opacity-100 scale-100'}
-                       ${step.unparriable ? 'bg-purple-500 shadow-[0_0_10px_rgba(160,32,240,0.5)]' : 'bg-emerald-500'}
+                       ${step.unparriable ? 'bg-purple-500 shadow-[0_0_10px_rgba(160,32,240,0.5)]' : (monsters[currentMonsterIdx].currentType === 'skills' ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]' : 'bg-emerald-500')}
+                       ${idx === monsters[currentMonsterIdx].stepIdx && monsters[currentMonsterIdx].cueActive ? 'animate-pulse border-2 border-yellow-300' : ''}
                        `}
                   />
                 ))}

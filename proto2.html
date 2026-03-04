@@ -266,71 +266,74 @@
 
 <body>
     <div id="game-container">
-        <!-- 1. HUD -->
-        <header id="top-status">
-            <div class="status-group">
-                <div class="status-item">
-                    <span class="status-label">Vitality</span>
-                    <span id="p-hp" class="status-value hp-text">100</span>
+        <div id="ui-layer" style="display: none;">
+            <!-- 1. HUD -->
+            <header id="top-status">
+                <div class="status-group">
+                    <div class="status-item">
+                        <span class="status-label">Vitality</span>
+                        <span id="p-hp" class="status-value hp-text">100</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Power</span>
+                        <span id="p-atk" class="status-value atk-text">50</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Defense</span>
+                        <span id="p-def" class="status-value def-text">0</span>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <span class="status-label">Power</span>
-                    <span id="p-atk" class="status-value atk-text">50</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Defense</span>
-                    <span id="p-def" class="status-value def-text">0</span>
-                </div>
-            </div>
-            <button class="btn-secondary" style="min-height: 2rem; padding: 0 0.5rem; font-size: 0.75rem;"
-                onclick="toggleEditor(true)">⚙️ EDIT</button>
-        </header>
+                <button class="btn-secondary" style="min-height: 2rem; padding: 0 0.5rem; font-size: 0.75rem;"
+                    onclick="toggleEditor(true)">⚙️ EDIT</button>
+            </header>
 
-        <!-- 2. Play Area -->
-        <main id="play-area">
-            <canvas id="gameCanvas"></canvas>
-            <div id="visual-overlays">
-                <div id="vignette" class="vignette"></div>
-                <div id="hit-icons-container"
-                    style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <!-- 2. Play Area -->
+            <main id="play-area">
+                <canvas id="gameCanvas"></canvas>
+                <div id="visual-overlays">
+                    <div id="vignette" class="vignette"></div>
+                    <div id="hit-icons-container"
+                        style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    </div>
+                    <div id="msg-container">
+                        <div id="message"></div>
+                    </div>
+                    <div id="turn-indicator"
+                        style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 0.75rem; letter-spacing: 2px; color: #444; font-weight: 800; text-transform: uppercase; pointer-events: none;">
+                        Player's Turn</div>
                 </div>
-                <div id="msg-container">
-                    <div id="message"></div>
-                </div>
-                <div id="turn-indicator"
-                    style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 0.75rem; letter-spacing: 2px; color: #444; font-weight: 800; text-transform: uppercase; pointer-events: none;">
-                    Player's Turn</div>
-            </div>
-        </main>
+            </main>
 
-        <!-- 3. Footer Control Area -->
-        <footer id="bottom-ui">
-            <div class="ap-wrapper">
-                <span class="ap-label">ENERGY</span>
-                <span id="p-ap" class="ap-text">0</span>
-            </div>
-
-            <div id="player-actions" class="btn-stack">
-                <div class="btn-row">
-                    <button class="btn-primary" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
-                    <button class="btn-secondary" onclick="executeSpinSlash()">🌀 회전 베기 (3)</button>
+            <!-- 3. Footer Control Area -->
+            <footer id="bottom-ui">
+                <div class="ap-wrapper">
+                    <span class="ap-label">ENERGY</span>
+                    <span id="p-ap" class="ap-text">0</span>
                 </div>
-                <button class="btn-primary btn-wide" onclick="startSkill('heavy')">💥 강력한 강타 (5)</button>
-                <button class="btn-secondary btn-wide" style="min-height: 2.25rem; font-size: 0.8rem; opacity: 0.5;"
-                    onclick="endPlayerTurn()">턴 종료</button>
-            </div>
 
-            <div id="monster-actions" class="btn-stack" style="display: none;">
-                <div id="pc-guide" class="pulse"
-                    style="text-align: center; color: #888; font-size: 0.875rem; display: none;">L-Click: Parry |
-                    R-Click: Dodge</div>
-                <div id="mobile-buttons" class="btn-row" style="display: none;">
-                    <button id="btn-parry" class="btn-secondary btn-wide" style="background: #fff; color: #000;">🛡️
-                        PARRY NOW</button>
-                    <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
+                <div id="player-actions" class="btn-stack">
+                    <div class="btn-row">
+                        <button id="btn-atk" class="btn-primary" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
+                        <button id="btn-spin" class="btn-secondary" onclick="executeSpinSlash()">🌀 회전 베기 (3)</button>
+                    </div>
+                    <button id="btn-heavy" class="btn-primary btn-wide" onclick="startSkill('heavy')">💥 강력한 강타
+                        (5)</button>
+                    <button id="btn-end" class="btn-secondary btn-wide"
+                        style="min-height: 2.25rem; font-size: 0.8rem; opacity: 0.5;" onclick="endPlayerTurn()">턴
+                        종료</button>
                 </div>
-            </div>
-        </footer>
+
+                <div id="monster-actions" class="btn-stack" style="display: none;">
+                    <div id="pc-guide" class="pulse"
+                        style="text-align: center; color: #888; font-size: 0.875rem; display: none;">L-Click: Parry |
+                        R-Click: Dodge</div>
+                    <div id="mobile-buttons" class="btn-row" style="display: none;">
+                        <button id="btn-parry" class="btn-secondary btn-wide" style="background: #fff; color: #000;">🛡️
+                            PARRY NOW</button>
+                        <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
+                    </div>
+                </div>
+        </div>
     </div>
 
     <!-- Overlays -->
@@ -457,6 +460,56 @@
         </div>
     </div>
 
+    <div id="monster-creator-panel" class="overlay" style="background: rgba(0,0,0,0.95);">
+        <div class="glass-panel" style="width: 90%; max-width: 400px; padding: 25px;">
+            <h2 id="creator-title" style="font-family: var(--font-title); color: var(--success); margin-bottom: 20px;">
+                🛠️ 몬스터 생성</h2>
+            <div class="btn-stack" style="gap: 15px;">
+                <div class="input-group">
+                    <label style="font-size: 12px; color: #888;">Name</label>
+                    <input id="lib-name" type="text"
+                        style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; color: #888;">HP</label>
+                        <input id="lib-hp" type="number"
+                            style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; color: #888;">ATK</label>
+                        <input id="lib-atk" type="number"
+                            style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size: 12px; color: #888;">Telegraph Mult: <span
+                            id="lib-val-telegraph">1.0</span>x</label>
+                    <input id="lib-telegraph" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
+                        oninput="document.getElementById('lib-val-telegraph').innerText=this.value"
+                        style="width: 100%;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; color: #888;">Post-Delay Mult: <span
+                            id="lib-val-postdelay">1.0</span>x</label>
+                    <input id="lib-postdelay" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
+                        oninput="document.getElementById('lib-val-postdelay').innerText=this.value"
+                        style="width: 100%;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; color: #888;">Hit Stop: <span id="lib-val-hitstop">3</span></label>
+                    <input id="lib-hitstop" type="range" min="0" max="10" step="1" value="3"
+                        oninput="document.getElementById('lib-val-hitstop').innerText=this.value" style="width: 100%;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn-primary" style="flex: 1;" onclick="confirmMonsterSave()">Save</button>
+                    <button class="btn-secondary" style="flex: 1;"
+                        onclick="document.getElementById('monster-creator-panel').style.display='none'">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -538,6 +591,7 @@
             PERFECT_WINDOW: 8,
             ATTACK_DURATION: 15,
             RETURN_DURATION: 20,
+            REACTION_WINDOW: 26, // [NEW] 신호 후 타격까지의 시간
             K: 50
         };
 
@@ -1424,7 +1478,22 @@
                 const prepRatio = Math.min(m.timer / waitFrames, 1);
                 // Vertical Shake
                 m.y = m.homeY + Math.sin(prepRatio * Math.PI) * 15;
-                if (m.timer >= waitFrames) { m.state = "ATTACK"; m.timer = 0; m.startX = m.x; m.startY = m.y; }
+
+                // [NEW] 26프레임 반응 기준용 Cue(신호) 발생 로직
+                const remainingTelegraph = waitFrames - m.timer;
+                if (remainingTelegraph + CONFIG.ATTACK_DURATION <= CONFIG.REACTION_WINDOW) {
+                    m.cueActive = true;
+                } else {
+                    m.cueActive = false;
+                }
+
+                if (m.timer >= waitFrames) {
+                    m.state = "ATTACK";
+                    m.timer = 0;
+                    m.startX = m.x;
+                    m.startY = m.y;
+                    m.cueActive = false; // 공격 시작 시 신호 종료
+                }
             } else if (m.state === "ATTACK") {
                 m.timer += dt;
                 let t = m.timer / CONFIG.ATTACK_DURATION;
@@ -1602,6 +1671,13 @@
                     const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
                     const alpha = Math.min(m.timer / waitFrames, 1);
                     color = `rgb(${255}, ${74 + 181 * alpha}, ${74 + 181 * alpha})`;
+
+                    // 신호(Cue) 발생 시 하얀색으로 강조
+                    if (m.cueActive) {
+                        color = "#ffffff";
+                        ctx.shadowBlur = 20;
+                        ctx.shadowColor = "#ffffff";
+                    }
                 }
 
                 ctx.fillStyle = color;
