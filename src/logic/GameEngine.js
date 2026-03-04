@@ -82,10 +82,10 @@ export class GameEngine {
             const baseMonster = {
                 id: Math.random().toString(36).substr(2, 9),
                 name: t.type,
-                homeX: 600,
-                homeY: t.y,
-                x: 600,
-                y: t.y,
+                homeX: 300,
+                homeY: t.y * 0.4, // 상단 영역으로 더 밀착
+                x: 300,
+                y: t.y * 0.4,
                 radius: isDragon ? 100 : (isBoss ? MONSTER_CONFIG.BOSS_RADIUS : MONSTER_CONFIG.BASE_RADIUS),
                 hp: t.hp,
                 maxHp: t.hp,

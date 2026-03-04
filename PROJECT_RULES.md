@@ -2,6 +2,11 @@
 
 이 문서는 본 프로젝트 진행 시 AI 코딩 어시스턴트(Antigravity 등) 및 기여자가 항상 최우선으로 준수해야 하는 공통 가이드라인입니다.
 
+## 0. 언어 지침 (Language Policy)
+- **모든 답변과 문서는 한글로 작성한다.**
+- 사용자 응대, 작업 목록(`task.md`), 구현 계획서(`implementation_plan.md`), 결과 보고서(`walkthrough.md`) 등 모든 산출물에 적용된다.
+- 코드 내 주석은 복잡한 로직 설명이 필요한 경우 한글로 작성한다.
+
 ## 1. 코드 스타일 (Code Style)
 - **모듈 시스템**: 반드시 ES 모듈(`import`/`export`)을 사용하며, CommonJS(`require`)는 금지합니다.
 - **문법**: 가능하면 구조 분해 할당(Destructuring assignment)을 적극적으로 사용합니다.

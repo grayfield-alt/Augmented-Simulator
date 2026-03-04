@@ -103,8 +103,15 @@
 
         .status-value {
             font-family: var(--font-title);
-            font-size: 18px;
+            font-size: 16px;
+            /* Slightly smaller for PC spacing */
             font-weight: 800;
+        }
+
+        @media (min-height: 800px) {
+            .status-value {
+                font-size: 20px;
+            }
         }
 
         .hp-text {
@@ -142,8 +149,12 @@
             display: flex;
             align-items: baseline;
             gap: 6px;
-            padding: 8px 16px;
+            padding: 8px 20px;
             pointer-events: none;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            /* Darker for contrast */
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.2);
         }
 
         .ap-label {
@@ -359,18 +370,32 @@
         /* --- Messages --- */
         #turn-indicator {
             position: absolute;
-            top: 100px;
+            top: 22%;
+            /* Relative to top */
+            left: 50%;
+            transform: translateX(-50%);
             letter-spacing: 2px;
             text-transform: uppercase;
             opacity: 0.5;
+            z-index: 5;
+            pointer-events: none;
         }
 
         #message {
             font-family: var(--font-title);
-            font-size: 54px;
+            font-size: clamp(32px, 8vw, 54px);
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        #msg-container {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -382,21 +407,21 @@
         <div id="ui-layer">
             <div id="vignette" class="vignette"></div>
 
-            <div id="top-status" class="glass-panel" style="width: 94%; margin: 0 auto; padding: 10px 16px;">
+            <div id="top-status" class="glass-panel" style="width: 96%; margin: 0 auto; padding: 10px 12px; gap: 10px;">
                 <div class="status-item">
                     <span class="status-label">Vitality</span>
                     <span id="p-hp" class="status-value hp-text">100</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px;">
                     <span class="status-label">Power</span>
                     <span id="p-atk" class="status-value atk-text">50</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px;">
                     <span class="status-label">Defense</span>
                     <span id="p-def" class="status-value def-text">0</span>
                 </div>
-                <button class="btn-sm"
-                    style="pointer-events: auto; padding: 6px 8px; font-size: 9px; border-radius: 8px;"
+                <button class="btn-sm action-parry"
+                    style="pointer-events: auto; padding: 8px 12px; font-size: 10px; border-radius: 8px; background: white; color: black; margin-left: auto;"
                     onclick="toggleEditor(true)">⚙️ EDIT</button>
             </div>
 
@@ -424,22 +449,19 @@
                         onclick="endPlayerTurn()">턴 종료</button>
                 </div>
 
-                <div id="monster-actions" class="actions-group" style="display: none;">
-                    <button id="btn-parry" class="action-parry"
-                        style="width: 100%; height: 80px; justify-content: center;">🛡️ 패링 / 방어</button>
-                    <div class="btn-grid">
-                        <button id="btn-dash" class="action-dash" style="grid-column: span 2;" onclick="useDash()">💨 긴급
-                            회피</button>
-                    </div>
-                </div>
+                <script>
+                    (function () {
+                        const isMob = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                        document.getElementById('pc-guide').style.display = isMob ? 'none' : 'block';
+                        document.getElementById('mobile-buttons').style.display = isMob ? 'flex' : 'none';
+                    })();
+                </script>
             </div>
 
             <div id="msg-container">
                 <div id="message"></div>
             </div>
-            <button class="btn-sm action-str"
-                style="pointer-events: auto; position: absolute; top: 80px; left: 20px; font-size: 10px;"
-                onclick="toggleEditor(true)">⚙️ 에디터 모드</button>
+            <!-- Removed independent Editor button, integrated into top-status below -->
         </div>
     </div>
 
@@ -495,7 +517,8 @@
             <div id="complete-inventory-list"
                 style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;"></div>
             <div style="display: flex; gap: 10px;">
-                <button style="flex: 1; background: var(--success);" onclick="openMonsterCreator()">New Monster</button>
+                <button style="flex: 1; background: var(--success);" onclick="openMonsterCreator()">New
+                    Monster</button>
                 <button style="flex: 1;" onclick="closeOverlay('inventory-overlay')">Close</button>
             </div>
         </div>
@@ -504,8 +527,10 @@
     <div id="stage-editor-overlay" class="overlay">
         <div class="glass-panel"
             style="width: 95%; max-width: 450px; height: 85%; display: flex; flex-direction: column; padding: 20px;">
-            <h2 style="font-family: var(--font-title); color: var(--primary); margin-bottom: 20px;">🗺️ 스테이지 에디터</h2>
-            <div id="full-stage-list" style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;"></div>
+            <h2 style="font-family: var(--font-title); color: var(--primary); margin-bottom: 20px;">🗺️ 스테이지 에디터
+            </h2>
+            <div id="full-stage-list" style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
+            </div>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <button style="background: var(--info);" onclick="saveToStorage()">All Save</button>
                 <div style="display: flex; gap: 10px;">
@@ -523,7 +548,8 @@
             <h2 style="font-family: var(--font-title); color: var(--primary); margin-bottom: 20px;">❓ 게임 가이드</h2>
             <div style="font-size: 14px; line-height: 1.6; color: #ccc;">
                 <p><b>■ 기본 조작</b><br>• 강타/회전베기: 스킬 버튼 누른 후 적 선택<br>• 패링: 적 공격 타이밍에 맞춰 버튼 유지</p>
-                <p><b>■ 시스템</b><br>• <b>AP:</b> 행동 시 소모되는 자원입니다.<br>• <b>패링:</b> 성공 시 대량의 AP를 획득합니다.<br>• <b>증강:</b> 라운드
+                <p><b>■ 시스템</b><br>• <b>AP:</b> 행동 시 소모되는 자원입니다.<br>• <b>패링:</b> 성공 시 대량의 AP를 획득합니다.<br>• <b>증강:</b>
+                    라운드
                     종료 시 영구적인 버프를 획득합니다.</p>
                 <p><b>■ 에디터</b><br>• 자신의 스테이지를 직접 구성하고 저장할 수 있습니다.</p>
             </div>
@@ -549,11 +575,13 @@
             <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
                 <h3 style="font-size: 14px; margin: 15px 0 10px; color: var(--info);">👾 Monster Library</h3>
                 <div id="monster-library-list" style="margin-bottom: 20px;"></div>
-                <h3 style="font-size: 14px; margin: 15px 0 10px; color: var(--primary);">🗺️ Stage Configuration</h3>
+                <h3 style="font-size: 14px; margin: 15px 0 10px; color: var(--primary);">🗺️ Stage Configuration
+                </h3>
                 <div id="stage-editor-list"></div>
             </div>
             <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button style="flex: 1; background: var(--info);" onclick="openMonsterCreator()">Create Monster</button>
+                <button style="flex: 1; background: var(--info);" onclick="openMonsterCreator()">Create
+                    Monster</button>
                 <button style="flex: 1; background: var(--success);" onclick="saveToStorage()">Save All</button>
             </div>
         </div>
@@ -575,9 +603,14 @@
             CANVAS_W = canvas.width;
             CANVAS_H = canvas.height;
 
+            // Safe Area Calculation (Assuming Top Bar ~80px, Bottom UI ~300px)
+            const safeTop = 100;
+            const safeBottom = 350;
+            const playableH = CANVAS_H - safeTop - safeBottom;
+
             // Relocate Player
             Player.x = CANVAS_W / 2;
-            Player.y = CANVAS_H * 0.82;
+            Player.y = safeTop + (playableH * 0.85); // Position within playable area
         }
         window.addEventListener('resize', resizeCanvas);
 
@@ -806,7 +839,11 @@
                         ["SLOW", "NORMAL", "FAST"]
                     ]
                 }
-            ]
+            ],
+            7: [{ type: "ANCIENT DRAGON", hp: 3500, atk: 45, patterns: ["NORMAL", "FAST", "FAST", "SLOW"] }],
+            8: [{ type: "Rhythm Crasher", hp: 1500, atk: 25, patterns: ["SLOW", "SLOW", "FAST"] }],
+            9: [{ type: "Cymbals Duo", hp: 1800, atk: 20, patterns: ["FAST", "FAST", "NORMAL"] }],
+            10: [{ type: "Fake Knight", hp: 2500, atk: 35, patterns: ["SLOW", "SLOW", "NORMAL"] }]
         };
 
         const PATTERN_SPEEDS = {
@@ -1100,9 +1137,14 @@
             const availableWidth = CANVAS_W - (screenMargin * 2);
             const spacing = count > 1 ? availableWidth / (count - 1) : 0;
 
+            // Safe Area for Monsters
+            const safeTop = 100;
+            const safeBottom = 350;
+            const playableH = CANVAS_H - safeTop - safeBottom;
+
             waveToSpawn.forEach((m, i) => {
                 m.x = count > 1 ? screenMargin + (spacing * i) : CANVAS_W / 2;
-                m.y = CANVAS_H * 0.25;
+                m.y = safeTop + (playableH * 0.15); // Top alignment within playable area
             });
 
             monsters = waveToSpawn.map(t => {
@@ -1800,11 +1842,37 @@
             showFeedback("DASH!", "#aaa");
         }
 
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        function handleInput(e) {
+            if (!gameStarted) return;
+            if (currentTurn === "PLAYER") {
+                if (isTargeting) handleTargeting(e);
+                return;
+            }
+            if (currentTurn === "MONSTER") {
+                e.preventDefault();
+                // Left Click (0) -> Parry, Right Click (2) -> Dash
+                if (e.button === 0) {
+                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                    Player.isParrying = true;
+                } else if (e.button === 2) {
+                    executeDash();
+                } else if (e.type === 'touchstart') {
+                    // Mobile touch also triggers parry via huge button
+                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                    Player.isParrying = true;
+                }
+            }
+        }
+
         function init() {
             try {
                 loadFromStorage();
                 window.addEventListener('resize', resizeCanvas);
                 canvas.addEventListener('mousedown', handleInput);
+                canvas.addEventListener('touchstart', handleInput, { passive: false });
+                window.addEventListener('contextmenu', (e) => e.preventDefault());
 
                 // Player Actions
                 if (ui.btns.atk) ui.btns.atk.onclick = () => startSkill("atk");
@@ -1817,18 +1885,23 @@
                 const btnDash = document.getElementById('btn-dash');
 
                 if (btnParry) {
-                    btnParry.onmousedown = (e) => {
+                    btnParry.addEventListener('mousedown', (e) => {
+                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                        Player.isParrying = true;
+                    });
+                    btnParry.addEventListener('touchstart', (e) => {
                         e.preventDefault();
                         Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
                         Player.isParrying = true;
-                    };
-                    btnParry.ontouchstart = (e) => {
-                        e.preventDefault();
-                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                        Player.isParrying = true;
-                    };
+                    }, { passive: false });
                 }
                 if (btnDash) btnDash.onclick = executeDash;
+
+                // Environmental Check - Remove buttons on PC to use mouse clicks
+                if (!isMobile) {
+                    // PC에서 버튼을 숨기고 가이드를 보여줄 수도 있음
+                    // btnParry.style.display = 'none';
+                }
 
                 resizeCanvas();
             } catch (e) {

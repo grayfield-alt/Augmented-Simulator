@@ -10,6 +10,8 @@ import {
 
 const engine = new GameEngine();
 
+const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 export default function App() {
   const [view, setView] = useState('menu');
   const [gameState, setGameState] = useState('idle'); // idle, fighting, event, choosing_augment, game_over
@@ -72,7 +74,7 @@ export default function App() {
   }, [gameState, monsters, currentMonsterIdx, currentTurn]);
 
   const draw = useCallback((ctx) => {
-    ctx.clearRect(0, 0, 800, 500);
+    ctx.clearRect(0, 0, 600, 800);
 
     // Draw Monsters
     monsters.forEach(m => {
@@ -120,7 +122,7 @@ export default function App() {
       ctx.strokeStyle = "#FFD700";
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(150, 225, player.radius + 5, 0, Math.PI * 2);
+      ctx.arc(300, 650, player.radius + 5, 0, Math.PI * 2);
       ctx.stroke();
     } else if (player.isDashing) {
       // 회피 효과 (회색 잔상/아우라)
@@ -130,13 +132,13 @@ export default function App() {
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 5]);
       ctx.beginPath();
-      ctx.arc(150, 225, player.radius + 8, 0, Math.PI * 2);
+      ctx.arc(300, 650, player.radius + 8, 0, Math.PI * 2);
       ctx.stroke();
     }
 
     ctx.fillStyle = player.isDashing ? "#888" : "#4a9eff";
     ctx.beginPath();
-    ctx.arc(150, 225, player.radius, 0, Math.PI * 2);
+    ctx.arc(300, 650, player.radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
@@ -215,8 +217,8 @@ export default function App() {
       m.timer += dt;
       let t = m.timer / PLAYER_CONFIG.ATTACK_DURATION;
       // 100% 피델리티를 위한 가감속 보정 (Quadratic Ease-In)
-      m.x = m.startX + (150 + player.radius - m.startX) * (t * t);
-      m.y = m.startY + (225 - m.startY) * (t * t);
+      m.x = m.startX + (300 - m.startX) * (t * t);
+      m.y = m.startY + (650 - player.radius - m.startY) * (t * t);
 
       if (m.timer >= PLAYER_CONFIG.ATTACK_DURATION - 2 && !m.hitTriggered) {
         m.hitTriggered = true;
@@ -234,7 +236,9 @@ export default function App() {
     } else if (m.state === "RETURN") {
       m.timer += dt;
       const isLastStep = m.stepIdx + 1 === m.currentScript.steps.length;
-      const duration = isLastStep ? PLAYER_CONFIG.RETURN_DURATION : 20;
+      // 연타 리듬을 위해 다음 전조가 매우 짧으면 복귀 시간도 단축
+      const nextStep = !isLastStep ? m.currentScript.steps[m.stepIdx + 1] : null;
+      const duration = isLastStep ? PLAYER_CONFIG.RETURN_DURATION : (nextStep && nextStep.duration < 20 ? 5 : 15);
       const targetX = isLastStep ? m.homeX : (m.homeX + m.returnStartX) / 2;
       const targetY = isLastStep ? m.homeY : (m.homeY + m.returnStartY) / 2;
 
@@ -286,7 +290,7 @@ export default function App() {
       const dmgMult = step.damageMult || 1.0;
       const finalDmg = Math.round(m.atk * dmgMult * (50 / (50 + player.def)) * player.augBuffs.takeDmgMult);
       engine.player.hp = Math.max(0, engine.player.hp - finalDmg);
-      addDamageText(150, 225 - 40, `-${finalDmg}`, "#ff4a4a");
+      addDamageText(300, 650 - 40, `-${finalDmg}`, "#ff4a4a");
       triggerVignette();
 
       const settings = m.settings || monsterSettings;
@@ -311,12 +315,12 @@ export default function App() {
   // --- Handlers ---
   const handleCanvasClick = (e) => {
     if (currentTurn === "MONSTER") {
-      // 좌클릭: 패링, 우클릭: 회피
-      if (e.button === 0) { // Left Click
+      e.preventDefault();
+      // 좌클릭(0): 패링, 우클릭(2): 회피
+      if (e.button === 2) { // Right Click
+        engine.executeDash();
+      } else { // Left Click and others
         engine.player.parryTimer = PLAYER_CONFIG.PARRY_STANCE_DURATION;
-      } else if (e.button === 2) { // Right Click
-        engine.player.dashTimer = PLAYER_CONFIG.DASH_DURATION;
-        engine.player.isDashing = true;
       }
       setPlayer({ ...engine.player });
     }
@@ -493,7 +497,41 @@ export default function App() {
 
             <div className="relative group cursor-crosshair overflow-hidden rounded-2xl border-2 border-white/5 shadow-2xl"
               onClick={handleCanvasClick} onContextMenu={(e) => e.preventDefault()} onMouseDown={handleCanvasClick}>
-              <canvas ref={canvasRef} width={800} height={500} className="bg-slate-900 p-0" />
+              <canvas
+                ref={canvasRef}
+                width={600}
+                height={800}
+                className="bg-slate-900 p-0 w-full h-auto touch-none"
+                onMouseDown={handleCanvasClick}
+                onTouchStart={handleCanvasClick}
+              />
+
+              {/* 플랫폼별 조작 UI 가이드 (Monster Turn) */}
+              {currentTurn === 'MONSTER' && (
+                <div className="absolute inset-0 pointer-events-none flex flex-col justify-end items-end p-8 pb-32 z-30">
+                  {isMobile ? (
+                    <div className="flex flex-col gap-6 pointer-events-auto">
+                      <button
+                        className="w-32 h-32 rounded-full bg-white/10 border-4 border-white/20 backdrop-blur-xl flex items-center justify-center text-white font-black text-xl active:scale-95 transition-transform shadow-2xl"
+                        onMouseDown={(e) => { e.preventDefault(); engine.player.parryTimer = PLAYER_CONFIG.PARRY_STANCE_DURATION; setPlayer({ ...engine.player }); }}
+                        onTouchStart={(e) => { e.preventDefault(); engine.player.parryTimer = PLAYER_CONFIG.PARRY_STANCE_DURATION; setPlayer({ ...engine.player }); }}
+                      >
+                        PARRY
+                      </button>
+                      <button
+                        className="w-24 h-24 rounded-full bg-slate-800/80 border-2 border-white/20 backdrop-blur-lg flex items-center justify-center text-white/70 font-bold active:scale-95 transition-transform shadow-xl"
+                        onClick={() => { engine.executeDash(); setPlayer({ ...engine.player }); }}
+                      >
+                        DASH
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="bg-black/80 px-6 py-3 rounded-full text-white/70 text-sm font-bold animate-pulse mr-4 border border-white/10 mb-10">
+                      <span className="text-primary font-mono">L-Click:</span> Parry | <span className="text-accent font-mono">R-Click:</span> Dodge
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Impact Vignette */}
               <div className={`absolute inset-0 pointer-events-none transition-opacity duration-300 bg-radial-gradient from-transparent to-red-600/30 ${isVignetteActive ? 'opacity-100' : 'opacity-0'}`} />
@@ -521,17 +559,25 @@ export default function App() {
               ))}
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
-              <SkillButton label="Normal Attack" cost={2} disabled={currentTurn !== 'PLAYER' || player.ap < 2} onClick={() => executeSkill('atk')} />
-              <SkillButton label="Cyclone Slash" cost={3} disabled={currentTurn !== 'PLAYER' || player.ap < 3} onClick={() => executeSkill('spin')} />
-              <SkillButton label="Grand Slam" cost={5} disabled={currentTurn !== 'PLAYER' || player.ap < 5} onClick={() => executeSkill('heavy')} />
-              <button onClick={() => setCurrentTurn('MONSTER')} className="glass-button bg-red-950/30 hover:bg-red-900/50 text-red-500 border border-red-900/50 font-black tracking-widest uppercase">End Turn</button>
+            {/* Energy UI - Moved to top for better visibility */}
+            <div className="flex justify-center -mt-4 mb-2">
+              <div className="bg-slate-900/90 border border-primary/30 px-6 py-2 rounded-2xl shadow-xl flex items-center gap-3">
+                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Energy</span>
+                <span className="text-3xl font-black text-primary drop-shadow-sm">{Math.floor(player.ap)}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-2">
+              <SkillButton label="공격" cost={2} disabled={currentTurn !== 'PLAYER' || player.ap < 2} onClick={() => executeSkill('atk')} />
+              <SkillButton label="회전 베기" cost={3} disabled={currentTurn !== 'PLAYER' || player.ap < 3} onClick={() => executeSkill('spin')} />
+              <SkillButton label="강력한 강타" cost={5} disabled={currentTurn !== 'PLAYER' || player.ap < 5} onClick={() => executeSkill('heavy')} />
+              <button onClick={() => setCurrentTurn('MONSTER')} className="glass-button bg-red-950/30 hover:bg-red-900/50 text-red-500 border border-red-900/50 font-black tracking-widest uppercase py-4 rounded-xl">턴 종료</button>
             </div>
 
             {/* Real-time Combat Log */}
-            <div className="premium-card bg-black/40 text-xs font-mono h-24 overflow-y-auto custom-scrollbar p-3 border-white/5">
+            <div className="premium-card bg-black/40 text-[10px] font-mono h-20 overflow-y-auto custom-scrollbar p-2 border-white/5 mx-2">
               {combatLog.map((log, i) => <div key={i} className="opacity-60 mb-1">{log}</div>)}
-              {combatLog.length === 0 && <div className="opacity-20 italic">전투 로그가 여기에 표시됩니다...</div>}
+              {combatLog.length === 0 && <div className="opacity-20 italic font-sans text-center mt-4 uppercase tracking-tighter">Combat Log Ready...</div>}
             </div>
 
             <MonsterDebugger

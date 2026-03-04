@@ -129,5 +129,51 @@ export const WAVE_DATA = {
                 ]
             }
         }
+    ],
+    8: [
+        {
+            type: "리듬 크래셔",
+            hp: 400,
+            atk: 20,
+            y: 225,
+            patterns: {
+                steps: [
+                    { type: "전조", duration: 60, action: "공격" }, // 정박
+                    { type: "전조", duration: 60, action: "공격" }, // 정박
+                    { type: "전조", duration: 26, action: "공격", damageMult: 1.5 } // 엇박 (급발진)
+                ]
+            }
+        }
+    ],
+    9: [
+        {
+            type: "심벌즈 듀오",
+            hp: 500,
+            atk: 15,
+            y: 225,
+            patterns: {
+                steps: [
+                    { type: "전조", duration: 50, action: "공격" },
+                    { type: "전조", duration: 15, action: "공격" }, // "따닥" 하는 아주 빠른 연타
+                    { type: "전조", duration: 60, action: "공격" }
+                ]
+            }
+        }
+    ],
+    10: [
+        {
+            type: "페이크 나이트",
+            hp: 800,
+            atk: 25,
+            y: 225,
+            radius: 40,
+            patterns: {
+                steps: [
+                    { type: "전조", duration: 120, action: "공격", damageMult: 2.0 }, // 매우 긴 대기 시간으로 인내심 시험
+                    { type: "전조", duration: 40, action: "공격" },
+                    { type: "전조", duration: 30, action: "공격", unparriable: true }
+                ]
+            }
+        }
     ]
 };
