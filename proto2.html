@@ -44,13 +44,21 @@
 
         #game-container {
             width: 100%;
-            max-width: 25.75rem;
-            /* ~412px */
+            max-width: 412px;
+            /* 표준 모바일 너비 */
             height: 100%;
+            max-height: 850px;
+            /* 표준 모바일 높이 예시 */
+            aspect-ratio: 9 / 18;
+            /* 세로로 긴 비율 고정 */
+            margin: auto;
+            /* 데스크톱 중앙 정렬 */
             display: flex;
             flex-direction: column;
             background: #000;
             position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
         }
 
         /* 1. HUD */
@@ -1784,36 +1792,32 @@
 
             if (!root || !playArea) return;
 
-            // Flex 레이아웃이므로 실제 렌더링된 크기를 가져옴
-            const rootW = root.clientWidth;
-            const rootH = root.clientHeight;
-
-            // UI 레이어가 보일 때만 정확한 높이 계산 가능
-            const hudH = (hud && hud.offsetHeight) || 0;
-            const footerH = (footer && footer.offsetHeight) || 0;
-
-            // 캔버스 크기를 Play Area 영역에 맞춤
-            const playAreaH = Math.max(rootH - hudH - footerH, 100); // 최소 높이 보장
-
-            canvas.width = rootW || 412; // 기본 모바일 너비 폴백
-            canvas.height = playAreaH;
+            // 1. 고정된 물리적 픽셀 크기 설정 (그리기 해상도 안정화)
+            // 논리 해상도를 400x700 정도로 고정하여 기기별 편차 제거
+            canvas.width = 412;
+            canvas.height = 700;
 
             CANVAS_W = canvas.width;
             CANVAS_H = canvas.height;
 
-            // 좌표계 업데이트 (플레이어 위치는 하단 중심)
+            // 2. 캐릭터 좌표 재설정 (전체 캔버스 크기 대비 백분율로 고정)
+            // 플레이어: 하단에서 15% 위 (전체 높이의 85% 지점)
             Player.x = CANVAS_W / 2;
             Player.y = CANVAS_H * 0.85;
 
-            // 몬스터 위치 업데이트 (스폰 전후 모두 대응)
+            // 몬스터: 상단에서 20% 지점
             monsters.forEach(m => {
                 m.homeX = CANVAS_W / 2;
-                m.homeY = CANVAS_H * 0.2;
+                m.homeY = CANVAS_H * 0.22;
                 if (m.state === "IDLE" || m.state === "DONE") {
                     m.x = m.homeX;
                     m.y = m.homeY;
                 }
             });
+
+            // 3. CSS 크기 조정 (부모 영역을 꽉 채우도록)
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
         }
 
         function init() {
