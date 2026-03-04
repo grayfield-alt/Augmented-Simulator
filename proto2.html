@@ -266,6 +266,7 @@
 
 <body>
     <div id="game-container">
+        <!-- 1. HUD -->
         <header id="top-status">
             <div class="status-group">
                 <div class="status-item">
@@ -285,11 +286,14 @@
                 onclick="toggleEditor(true)">⚙️ EDIT</button>
         </header>
 
+        <!-- 2. Play Area -->
         <main id="play-area">
             <canvas id="gameCanvas"></canvas>
             <div id="visual-overlays">
                 <div id="vignette" class="vignette"></div>
-                <div id="hit-icons-container" style="position: absolute; top: 1rem; right: 1rem;"></div>
+                <div id="hit-icons-container"
+                    style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                </div>
                 <div id="msg-container">
                     <div id="message"></div>
                 </div>
@@ -299,6 +303,7 @@
             </div>
         </main>
 
+        <!-- 3. Footer Control Area -->
         <footer id="bottom-ui">
             <div class="ap-wrapper">
                 <span class="ap-label">ENERGY</span>
@@ -328,33 +333,19 @@
         </footer>
     </div>
 
-    <script>
-        (function () {
-            const isMob = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            document.getElementById('pc-guide').style.display = isMob ? 'none' : 'block';
-            document.getElementById('mobile-buttons').style.display = isMob ? 'flex' : 'none';
-        })();
-    </script>
-    </div>
-
-    <div id="msg-container">
-        <div id="message"></div>
-    </div>
-    <!-- Removed independent Editor button, integrated into top-status below -->
-    </div>
-    </div>
-
-    <!-- Overlays Moved to Body for Z-Index Priority -->
+    <!-- Overlays -->
     <div id="lobby-overlay" class="overlay" style="display: flex;">
-        <div class="lobby-title">AUGMENTED<br>SIMULATOR</div>
-        <div class="lobby-menu">
-            <button class="lobby-btn" style="background: var(--primary); color: #000;" onclick="startGame()">⚔️ 전투
-                시작</button>
-            <button class="lobby-btn" onclick="openInventory()">🧪 몬스터 연구소</button>
-            <button class="lobby-btn" onclick="openStageEditor()">🗺️ 스테이지 에디터</button>
-            <button class="lobby-btn" onclick="toggleGuide(true)">❓ 가이드</button>
+        <div
+            style="font-family: var(--font-title); font-size: 3rem; font-weight: 900; text-align: center; line-height: 1; margin-bottom: 3rem;">
+            AUGMENTED<br>SIMULATOR</div>
+        <div class="btn-stack" style="max-width: 250px;">
+            <button class="btn-primary btn-wide" onclick="startGame()">⚔️ 전투 시작</button>
+            <button class="btn-secondary btn-wide" onclick="openInventory()">🧪 몬스터 연구소</button>
+            <button class="lobby-btn btn-secondary btn-wide" onclick="openStageEditor()" style="display:none">🗺️ 스테이지
+                에디터</button>
+            <button class="btn-secondary btn-wide" onclick="toggleGuide(true)">❓ 가이드</button>
         </div>
-        <p style="margin-top: 40px; color: #444; font-size: 11px; font-weight: 700;">VERSION 2.6 PORTRAIT</p>
+        <p style="margin-top: 3rem; color: #333; font-size: 0.75rem; font-weight: 700;">VERSION 2.7 PORTRAIT</p>
     </div>
 
     <div id="augment-overlay" class="overlay">
@@ -474,24 +465,7 @@
         let CANVAS_W = 400;
         let CANVAS_H = 700;
 
-        function resizeCanvas() {
-            const container = document.getElementById('game-container');
-            const rect = container.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            CANVAS_W = canvas.width;
-            CANVAS_H = canvas.height;
 
-            // Safe Area Calculation (Assuming Top Bar ~80px, Bottom UI ~300px)
-            const safeTop = 100;
-            const safeBottom = 350;
-            const playableH = CANVAS_H - safeTop - safeBottom;
-
-            // Relocate Player
-            Player.x = CANVAS_W / 2;
-            Player.y = safeTop + (playableH * 0.85); // Position within playable area
-        }
-        window.addEventListener('resize', resizeCanvas);
 
         const AUGMENT_DATA = {
             "Common": [
@@ -1195,18 +1169,7 @@
             showFeedback("Select Target!", "#fff");
         }
 
-        function handleInput(e) {
-            if (!gameStarted) return;
-            if (currentTurn === "PLAYER") {
-                if (isTargeting) handleTargeting(e);
-                return;
-            }
-            if (currentTurn === "MONSTER") {
-                // 모바일 터치 또는 좌클릭
-                Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                Player.isParrying = true;
-            }
-        }
+
 
         function handleTargeting(e) {
             const rect = canvas.getBoundingClientRect();
@@ -1797,19 +1760,24 @@
         }
 
         function handleInput(e) {
-            if (!gameStarted || currentTurn !== "MONSTER") return;
-            // canvas 영역 클릭 시만 반응
-            if (e.target !== canvas) return;
-
-            e.preventDefault();
-
-            // PC 마우스 조작
-            if (!isMobile) {
-                if (e.button === 0) { // 좌클릭 (Parry)
+            if (!gameStarted) return;
+            if (currentTurn === "PLAYER") {
+                if (isTargeting) handleTargeting(e);
+                return;
+            }
+            if (currentTurn === "MONSTER") {
+                if (e.target !== canvas) return;
+                e.preventDefault();
+                if (!isMobile) {
+                    if (e.button === 0) { // 좌클릭 (Parry)
+                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                        Player.isParrying = true;
+                    } else if (e.button === 2) { // 우클릭 (Dash)
+                        executeDash();
+                    }
+                } else {
                     Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
                     Player.isParrying = true;
-                } else if (e.button === 2) { // 우클릭 (Dash)
-                    executeDash();
                 }
             }
         }
