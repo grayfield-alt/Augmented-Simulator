@@ -979,10 +979,14 @@
         }
 
         function startGame() {
-            resizeCanvas();
-            gameStarted = true;
+            // 1. UI 레이어를 먼저 표시하여 요소들의 높이/너비 계산이 가능하게 함
+            ui.uiLayer.style.display = "block";
             ui.lobby.style.display = "none";
-            ui.uiLayer.style.display = "block"; // Show Battle UI
+
+            // 2. 레이아웃 확정 후 캔버스 리사이징 및 좌표 초기화
+            resizeCanvas();
+
+            gameStarted = true;
             lastTimestamp = performance.now();
             spawnWave(currentRound);
             requestAnimationFrame(gameLoop);
@@ -1768,29 +1772,37 @@
             const footer = document.getElementById('bottom-ui');
             const playArea = document.getElementById('play-area');
 
-            // Flex 레이아웃이므로 자동 계산된 부모 크기 사용
+            if (!root || !playArea) return;
+
+            // Flex 레이아웃이므로 실제 렌더링된 크기를 가져옴
             const rootW = root.clientWidth;
             const rootH = root.clientHeight;
-            const hudH = hud.offsetHeight;
-            const footerH = footer.offsetHeight;
 
-            // 캔버스 크기를 남은 영역(Play Area)에 맞춤
-            const playAreaH = rootH - hudH - footerH;
+            // UI 레이어가 보일 때만 정확한 높이 계산 가능
+            const hudH = (hud && hud.offsetHeight) || 0;
+            const footerH = (footer && footer.offsetHeight) || 0;
 
-            canvas.width = rootW;
+            // 캔버스 크기를 Play Area 영역에 맞춤
+            const playAreaH = Math.max(rootH - hudH - footerH, 100); // 최소 높이 보장
+
+            canvas.width = rootW || 412; // 기본 모바일 너비 폴백
             canvas.height = playAreaH;
+
             CANVAS_W = canvas.width;
             CANVAS_H = canvas.height;
 
-            // 좌표계 업데이트 (플레이어 위치는 Play Area 하단 중심)
+            // 좌표계 업데이트 (플레이어 위치는 하단 중심)
             Player.x = CANVAS_W / 2;
             Player.y = CANVAS_H * 0.85;
 
-            // 몬스터 배경 위치 재확인
+            // 몬스터 위치 업데이트 (스폰 전후 모두 대응)
             monsters.forEach(m => {
                 m.homeX = CANVAS_W / 2;
                 m.homeY = CANVAS_H * 0.2;
-                if (m.state === "IDLE") { m.x = m.homeX; m.y = m.homeY; }
+                if (m.state === "IDLE" || m.state === "DONE") {
+                    m.x = m.homeX;
+                    m.y = m.homeY;
+                }
             });
         }
 
