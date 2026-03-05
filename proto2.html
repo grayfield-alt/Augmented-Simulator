@@ -81,13 +81,50 @@
         header#top-status {
             flex: 0 0 60px;
             /* 높이 고정 */
-            padding: 0 1rem;
+            padding: 0 1.5rem;
             background: rgba(15, 15, 20, 0.95);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
+        }
+
+        /* UI Safe Area & Layout Rules */
+        .ui-safe-container {
+            position: absolute;
+            inset: 60px 0 180px 0;
+            /* Header to Footer */
+            pointer-events: none;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+
+        #turn-indicator-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-blur: 4px;
+            padding: 4px 12px;
+            border-radius: 99px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--primary);
+            font-family: var(--font-title);
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 14px;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
 
         .status-group {
@@ -215,11 +252,12 @@
 
         .btn-stack {
             position: absolute;
-            /* 영역 가변 방지를 위해 절대 좌표 사용 */
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -30%);
-            width: 85%;
+            transform: translate(-50%, -40%);
+            /* 모바일 잘림 방지를 위해 약간 상단으로 이동 */
+            width: 90%;
+            /* 너비 확장 */
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
@@ -232,22 +270,25 @@
 
         #monster-actions {
             z-index: 5;
-            transform: translate(-50%, -10%);
-            /* 위치 미세 조정 */
+            display: none;
+            /* 초기값 */
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
 
         .btn-row {
             display: flex;
-            flex-wrap: wrap;
+            width: 100%;
             gap: 0.75rem;
         }
 
         button {
-            min-height: 3rem;
-            /* 최소 48px */
+            min-height: 3.5rem;
+            /* 터치 영역 확대 */
             padding: 0.75rem 1rem;
             border: none;
-            border-radius: 0.75rem;
+            border-radius: 1rem;
             font-family: var(--font-title);
             font-weight: 900;
             font-size: 1rem;
@@ -257,7 +298,8 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            flex: 1 1 45%;
+            flex: 1 1 0;
+            /* 균등 배분 */
         }
 
         button:active {
@@ -361,9 +403,7 @@
                             class="text-5xl font-black italic text-white font-title drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-0 transition-all duration-300 uppercase tracking-tighter">
                         </div>
                     </div>
-                    <div id="turn-indicator"
-                        class="absolute top-[10%] left-1/2 -translate-x-1/2 text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">
-                        Player's Turn</div>
+                    <div id="turn-indicator-overlay" class="hidden">PLAYER'S TURN</div>
                 </div>
             </main>
 
@@ -406,14 +446,18 @@
                     <div id="monster-actions"
                         class="hidden w-full flex-col items-center gap-4 transition-all duration-300">
                         <div id="pc-guide"
-                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] pulse mb-2">L-CLICK:
-                            PARRY | R-CLICK: DASH</div>
-                        <div id="mobile-buttons" class="hidden w-full flex-col gap-3">
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] pulse mb-2 w-full text-center px-4">
+                            L-CLICK: PARRY | R-CLICK: DASH
+                        </div>
+                        <div id="mobile-buttons" class="hidden w-full flex-col gap-3 px-6">
                             <button id="btn-parry"
-                                class="w-full bg-white p-5 rounded-2xl font-black text-background text-lg uppercase shadow-[0_10px_40px_rgba(255,255,255,0.2)]">PARRY
-                                NOW</button>
+                                class="w-full bg-white p-5 rounded-2xl font-black text-background text-lg uppercase shadow-[0_10px_40px_rgba(255,255,255,0.2)]">
+                                PARRY NOW
+                            </button>
                             <button id="btn-dash"
-                                class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white text-lg uppercase tracking-widest">DASH</button>
+                                class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white text-lg uppercase tracking-widest">
+                                DASH
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1320,6 +1364,14 @@
                 let d = defaults[id] || defaults["mon_tuto_1"];
                 libM = { ...d };
             }
+            // 밸런스 시트 반영 (스테이지 2 강화 허수아비 등)
+            if (id === "mon_tuto_2") {
+                libM.hp = 180;
+                libM.atk = 24;
+            } else if (id === "mon_boss_1") {
+                libM.hp = 1500;
+                libM.atk = 32;
+            }
             return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
         }
 
@@ -1896,34 +1948,51 @@
         }
 
         function updateInterfaceVisibility() {
-            const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver];
+            const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver, ui.stageEditor, ui.monsterCreator, ui.inventory, ui.overlayGuide];
             const isAnyOverlayVisible = overlays.some(o => o && (o.style.display === "flex" || o.style.display === "block" || !o.classList.contains('hidden')));
 
             const bottomUI = document.getElementById('bottom-ui');
             const topHUD = document.getElementById('top-status');
+            const turnIndicator = document.getElementById('turn-indicator-overlay');
 
-            if (isAnyOverlayVisible || !gameStarted || currentTurn === "NONE") {
-                if (bottomUI) { bottomUI.classList.add('opacity-0'); bottomUI.classList.add('pointer-events-none'); }
-                if (topHUD) topHUD.classList.add('opacity-0');
+            // 오버레이가 떠있거나 게임 시작 전이면 전투 UI 숨김
+            if (isAnyOverlayVisible || !gameStarted) {
+                if (bottomUI) bottomUI.classList.add('hidden');
+                if (topHUD) topHUD.classList.add('hidden');
+                if (turnIndicator) turnIndicator.classList.add('hidden');
                 return;
             }
 
-            if (bottomUI) { bottomUI.classList.remove('opacity-0'); bottomUI.classList.remove('pointer-events-none'); }
-            if (topHUD) topHUD.classList.remove('opacity-0');
+            // 전투 중에는 기본적으로 HUD 표시 (NONE 턴 포함)
+            if (bottomUI) bottomUI.classList.remove('hidden');
+            if (topHUD) topHUD.classList.remove('hidden');
 
             const playerActions = document.getElementById('player-actions');
             const monsterActions = document.getElementById('monster-actions');
 
             if (currentTurn === "PLAYER") {
-                playerActions.classList.remove('hidden');
-                playerActions.classList.add('flex');
-                monsterActions.classList.add('hidden');
-                monsterActions.classList.remove('flex');
+                if (playerActions) { playerActions.classList.remove('hidden'); playerActions.classList.add('flex'); }
+                if (monsterActions) { monsterActions.classList.add('hidden'); monsterActions.classList.remove('flex'); }
+
+                if (turnIndicator) {
+                    turnIndicator.classList.remove('hidden');
+                    turnIndicator.innerText = "PLAYER'S TURN";
+                    turnIndicator.style.color = "var(--primary)";
+                }
             } else if (currentTurn === "MONSTER") {
-                playerActions.classList.add('hidden');
-                playerActions.classList.remove('flex');
-                monsterActions.classList.remove('hidden');
-                monsterActions.classList.add('flex');
+                if (playerActions) { playerActions.classList.add('hidden'); playerActions.classList.remove('flex'); }
+                if (monsterActions) { monsterActions.classList.remove('hidden'); monsterActions.classList.add('flex'); }
+
+                if (turnIndicator) {
+                    turnIndicator.classList.remove('hidden');
+                    turnIndicator.innerText = "MONSTER'S TURN";
+                    turnIndicator.style.color = "var(--danger)";
+                }
+            } else {
+                // 턴 전환 중(NONE)에는 액션 버튼들만 숨기고 HUD는 유지
+                if (playerActions) playerActions.classList.add('hidden');
+                if (monsterActions) monsterActions.classList.add('hidden');
+                if (turnIndicator) turnIndicator.classList.add('hidden');
             }
         }
 

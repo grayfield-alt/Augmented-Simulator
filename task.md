@@ -22,6 +22,7 @@
 - [ ] 몬스터 애니메이션 및 히트박스 타이밍 정교화
 
 ## UI/UX 및 그래픽 고도화
-- [ ] `proto2.html` UI 미작동 및 겹침 문제 해결
-- [ ] V2 Standalone 버전의 프리미엄 그래픽 스타일(Tailwind/Lucide) 이식
-- [ ] 클린 아키텍처 기조에 따른 UI 로직 구조 개선
+- [x] `proto2.html` UI 미작동 및 겹침 문제 해결 [x]
+- [x] V2 Standalone 버전의 프리미엄 그래픽 스타일(Tailwind/Lucide) 이식 [x]
+- [x] 클린 아키텍처 기조에 따른 UI 로직 구조 개선 [x]
+- [x] Git Push 및 작업일지 업데이트 완료 [x]
