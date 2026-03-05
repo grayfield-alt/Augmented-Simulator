@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Augmented Simulator - Portrait</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@500;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --primary: #fae133;
+            --danger: #ff4a4a;
+            --info: #4a9eff;
+            --success: #4ade80;
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-title: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: var(--font-main);
+            display: flex;
+            justify-content: center;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 412px;
+            /* 표준 모바일 너비 */
+            height: 100%;
+            max-height: 850px;
+            /* 표준 모바일 높이 예시 */
+            aspect-ratio: 9 / 18;
+            /* 세로로 긴 비율 고정 */
+            margin: auto;
+            /* 데스크톱 중앙 정렬 */
+            display: flex;
+            flex-direction: column;
+            background: #000;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        /* 1. HUD */
+        header#top-status {
+            flex: 0 0 60px;
+            /* 높이 고정 */
+            padding: 0 1rem;
+            background: rgba(15, 15, 20, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .status-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-label {
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .status-value {
+            font-family: var(--font-title);
+            font-size: 1.125rem;
+            font-weight: 900;
+        }
+
+        .hp-text {
+            color: var(--danger);
+        }
+
+        .atk-text {
+            color: var(--primary);
+        }
+
+        .def-text {
+            color: var(--info);
+        }
+
+        /* 2. Play Area */
+        main#play-area {
+            flex: 1 1 auto;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+
+        canvas#gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #visual-overlays {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #msg-container {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+        }
+
+        #message {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 3. Footer Control Area */
+        footer#bottom-ui {
+            flex: 0 0 280px;
+            /* 하단 UI 영역 높이 완전 고정 (가변 방지) */
+            position: relative;
+            background: rgba(10, 10, 12, 0.98);
+            border-top: 2px solid rgba(250, 225, 51, 0.2);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        /* 턴 전환 시 요소들이 공간을 차지하지 않고 중앙 정렬되도록 함 */
+        .ui-stack-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1.25rem;
+            padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+        }
+
+        .ap-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .ap-label {
+            font-size: 0.8125rem;
+            font-weight: 800;
+            color: #666;
+            /* 색상 가독성 개선 */
+        }
+
+        .ap-text {
+            font-family: var(--font-title);
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        /* 로비 전용 버튼 스택 (중앙 정렬) */
+        .lobby-btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            max-width: 280px;
+            z-index: 10;
+        }
+
+        /* 전투 화면 전용 버튼 스택 (절대 좌표 고정) */
+        .battle-btn-stack {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -30%);
+            width: 85%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #player-actions {
+            z-index: 10;
+        }
+
+        #monster-actions {
+            z-index: 5;
+            transform: translate(-50%, -10%);
+            /* 위치 미세 조정 */
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        button {
+            min-height: 3rem;
+            /* 최소 48px */
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-family: var(--font-title);
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex: 1 1 45%;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            opacity: 0.8;
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-wide {
+            flex: 1 1 100%;
+            height: 3.5rem;
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<style>
+    /* 프리미엄 로비 스타일 추가 */
+    .lobby-title {
+        font-family: var(--font-title);
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-align: center;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 2rem;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    .lobby-version {
+        position: absolute;
+        bottom: 2rem;
+        color: rgba(255, 255, 255, 0.2);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 시뮬레이션 오버레이 */
+    #sim-overlay {
+        background: rgba(0, 0, 0, 0.98);
+        color: var(--success);
+        font-family: monospace;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        overflow-y: auto;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 1rem;
+    }
+</style>
+
+<div id="sim-overlay" class="overlay">
+    <h2 style="color: var(--primary); margin-bottom: 1rem;">BALANCE SIMULATION REPORT</h2>
+    <div id="sim-log"></div>
+</div>
+
+<script>
+    // ==========================================
+    // [레이어 0] 시스템 초기화 및 전역 변수
+    // ==========================================
+    const CONFIG = {
+        FPS: 60, PARRY_STANCE_DURATION: 21, PERFECT_WINDOW: 8,
+        ATTACK_DURATION: 15, RETURN_DURATION: 20, REACTION_WINDOW: 26,
+        K: 50, CANVAS_W: 412, CANVAS_H: 600
+    };
+
+    const Player = {
+        x: 206, y: 510, radius: 42, hp: 100, maxHp: 100, atk: 50, def: 0, ap: 0, maxAp: 10,
+        color: "#4a9eff", parryTimer: 0, isParrying: false, dashTimer: 0, ghosts: [],
+        actionsUsed: { atk: false, spin: false, heavy: false },
+        augBuffs: { atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0, executeLow: 0, stackAtk: 0, spinMultiTarget: 0 },
+        state: { consecutiveTarget: null, killStacks: 0, firstAttackThisTurn: true },
+        activeAugments: []
+    };
+
+    class Monster {
+        constructor(name, hp, atk, telegraph, postdelay, hitstop) {
+            this.name = name; this.hp = hp; this.maxHp = hp; this.atk = atk;
+            this.x = 0; this.y = 0; this.homeX = 0; this.homeY = 0; this.radius = 45;
+            this.color = name.includes("지배자") ? "#ff0000" : (name.includes("제왕") ? "#ff8800" : "#ff4a4a");
+            this.timer = 0; this.settings = { telegraphMult: telegraph, postDelayMult: postdelay, hitStop: hitstop };
+        }
+    }
+
+    let monsters = [], currentTurn = "NONE", currentRound = 1, gameStarted = false;
+    let isTargeting = false, selectedSkill = null, damageTexts = [], lastTimestamp = 0;
+    let isSimulating = false;
+
+    // ==========================================
+    // [레이어 1] 데이터 저장소
+    // ==========================================
+    const monsterLibrary = [
+        { id: "mon_tuto_1", name: "나무 허수아비", hp: 150, atk: 12, telegraph: 1.6, postdelay: 1.2, hitstop: 3 },
+        { id: "mon_tuto_2", name: "녹슨 기갑병", hp: 250, atk: 18, telegraph: 1.3, postdelay: 1.0, hitstop: 4 },
+        { id: "mon_swarm_1", name: "그림자 슬라임", hp: 100, atk: 10, telegraph: 1.1, postdelay: 0.8, hitstop: 2 },
+        { id: "mon_elite_1", name: "침묵의 집행자", hp: 800, atk: 28, telegraph: 0.9, postdelay: 1.1, hitstop: 5 },
+        { id: "mon_boss_1", name: "폐허의 제왕", hp: 3000, atk: 45, telegraph: 0.7, postdelay: 1.3, hitstop: 8 },
+        { id: "mon_boss_final", name: "심연의 지배자", hp: 6000, atk: 65, telegraph: 0.6, postdelay: 1.4, hitstop: 10 }
+    ];
+
+    const customStages = {
+        1: ["mon_tuto_1"], 2: ["mon_tuto_2"], 3: ["mon_swarm_1", "mon_swarm_1"],
+        5: ["mon_elite_1"], 8: ["mon_boss_1"], 12: ["mon_elite_1", "mon_elite_1"], 15: ["mon_boss_final"]
+    };
+
+    // ==========================================
+    // [레이어 2] UI 관리자
+    // ==========================================
+    const ui = {
+        lobby: document.getElementById('lobby-overlay'),
+        battle: document.getElementById('battle-screen'),
+        over: document.getElementById('game-over-overlay'),
+        hp: document.getElementById('p-hp'), atk: document.getElementById('p-atk'),
+        ap: document.getElementById('p-ap'), msg: document.getElementById('message'),
+        btns: { atk: document.getElementById('btn-atk'), spin: document.getElementById('btn-spin'), heavy: document.getElementById('btn-heavy'), end: document.getElementById('btn-end') }
+    };
+
+    const UIManager = {
+        update() {
+            if (isSimulating) return;
+            ui.hp.innerText = Math.max(0, Math.ceil(Player.hp)); ui.atk.innerText = Math.ceil(Player.atk);
+            ui.ap.innerText = Math.floor(Player.ap);
+            const isPlayer = currentTurn === "PLAYER";
+            ui.btns.atk.disabled = !isPlayer || Player.ap < 2 || Player.actionsUsed.atk;
+            ui.btns.spin.disabled = !isPlayer || Player.ap < 3 || Player.actionsUsed.spin;
+            ui.btns.heavy.disabled = !isPlayer || Player.ap < 5 || Player.actionsUsed.heavy;
+            ui.btns.end.disabled = !isPlayer;
+        },
+        showFeedback(text, color = "#fff") {
+            if (isSimulating) return;
+            ui.msg.innerText = text; ui.msg.style.color = color; ui.msg.style.opacity = 1;
+            setTimeout(() => ui.msg.style.opacity = 0, 1000);
+        },
+        toggleScreen(screenId) {
+            if (isSimulating) return;
+            ui.lobby.style.display = (screenId === "lobby") ? "flex" : "none";
+            ui.battle.style.display = (screenId === "battle") ? "flex" : "none";
+        }
+    };
+
+    // ==========================================
+    // [레이어 3] 전투 및 스테이지 로직
+    // ==========================================
+    const BattleEngine = {
+        executeSkill(skill, target = null) {
+            if (target === null && monsters.length > 1 && skill !== "spin") {
+                isTargeting = true; selectedSkill = skill;
+                UIManager.showFeedback("Select Target!", "#fff"); return;
+            }
+            const t = target || monsters[0];
+            if (!t) return;
+            if (skill === "atk" && Player.ap >= 2) {
+                Player.ap -= 2; this.dealDamage(Player.atk * Player.augBuffs.atk, t); Player.actionsUsed.atk = true;
+            } else if (skill === "heavy" && Player.ap >= 5) {
+                Player.ap -= 5; this.dealDamage(Player.atk * 2 * Player.augBuffs.heavy, t); Player.actionsUsed.heavy = true;
+            } else if (skill === "spin" && Player.ap >= 3) {
+                Player.ap -= 3;
+                monsters.forEach(m => this.dealDamage(Player.atk * 1.2 * Player.augBuffs.spin, m));
+                Player.actionsUsed.spin = true;
+            }
+            UIManager.update();
+        },
+        dealDamage(amt, target) {
+            const final = Math.ceil(amt); target.hp -= final;
+            if (!isSimulating) damageTexts.push({ x: target.x, y: target.y - 30, text: `-${final}`, color: "#ff4a4a", timer: 60 });
+            if (target.hp <= 0) {
+                monsters = monsters.filter(m => m !== target);
+                if (monsters.length === 0) StageManager.winRound();
+            }
+        }
+    };
+
+    const StageManager = {
+        spawnWave(round) {
+            UIManager.toggleScreen("battle"); resizeCanvas(); monsters = [];
+            const ids = customStages[round] || ["mon_tuto_1"];
+            ids.forEach((id, i) => {
+                const libM = monsterLibrary.find(x => x.id === id) || monsterLibrary[0];
+                const m = new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
+                const ratio = ids.length === 1 ? 0.5 : (i === 0 ? 0.3 : 0.7);
+                m.x = m.homeX = CONFIG.CANVAS_W * ratio; m.y = m.homeY = CONFIG.CANVAS_H * 0.25;
+                monsters.push(m);
+            });
+            currentTurn = "PLAYER"; Player.ap = Math.min(Player.maxAp, Player.ap + 3);
+            Player.actionsUsed = { atk: false, spin: false, heavy: false };
+            UIManager.update(); UIManager.showFeedback(`WAVE ${round}`);
+        },
+        winRound() {
+            currentRound++;
+            if (currentRound > 15) {
+                UIManager.showFeedback("VICTORY!", "#FFD700");
+                if (!isSimulating) { gameStarted = false; setTimeout(() => UIManager.toggleScreen("lobby"), 2000); }
+            } else this.spawnWave(currentRound);
+        }
+    };
+
+    // ==========================================
+    // [레이어 4] 시뮬레이션 엔진
+    // ==========================================
+    const Simulator = {
+        results: [],
+        log(msg) { document.getElementById('sim-log').innerHTML += `<p>${msg}</p>`; },
+        async runMultiple(count, mode = "Expert") {
+            isSimulating = true; gameStarted = true;
+            this.results = [];
+            document.getElementById('sim-overlay').style.display = 'flex';
+            this.log(`Starting ${count} simulations in ${mode} mode...`);
+
+            for (let i = 1; i <= count; i++) {
+                const res = await this.runOne(mode);
+                this.results.push(res);
+                if (i % 10 === 0) this.log(`Completed ${i}/${count}... (Win Rate: ${this.getWinRate()}%)`);
+            }
+
+            this.report();
+        },
+        async runOne(mode) {
+            Player.hp = 100; Player.ap = 0; Player.atk = 50; currentRound = 1;
+            let turns = 0;
+            while (currentRound <= 15 && Player.hp > 0 && turns < 500) {
+                if (currentTurn === "PLAYER") {
+                    // AI Player Logic
+                    if (Player.ap >= 5 && !Player.actionsUsed.heavy) BattleEngine.executeSkill("heavy");
+                    else if (Player.ap >= 3 && monsters.length > 1 && !Player.actionsUsed.spin) BattleEngine.executeSkill("spin");
+                    else if (Player.ap >= 2 && !Player.actionsUsed.atk) BattleEngine.executeSkill("atk");
+                    else endPlayerTurn();
+                } else {
+                    // AI Monster Turn Simulation
+                    monsters.forEach(m => {
+                        let dmg = Math.ceil(m.atk * (CONFIG.K / (CONFIG.K + Player.def)));
+                        if (mode === "Expert") {
+                            // 80% chance to 'Parry' in Expert mode (simplified)
+                            if (Math.random() < 0.8) { dmg = 0; Player.ap = Math.min(Player.maxAp, Player.ap + 2); }
+                        }
+                        Player.hp -= dmg;
+                    });
+                    currentTurn = "PLAYER"; turns++;
+                }
+                if (monsters.length === 0) StageManager.winRound();
+            }
+            return { win: currentRound > 15, turns, lastRound: currentRound };
+        },
+        getWinRate() {
+            const wins = this.results.filter(r => r.win).length;
+            return Math.floor((wins / this.results.length) * 100);
+        },
+        report() {
+            const winRate = this.getWinRate();
+            const avgTurns = Math.floor(this.results.reduce((a, b) => a + b.turns, 0) / this.results.length);
+            this.log(`--- FINAL REPORT ---`);
+            this.log(`Total Games: ${this.results.length}`);
+            this.log(`Win Rate: ${winRate}%`);
+            this.log(`Avg Turns to Clear: ${avgTurns}`);
+            this.log(`<button onclick="location.reload()" class="btn-primary" style="margin-top:1rem">CLOSE & RELOAD</button>`);
+        }
+    };
+
+    // ==========================================
+    // [레이어 5] 인프라: 렌더링 및 루프
+    // ==========================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        const playArea = document.getElementById('play-area');
+        if (!playArea) return;
+        const rect = playArea.getBoundingClientRect();
+        canvas.width = rect.width; canvas.height = rect.height;
+        CONFIG.CANVAS_W = canvas.width; CONFIG.CANVAS_H = canvas.height;
+        Player.x = CONFIG.CANVAS_W / 2; Player.y = CONFIG.CANVAS_H * 0.85;
+    }
+
+    function gameLoop(time) {
+        if (!lastTimestamp) lastTimestamp = time;
+        const dt = (time - lastTimestamp) / 16.66; lastTimestamp = time;
+        if (gameStarted && !isSimulating) { update(dt); draw(); }
+        requestAnimationFrame(gameLoop);
+    }
+
+    function update(dt) {
+        damageTexts.forEach((d, i) => { d.y -= 0.5 * dt; d.timer -= dt; if (d.timer <= 0) damageTexts.splice(i, 1); });
+        if (currentTurn === "MONSTER") {
+            const m = monsters[0];
+            if (m) {
+                m.timer += dt;
+                if (m.timer > 60) {
+                    const dmg = Math.ceil(m.atk * (CONFIG.K / (CONFIG.K + Player.def)));
+                    Player.hp -= dmg; damageTexts.push({ x: Player.x, y: Player.y - 30, text: `-${dmg}`, color: "#f44", timer: 60 });
+                    m.timer = 0; if (Player.hp <= 0) { gameStarted = false; ui.over.style.display = 'flex'; }
+                }
+            } else { currentTurn = "PLAYER"; UIManager.update(); }
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        monsters.forEach(m => {
+            ctx.fillStyle = m.color; ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#fff"; ctx.font = "bold 12px Inter"; ctx.textAlign = "center";
+            ctx.fillText(m.name, m.x, m.y - m.radius - 20);
+            ctx.fillText(`${Math.ceil(m.hp)} HP`, m.x, m.y - m.radius - 5);
+        });
+        ctx.fillStyle = Player.color; ctx.beginPath(); ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2); ctx.fill();
+        damageTexts.forEach(d => { ctx.fillStyle = d.color; ctx.fillText(d.text, d.x, d.y); });
+    }
+
+    // ==========================================
+    // [레이어 6] 전역 인터페이스
+    // ==========================================
+    function startGame() { gameStarted = true; StageManager.spawnWave(currentRound); }
+    function startSkill(s) { BattleEngine.executeSkill(s); }
+    function executeSpinSlash() { BattleEngine.executeSkill("spin"); }
+    function endPlayerTurn() { currentTurn = "MONSTER"; UIManager.update(); }
+    function retryGame() { Player.hp = 100; Player.ap = 0; currentRound = 1; ui.over.style.display = 'none'; startGame(); }
+    function openInventory() { Simulator.runMultiple(150, "Expert"); } // 임시로 연구소 누르면 시뮬레이션
+    function toggleGuide(v) { document.getElementById('guide-overlay').style.display = v ? 'flex' : 'none'; }
+
+    canvas.addEventListener('mousedown', e => {
+        if (isTargeting) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
+            monsters.forEach(m => {
+                if (Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2) < m.radius * 2) {
+                    BattleEngine.executeSkill(selectedSkill, m);
+                    isTargeting = false; selectedSkill = null;
+                }
+            });
+        }
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    requestAnimationFrame(gameLoop);
+</script>
+</body>
+
+</html>
