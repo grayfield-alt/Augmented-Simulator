@@ -1,0 +1,8 @@
+Type,ID,Name,BaseHP,TargetHP,BaseATK,TargetATK,TG,BaseDifficulty,TargetDifficulty,NotesRef
+Player,player,Player,100,80,50,45,-,-,-,N1;N2
+Monster,mon_tuto_1,연습용 허수아비,100,110,10,12,1.2x,-,-,-
+Monster,mon_tuto_2,강화 허수아비,150,180,12,24,1.0x,-,-,N3
+Monster,mon_boss_1,디-스톰파,1200,1500,25,32,0.8x,-,-,-
+Wave,wave_1,Wave 1,-,-,-,-,-,1/10,2/10,-
+Wave,wave_2,Wave 2,-,-,-,-,-,2/10,5/10,N4
+Wave,wave_4,Wave 4,-,-,-,-,-,4/10,7/10,-
