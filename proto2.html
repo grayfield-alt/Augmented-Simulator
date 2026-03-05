@@ -871,7 +871,8 @@
                 btnAtk: 'btn-atk',
                 btnSpin: 'btn-spin',
                 btnHeavy: 'btn-heavy',
-                btnEnd: 'btn-end'
+                btnEnd: 'btn-end',
+                canvas: 'gameCanvas' // [NEW] 캔버스 ID 중앙 관리
             },
 
             /**
@@ -884,6 +885,13 @@
                 return el;
             }
         };
+
+        // --- LAYER 1.5: CORE RENDERER SETUP ---
+        // 기존 전역 코드와의 호환성을 위해 canvas/ctx 전역 선언 유지 (Safety Guarded)
+        const canvas = UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.canvas);
+        const ctx = canvas.getContext('2d');
+        let CANVAS_W = 400;
+        let CANVAS_H = 700;
 
         // --- LAYER 2: GAME_CORE (PURE LOGIC) ---
         // 브라우저 API 접근 금지 규약 준수
@@ -1144,6 +1152,12 @@
 
         const CONFIG = GAME_CORE.CONFIG;
 
+        // UI 캐싱 필드 (불필요한 DOM 접근 방지) (한글)
+        const uiCache = {
+            hp: -1, atk: -1, def: -1, ap: -1, turn: "",
+            atkBtn: null, spinBtn: null, heavyBtn: null, endBtn: null
+        };
+
         const PATTERN_SPEEDS = {
             "FAST": 40,
             "NORMAL": 60,
@@ -1324,12 +1338,6 @@
             }
             list.innerHTML = html;
         }
-
-        // UI 캐싱 필드
-        const uiCache = {
-            hp: -1, atk: -1, def: -1, ap: -1, turn: "",
-            atkBtn: null, spinBtn: null, heavyBtn: null, endBtn: null
-        };
 
         function toggleGuide(show) {
             ui.overlayGuide.style.display = show ? "flex" : "none";
