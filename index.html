@@ -3,67 +3,31 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>AUGMENTED SIMULATOR V3</title>
-  <link rel="stylesheet" href="src/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Augmented Simulator - V3 Core</title>
+  <!-- Tailwind 및 Lucide 아이콘 등은 메인 앱에서 동적 로드 또는 에셋 번들링 (한글) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.4.0/css/lucide.min.css">
 </head>
 
-<body>
-  <div id="game-container">
-    <!-- 1. HUD -->
-    <header id="top-status">
-      <div class="status-group">
-        <div class="status-item">
-          <span class="status-label">Vitality</span>
-          <span id="p-hp" class="status-value hp-text">100</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Power</span>
-          <span id="p-atk" class="status-value atk-text">50</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Defense</span>
-          <span id="p-def" class="status-value def-text">0</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- 2. Play Area -->
-    <main id="play-area">
-      <canvas id="gameCanvas"></canvas>
-      <div id="visual-overlays">
-        <div id="vignette" class="vignette"></div>
-        <div id="msg-container">
-          <div id="message"></div>
-        </div>
-        <div id="turn-indicator">Player's Turn</div>
-      </div>
-    </main>
-
-    <!-- 3. Footer Control Area -->
-    <footer id="bottom-ui">
-      <div class="ap-wrapper">
-        <span class="ap-label">ENERGY</span>
-        <span id="p-ap" class="ap-text">0</span>
-      </div>
-
-      <div id="player-actions" class="btn-stack">
-        <div class="btn-row">
-          <button class="btn-primary" onclick="window.gameAction('atk')">🗡️ 공격 (2)</button>
-          <button class="btn-secondary" onclick="window.gameAction('spin')">🌀 회전 베기 (3)</button>
-        </div>
-        <button class="btn-primary btn-wide" onclick="window.gameAction('heavy')">💥 강력한 강타 (5)</button>
-        <button class="btn-secondary btn-wide" style="opacity: 0.5;" onclick="window.gameAction('end')">턴 종료</button>
-      </div>
-    </footer>
+<body class="bg-black text-white select-none overflow-hidden">
+  <!-- 에러 오버레이 (V3 필수 안정장치) (한글) -->
+  <div id="error-overlay"
+    style="position: fixed; top: 0; left: 0; width: 100%; background: rgba(220, 38, 38, 0.95); color: white; padding: 15px; font-family: monospace; font-size: 12px; z-index: 999999; display: none; white-space: pre-wrap; border-bottom: 2px solid #7f1d1d;">
   </div>
 
-  <!-- V3 Script Entry -->
-  <script type="module" src="src/main.js"></script>
+  <div id="app">
+    <!-- V3 React/Vanilla App Mount Point (한글) -->
+    <div class="flex items-center justify-center h-screen">
+      <div class="text-center">
+        <h1 class="text-4xl font-black mb-4 animate-pulse">BOOTING V3...</h1>
+        <p class="text-gray-500">Initializing Clean Architecture Core</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- V3 엔트리 포인트 연동 (한글) -->
+  <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>
