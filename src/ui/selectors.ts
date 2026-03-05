@@ -7,10 +7,25 @@ export const SELECTORS = {
     atk: 'p-atk',
     def: 'p-def',
     ap: 'p-ap',
-    turn: 'turn-indicator',
+    turn: 'turn-indicator-overlay',
     message: 'message',
     errorOverlay: 'error-overlay',
-    // ... 버튼 및 오버레이 ID 생략/추가
+    btnAtk: 'btn-atk',
+    btnSpin: 'btn-spin',
+    btnHeavy: 'btn-heavy',
+    btnEnd: 'btn-end',
+    lobby: 'lobby-overlay',
+    battleScreen: 'battle-screen',
+    overlayAug: 'augment-overlay',
+    overlayEvent: 'event-overlay',
+    overlayGameOver: 'game-over-overlay',
+    inventory: 'inventory-overlay',
+    stageEditor: 'stage-editor-overlay',
+    overlayGuide: 'guide-overlay',
+    vignette: 'vignette',
+    hitIcons: 'hit-icons-container',
+    btnReroll: 'btn-reroll',
+    msg: 'msg-container'
 };
 
 // 에러 스로틀링 관리 (한글)

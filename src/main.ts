@@ -2,17 +2,23 @@
 import './ui/style.css';
 import { setupGlobalHandlers } from './ui/selectors';
 import { store } from './app/store';
+import { renderUI } from './ui/renderer';
 
-// 초기 부팅 로직 (한글)
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Augmented Simulator V3 Core Booting...");
+function boot() {
+    console.log("Augmented Simulator V3 Booting...");
 
-    // 1. 전역 에러 핸들러 설정 (한글)
+    // 1. 시스템 안정장치 활성화 (한글)
     setupGlobalHandlers();
 
-    // 2. 초기 상태 렌더링 (한글)
-    const state = store.getState();
-    // renderInitialUI(state); // 향후 UI 모듈 완성 시 연동
+    // 2. 스토어 변경 구독 (UI 렌더러 연결) (한글)
+    store.subscribe((state) => {
+        renderUI(state);
+    });
 
-    console.log("V3 Ready.");
-});
+    // 3. 초기 상태 갱신 (한글)
+    store.dispatch({ type: 'INIT' });
+
+    console.log("V3 Core Operational.");
+}
+
+document.addEventListener('DOMContentLoaded', boot);

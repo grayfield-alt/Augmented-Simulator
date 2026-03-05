@@ -8,48 +8,48 @@ export const GAME_CONFIG = {
     ATTACK_DURATION: 15,
     RETURN_DURATION: 20,
     REACTION_WINDOW: 26,
-    K: 50 // 방어 상수
+    K: 50
 };
 
-// 순수 함수: 데미지 계산 (한글)
 export function calculateDamage(atk: number, def: number): number {
     return Math.max(1, Math.round(atk * (GAME_CONFIG.K / (GAME_CONFIG.K + def))));
 }
 
-// 순수 함수: 상태 업데이트 (Reducer 패턴) (한글)
 export function processTurn(state: GameState, action: any): GameState {
-    const nextState = JSON.parse(JSON.stringify(state)); // Deep Clone for purity
+    const next = JSON.parse(JSON.stringify(state)) as GameState;
+    const p = next.player;
 
     switch (action.type) {
         case 'START_TURN':
-            nextState.currentTurn = action.turn;
+            next.currentTurn = action.turn;
             if (action.turn === 'PLAYER') {
-                nextState.player.ap = Math.min(nextState.player.maxAp, nextState.player.ap + 3);
-                nextState.player.actionsUsed = { atk: false, spin: false, heavy: false };
+                // AP 누적 로직 (한글)
+                const gain = 3 + (p.augBuffs.startAp || 0);
+                p.ap = Math.min(p.maxAp, p.ap + gain);
+                p.actionsUsed = { atk: false, spin: false, heavy: false };
+                p.state.killsThisTurn = 0;
             }
             break;
 
-        case 'TAKE_DAMAGE':
-            const dmg = calculateDamage(action.atk, nextState.player.def);
-            nextState.player.hp = Math.max(0, nextState.player.hp - dmg);
+        case 'EXECUTE_SKILL':
+            const cost = action.skill === 'atk' ? 2 : (action.skill === 'spin' ? 3 : 5);
+            if (p.ap >= cost) {
+                p.ap -= cost;
+                // 데미지 및 효과 처리는 시뮬레이터에서 별도 수행 후 상태 반영 (한글)
+            }
             break;
 
-        // ... 추가 리듀서 로직
+        case 'PARRY_SUCCESS':
+            const parryGain = action.isPerfect ? 2 : 1;
+            p.ap = Math.min(p.maxAp, p.ap + parryGain + (p.augBuffs.parryAp || 0));
+            break;
+
+        case 'TAKE_DAMAGE':
+            const rawDmg = action.atk * (p.augBuffs.takeDmgMult || 1.0);
+            const finalDmg = calculateDamage(rawDmg, p.def);
+            p.hp = Math.max(0, p.hp - finalDmg);
+            break;
     }
 
-    return nextState;
-}
-
-// 시뮬레이션 로직 (DOM 접근 금지) (한글)
-export class CombatSimulator {
-    static validateAction(state: GameState, actionType: string): boolean {
-        const p = state.player;
-        if (state.currentTurn !== 'PLAYER') return false;
-
-        if (actionType === 'atk') return p.ap >= 2 && !p.actionsUsed.atk;
-        if (actionType === 'spin') return p.ap >= 3 && !p.actionsUsed.spin;
-        if (actionType === 'heavy') return p.ap >= 5 && !p.actionsUsed.heavy;
-
-        return true;
-    }
+    return next;
 }
