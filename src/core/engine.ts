@@ -18,11 +18,13 @@ export function calculateDamage(atk: number, def: number): number {
     return dmg;
 }
 
+import { enterStage, advanceStageNode } from './stageRunner';
+
 export function processTurn(state: GameState, action: any): GameState {
     // 1. 입력 상태 검증 (한글)
     validateState(state);
 
-    const next = JSON.parse(JSON.stringify(state)) as GameState;
+    let next = JSON.parse(JSON.stringify(state)) as GameState;
     const p = next.player;
 
     switch (action.type) {
@@ -55,6 +57,22 @@ export function processTurn(state: GameState, action: any): GameState {
             const finalDmg = calculateDamage(rawDmg, p.def);
             p.hp = Math.max(0, p.hp - finalDmg);
             break;
+
+        case 'ENTER_STAGE':
+            next = enterStage(next, action.stagePlan);
+            break;
+
+        case 'ADVANCE_NODE':
+            next = advanceStageNode(next);
+            break;
+
+        case 'REST_CHOICE_MADE':
+            if (action.choice === 'heal') {
+                p.hp = Math.min(p.maxHp, Math.round(p.hp + p.maxHp * 0.35));
+            }
+            // (증강 선택 시 다른 액션이나, 단순히 노드만 넘길수도 있음)
+            next = advanceStageNode(next);
+            break;
     }
 
     // 2. 결과 상태 검증 (한글)
@@ -62,3 +80,4 @@ export function processTurn(state: GameState, action: any): GameState {
 
     return next;
 }
+

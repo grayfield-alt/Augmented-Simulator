@@ -1,6 +1,6 @@
-// src/ui/renderer.ts (한글)
 import { GameState } from '../core/state';
 import { SELECTORS, mustGet } from './selectors';
+import { renderStageFlow } from './stageFlowView';
 
 export function renderUI(state: GameState) {
     // 1. 상태 텍스트 업데이트 (한글)
@@ -27,6 +27,9 @@ export function renderUI(state: GameState) {
     } else {
         turnIndicator.style.display = "none";
     }
+
+    // 3. 스테이지 노드 기반 UI 렌더링 연동 (한글)
+    renderStageFlow(state);
 }
 
 export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {

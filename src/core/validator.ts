@@ -1,6 +1,8 @@
 // src/core/validator.ts (한글)
 import { GameState } from './state';
 
+import { validateStagePlan } from './stageRunner';
+
 /**
  * 게임 상태의 무결성을 검증합니다.
  * 필수 필드 누락, NaN 값, 비정상적인 범위 등을 체크하여 에러를 던집니다. (한글)
@@ -29,5 +31,13 @@ export function validateState(state: GameState): void {
     // 4. 턴 상태 검증 (한글)
     if (!['PLAYER', 'MONSTER', 'NONE'].includes(state.currentTurn)) {
         throw new Error(`[INVALID_STATE] Invalid currentTurn: ${state.currentTurn}`);
+    }
+
+    // 5. 스테이지 플랜 무결성 검증 (로드된 경우에 한함) (한글)
+    if (state.stagePlan !== null) {
+        validateStagePlan(state.stagePlan as any);
+        if (typeof state.currentNodeIndex !== 'number' || state.currentNodeIndex < 0) {
+            throw new Error(`[INVALID_STATE] currentNodeIndex is invalid: ${state.currentNodeIndex}`);
+        }
     }
 }

@@ -24,6 +24,9 @@ export interface GameState {
     gameStarted: boolean;
     currentTurn: "PLAYER" | "MONSTER" | "NONE";
     currentRound: number;
+    currentStageId: string | null;  // 현재 진행 중인 스테이지 (한글)
+    currentNodeIndex: number;       // 스테이지 내 현재 노드 위치 (한글)
+    stagePlan: any | null;          // 현재 로드된 StagePlan 개체 (타입 체킹 위해 any 임시 허용) (한글)
     player: PlayerState;
     monsters: any[];
     history: any[];
@@ -66,6 +69,9 @@ export const getInitialGameState = (): GameState => ({
     gameStarted: false,
     currentTurn: "NONE",
     currentRound: 1,
+    currentStageId: null,
+    currentNodeIndex: 0,
+    stagePlan: null,
     player: getInitialPlayerState(),
     monsters: [],
     history: []
