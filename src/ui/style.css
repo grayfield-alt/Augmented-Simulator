@@ -1,0 +1,57 @@
+/* src/ui/style.css (한글) */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --accent-red: #ff4a4a;
+  --accent-blue: #4a9eff;
+  --accent-green: #4ade80;
+  --accent-gold: #facc15;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  color: #fff;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 모바일 Safe Area 대응 (한글) */
+.bottom-ui-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+
+/* 에러 오버레이 스타일 (한글) */
+#error-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(220, 38, 38, 0.95);
+  color: white;
+  padding: 15px;
+  font-family: monospace;
+  font-size: 12px;
+  z-index: 999999;
+  display: none;
+  white-space: pre-wrap;
+  border-bottom: 2px solid #7f1d1d;
+}
