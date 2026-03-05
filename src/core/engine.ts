@@ -1,5 +1,6 @@
 // src/core/engine.ts (한글)
 import { GameState, PlayerState } from './state';
+import { validateState } from './validator';
 
 export const GAME_CONFIG = {
     FPS: 60,
@@ -12,10 +13,15 @@ export const GAME_CONFIG = {
 };
 
 export function calculateDamage(atk: number, def: number): number {
-    return Math.max(1, Math.round(atk * (GAME_CONFIG.K / (GAME_CONFIG.K + def))));
+    const dmg = Math.max(1, Math.round(atk * (GAME_CONFIG.K / (GAME_CONFIG.K + def))));
+    if (!Number.isFinite(dmg)) throw new Error(`[CRITICAL] Damage calculation resulted in non-finite value: ${dmg}`);
+    return dmg;
 }
 
 export function processTurn(state: GameState, action: any): GameState {
+    // 1. 입력 상태 검증 (한글)
+    validateState(state);
+
     const next = JSON.parse(JSON.stringify(state)) as GameState;
     const p = next.player;
 
@@ -50,6 +56,9 @@ export function processTurn(state: GameState, action: any): GameState {
             p.hp = Math.max(0, p.hp - finalDmg);
             break;
     }
+
+    // 2. 결과 상태 검증 (한글)
+    validateState(next);
 
     return next;
 }
