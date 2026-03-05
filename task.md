@@ -23,6 +23,9 @@
 
 ## UI/UX 및 그래픽 고도화
 - [x] `proto2.html` UI 미작동 및 겹침 문제 해결 [x]
-- [x] V2 Standalone 버전의 프리미엄 그래픽 스타일(Tailwind/Lucide) 이식 [x]
-- [x] 클린 아키텍처 기조에 따른 UI 로직 구조 개선 [x]
-- [x] Git Push 및 작업일지 업데이트 완료 [x]
+- [x] 모바일 하단 버튼 잘림 및 정렬 쏠림 현상 수정 [x]
+- [x] 턴 전환 중 HUD 소실 버그 수정 및 턴 표시 오버레이 구현 [x]
+- [x] 스테이지 2 난이도 상향 및 플레이어 스탯 밸런스 조정 ([balance_sheet.md](file:///c:/Users/grayfield/scratch/augmented_simulator/balance_sheet.md)) [x]
+- [x] V2 Standalone 버전의 프리미엄 그래픽 스타일 이식 및 지침 준수 [x]
+- [x] 모든 기술 문서 및 구현 계획서 한글화 완료 [x]
+- [x] Git Push 및 최종 작업일지 업데이트 완료 [x]
