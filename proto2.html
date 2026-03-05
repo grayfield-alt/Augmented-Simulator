@@ -197,9 +197,19 @@
             color: var(--primary);
         }
 
-        .btn-stack {
+        /* 로비 전용 버튼 스택 (중앙 정렬) */
+        .lobby-btn-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            max-width: 280px;
+            z-index: 10;
+        }
+
+        /* 전투 화면 전용 버튼 스택 (절대 좌표 고정) */
+        .battle-btn-stack {
             position: absolute;
-            /* 영역 가변 방지를 위해 절대 좌표 사용 */
             top: 50%;
             left: 50%;
             transform: translate(-50%, -30%);
@@ -301,1715 +311,339 @@
     </style>
 </head>
 
-<body>
-    <div id="game-container">
-        <!-- Battle Screen: 전투 중 모든 HUD, 플레이 영역, 하단 조작계가 표시되는 영역 -->
-        <div id="battle-screen" style="display: none; height: 100%; flex-direction: column;">
-            <!-- 1. HUD: Vitality, Power, Defense 등 상태 표시부 -->
-            <header id="top-status">
-                <div class="status-group">
-                    <div class="status-item">
-                        <span class="status-label">Vitality</span>
-                        <span id="p-hp" class="status-value hp-text">100</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Power</span>
-                        <span id="p-atk" class="status-value atk-text">50</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Defense</span>
-                        <span id="p-def" class="status-value def-text">0</span>
-                    </div>
-                </div>
-                <button class="btn-secondary" style="min-height: 2rem; padding: 0 0.5rem; font-size: 0.75rem;"
-                    onclick="toggleEditor(true)">⚙️ EDIT</button>
-            </header>
+<style>
+    /* 프리미엄 로비 스타일 추가 */
+    .lobby-title {
+        font-family: var(--font-title);
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-align: center;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 2rem;
+        animation: fadeInDown 0.8s ease-out;
+    }
 
-            <!-- 2. Play Area: 실제 게임 캐릭터와 이펙트가 그려지는 Canvas 영역 -->
-            <main id="play-area" style="flex: 1; position: relative;">
-                <canvas id="gameCanvas"
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
-                <div id="visual-overlays" style="position: absolute; inset: 0; pointer-events: none; z-index: 2;">
-                    <div id="vignette" class="vignette"></div>
-                    <div id="hit-icons-container"
-                        style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    </div>
-                    <div id="msg-container">
-                        <div id="message"></div>
-                    </div>
-                    <div id="turn-indicator"
-                        style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 0.75rem; letter-spacing: 2px; color: #444; font-weight: 800; text-transform: uppercase; pointer-events: none;">
-                        Player's Turn</div>
-                </div>
-            </main>
+    .lobby-version {
+        position: absolute;
+        bottom: 2rem;
+        color: rgba(255, 255, 255, 0.2);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
 
-            <!-- 3. Footer Control Area -->
-            <footer id="bottom-ui">
-                <div class="ui-stack-container">
-                    <div class="ap-wrapper">
-                        <span class="ap-label">ENERGY</span>
-                        <span id="p-ap" class="ap-text">0</span>
-                    </div>
-
-                    <div id="player-actions" class="btn-stack">
-                        <div class="btn-row">
-                            <button id="btn-atk" class="btn-primary" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
-                            <button id="btn-spin" class="btn-secondary" onclick="executeSpinSlash()">🌀 회전 베기
-                                (3)</button>
-                        </div>
-                        <button id="btn-heavy" class="btn-primary btn-wide" onclick="startSkill('heavy')">💥 강력한 강타
-                            (5)</button>
-                        <button id="btn-end" class="btn-secondary btn-wide"
-                            style="min-height: 2.25rem; font-size: 0.8rem; opacity: 0.5;" onclick="endPlayerTurn()">턴
-                            종료</button>
-                    </div>
-
-                    <div id="monster-actions" class="btn-stack"
-                        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -10%); width: 85%;">
-                        <div id="pc-guide" class="pulse"
-                            style="text-align: center; color: #888; font-size: 0.875rem; display: none;">L-Click: Parry
-                            |
-                            R-Click: Dodge</div>
-                        <div id="mobile-buttons" class="btn-row" style="display: none;">
-                            <button id="btn-parry" class="btn-secondary btn-wide"
-                                style="background: #fff; color: #000;">🛡️
-                                PARRY NOW</button>
-                            <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </div>
-    </div>
-
-    <!-- Overlays -->
-    <div id="lobby-overlay" class="overlay" style="display: flex;">
-        <div
-            style="font-family: var(--font-title); font-size: 3rem; font-weight: 900; text-align: center; line-height: 1; margin-bottom: 3rem;">
-            AUGMENTED<br>SIMULATOR</div>
-        <div class="btn-stack" style="max-width: 250px;">
-            <button class="btn-primary btn-wide" onclick="startGame()">⚔️ 전투 시작</button>
-            <button class="btn-secondary btn-wide" onclick="openInventory()">🧪 몬스터 연구소</button>
-            <button class="lobby-btn btn-secondary btn-wide" onclick="openStageEditor()" style="display:none">🗺️ 스테이지
-                에디터</button>
-            <button class="btn-secondary btn-wide" onclick="toggleGuide(true)">❓ 가이드</button>
-        </div>
-        <p style="margin-top: 3rem; color: #333; font-size: 0.75rem; font-weight: 700;">VERSION 2.7 PORTRAIT</p>
-    </div>
-
-    <div id="augment-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 100%; max-width: 400px; padding: 30px; display: flex; flex-direction: column; align-items: center;">
-            <h2 style="font-family: var(--font-title); font-size: 24px; margin-bottom: 30px; color: var(--primary);">
-                Choose an Augment</h2>
-            <div id="augment-cards" class="augment-container"></div>
-            <button id="btn-reroll" class="lobby-btn" style="margin-top: 20px; width: 100%;"
-                onclick="rerollAugments()">🔄 Reroll (1 Remaining)</button>
-        </div>
-    </div>
-
-    <div id="event-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 100%; max-width: 400px; padding: 30px; display: flex; flex-direction: column; align-items: center;">
-            <h2 style="font-family: var(--font-title); font-size: 24px; margin-bottom: 30px; color: var(--success);">
-                Round 3: Event Option</h2>
-            <div id="event-options" class="event-container"
-                style="display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100%;">
-                <div class="augment-card" style="width: 100% !important; cursor: pointer;"
-                    onclick="selectEventOption(1)">
-                    <h3 style="color: var(--primary);">🎁 선물</h3>
-                    <p>Common 증강 1개 선택</p>
-                </div>
-                <div class="augment-card" style="width: 100% !important; cursor: pointer;"
-                    onclick="selectEventOption(2)">
-                    <h3 style="color: var(--success);">🍕 휴식</h3>
-                    <p>HP 회복 35%</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="inventory-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 95%; max-width: 450px; height: 85%; display: flex; flex-direction: column; padding: 20px;">
-            <h2 style="font-family: var(--font-title); color: var(--info); margin-bottom: 20px;">🧪 몬스터 연구소</h2>
-            <div id="complete-inventory-list"
-                style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;"></div>
-            <div style="display: flex; gap: 10px;">
-                <button style="flex: 1; background: var(--success);" onclick="openMonsterCreator()">New
-                    Monster</button>
-                <button style="flex: 1;" onclick="closeOverlay('inventory-overlay')">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="stage-editor-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 95%; max-width: 450px; height: 85%; display: flex; flex-direction: column; padding: 20px;">
-            <h2 style="font-family: var(--font-title); color: var(--primary); margin-bottom: 20px;">🗺️ 스테이지 에디터
-            </h2>
-            <div id="full-stage-list" style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button style="background: var(--info);" onclick="saveToStorage()">All Save</button>
-                <div style="display: flex; gap: 10px;">
-                    <button style="flex: 1; border-color: var(--danger); color: var(--danger);"
-                        onclick="resetStagesToDefault()">Reset</button>
-                    <button style="flex: 1;" onclick="closeOverlay('stage-editor-overlay')">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="guide-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 90%; max-width: 400px; padding: 30px; text-align: left; max-height: 80%; overflow-y: auto;">
-            <h2 style="font-family: var(--font-title); color: var(--primary); margin-bottom: 20px;">❓ 게임 가이드</h2>
-            <div style="font-size: 14px; line-height: 1.6; color: #ccc;">
-                <p><b>■ 기본 조작</b><br>• 강타/회전베기: 스킬 버튼 누른 후 적 선택<br>• 패링: 적 공격 타이밍에 맞춰 버튼 유지</p>
-                <p><b>■ 시스템</b><br>• <b>AP:</b> 행동 시 소모되는 자원입니다.<br>• <b>패링:</b> 성공 시 대량의 AP를 획득합니다.<br>• <b>증강:</b>
-                    라운드
-                    종료 시 영구적인 버프를 획득합니다.</p>
-                <p><b>■ 에디터</b><br>• 자신의 스테이지를 직접 구성하고 저장할 수 있습니다.</p>
-            </div>
-            <button class="lobby-btn" style="margin-top: 30px; width: 100%; background: var(--primary); color: #000;"
-                onclick="toggleGuide(false)">닫기</button>
-        </div>
-    </div>
-
-    <div id="game-over-overlay" class="overlay">
-        <h2 style="font-family: var(--font-title); font-size: 48px; color: var(--danger); margin-bottom: 20px;">GAME
-            OVER</h2>
-        <button class="lobby-btn" style="width: 200px; background: var(--primary); color: #000;"
-            onclick="retryGame()">RETRY</button>
-    </div>
-
-    <div id="editor-overlay" class="overlay" style="background: rgba(0,0,0,0.98);">
-        <div class="glass-panel"
-            style="width: 96%; max-width: 480px; height: 90%; display: flex; flex-direction: column; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h2 style="font-family: var(--font-title); font-size: 20px;">⚙️ STAGE & MONSTER EDITOR</h2>
-                <button class="btn-sm" onclick="toggleEditor(false)">✕</button>
-            </div>
-            <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
-                <h3 style="font-size: 14px; margin: 15px 0 10px; color: var(--info);">👾 Monster Library</h3>
-                <div id="monster-library-list" style="margin-bottom: 20px;"></div>
-                <h3 style="font-size: 14px; margin: 15px 0 10px; color: var(--primary);">🗺️ Stage Configuration
-                </h3>
-                <div id="stage-editor-list"></div>
-            </div>
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button style="flex: 1; background: var(--info);" onclick="openMonsterCreator()">Create
-                    Monster</button>
-                <button style="flex: 1; background: var(--success);" onclick="saveToStorage()">Save All</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="monster-creator-panel" class="overlay" style="background: rgba(0,0,0,0.95);">
-        <div class="glass-panel" style="width: 90%; max-width: 400px; padding: 25px;">
-            <h2 id="creator-title" style="font-family: var(--font-title); color: var(--success); margin-bottom: 20px;">
-                🛠️ 몬스터 생성</h2>
-            <div class="btn-stack" style="gap: 15px;">
-                <div class="input-group">
-                    <label style="font-size: 12px; color: #888;">Name</label>
-                    <input id="lib-name" type="text"
-                        style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; color: #888;">HP</label>
-                        <input id="lib-hp" type="number"
-                            style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; color: #888;">ATK</label>
-                        <input id="lib-atk" type="number"
-                            style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
-                    </div>
-                </div>
-                <div>
-                    <label style="font-size: 12px; color: #888;">Telegraph Mult: <span
-                            id="lib-val-telegraph">1.0</span>x</label>
-                    <input id="lib-telegraph" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
-                        oninput="document.getElementById('lib-val-telegraph').innerText=this.value"
-                        style="width: 100%;">
-                </div>
-                <div>
-                    <label style="font-size: 12px; color: #888;">Post-Delay Mult: <span
-                            id="lib-val-postdelay">1.0</span>x</label>
-                    <input id="lib-postdelay" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
-                        oninput="document.getElementById('lib-val-postdelay').innerText=this.value"
-                        style="width: 100%;">
-                </div>
-                <div>
-                    <label style="font-size: 12px; color: #888;">Hit Stop: <span id="lib-val-hitstop">3</span></label>
-                    <input id="lib-hitstop" type="range" min="0" max="10" step="1" value="3"
-                        oninput="document.getElementById('lib-val-hitstop').innerText=this.value" style="width: 100%;">
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="btn-primary" style="flex: 1;" onclick="confirmMonsterSave()">Save</button>
-                    <button class="btn-secondary" style="flex: 1;"
-                        onclick="document.getElementById('monster-creator-panel').style.display='none'">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // Layout Constants
-        let CANVAS_W = 400;
-        let CANVAS_H = 700;
-
-
-
-        const AUGMENT_DATA = {
-            "Common": [
-                { id: "c1", name: "날카로움", desc: "공격력 ×1.10", effect: p => p.augBuffs.atk *= 1.1 },
-                { id: "c2", name: "축적된 분노", desc: "강타 공격력 ×1.20", effect: p => p.augBuffs.heavy *= 1.2 },
-                { id: "c3", name: "회전 가속", desc: "회전베기 공격력 ×1.15", effect: p => p.augBuffs.spin *= 1.15 },
-                { id: "c4", name: "정밀 방어", desc: "패링 성공 시 AP +1 (턴당 1회)", effect: p => p.augBuffs.parryAp += 1 },
-                { id: "c5", name: "연속 호흡", desc: "전투 시작 시 AP +2", effect: p => p.augBuffs.startAp += 2 },
-                { id: "c6", name: "처형 본능", desc: "대상 HP 30% 이하일 때 공격력 ×1.15", effect: p => p.augBuffs.executeLow = 0.3 },
-                { id: "c7", name: "약점 파악", desc: "같은 적 연속 공격 시 2타부터 공격력 ×1.10", effect: p => p.augBuffs.stackAtk = 0.1 },
-                { id: "c8", name: "철갑 분쇄", desc: "강타 적중 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.heavySunder = 0.15 },
-                { id: "c9", name: "피의 회수", desc: "적 처치 시 AP +1 (턴당 2회)", effect: p => p.augBuffs.killAp += 1 },
-                { id: "c10", name: "집중력", desc: "퍼펙트 패링 성공 시 다음 공격력 ×1.20", effect: p => p.augBuffs.perfectFocus = 0.20 }
-            ],
-            "Epic": [
-                { id: "e1", name: "약점 해부", desc: "같은 적 연속 공격 시 공격력 ×1.06 (최대 5중첩)", effect: p => p.augBuffs.stackAtkEpic = 0.06 },
-                { id: "e2", name: "과열 타격", desc: "강타 사용 후 다음 턴 첫 공격 공격력 ×1.35", effect: p => p.augBuffs.heavyOverheat = 0.35 },
-                { id: "e3", name: "원심 폭발", desc: "회전베기 공격력 ×1.25 / 처치 시 AP +1", effect: p => { p.augBuffs.spin *= 1.25; p.augBuffs.spinKillAp += 1; } },
-                { id: "e4", name: "완벽한 리듬", desc: "퍼펙트 패링 시 이번 턴 공격력 ×1.20", effect: p => p.augBuffs.turnAtkPerf = 0.2 },
-                { id: "e5", name: "초반 가속", desc: "전투 시작 시 AP +3 / 첫 턴 공격력 ×1.10", effect: p => { p.augBuffs.startAp += 3; p.augBuffs.startTurnAtk = 0.1; } },
-                { id: "e6", name: "피의 수확", desc: "적 처치 시 공격력 ×1.04 (최대 10중첩)", effect: p => p.augBuffs.killStackAtk = 0.04 },
-                { id: "e7", name: "단두의 각", desc: "적 HP 30% 이하일 때 강타 공격력 ×1.40", effect: p => p.augBuffs.heavyExecute = 0.4 },
-                { id: "e8", name: "침착한 폭력", desc: "현재 AP 가 0~2일 때 공격력 ×1.18", effect: p => p.augBuffs.lowApAtk = 1.18 },
-                { id: "e9", name: "관성 베기", desc: "기본 공격 사용 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.inertiaSlice = 0.15 },
-                { id: "e10", name: "파괴의 맥박", desc: "매 턴 첫 공격 공격력 ×1.15 (강타라면 x1.25)", effect: p => p.augBuffs.firstAtkMult = 0.15 }
-            ],
-            "Unique": [
-                { id: "u1", name: "검성의 서약", desc: "모든 스킬 공격력 ×1.20", effect: p => { p.augBuffs.atk *= 1.2; p.augBuffs.spin *= 1.2; p.augBuffs.heavy *= 1.2; } },
-                { id: "u2", name: "큰 한 방", desc: "강타 공격력 ×1.60 / 강타 처치 시 AP +2", effect: p => { p.augBuffs.heavy *= 1.6; p.augBuffs.heavyKillAp += 2; } },
-                { id: "u3", name: "폭풍의 중심", desc: "회전베기 공격력 ×1.50 / 적 2마리 이상 시 추가 x1.1", effect: p => { p.augBuffs.spin *= 1.5; p.augBuffs.spinMultiTarget = 0.1; } },
-                { id: "u4", name: "무한 템포", desc: "전투 시작 AP +4 / 퍼펙트 패링 시 AP +1 (턴당 2)", effect: p => { p.augBuffs.startAp += 4; p.augBuffs.perfectApBonus += 1; } },
-                { id: "u5", name: "피의 엔진", desc: "적 처치 시 공격력 ×1.06 (무제한) / 피격 피해 x1.1", effect: p => { p.augBuffs.unlimitKillAtk = 0.06; p.augBuffs.takeDmgMult *= 1.1; } },
-                { id: "u6", name: "결투가", desc: "적 1마리일 때 공격력 ×1.35 / 강타 추가 x1.15", effect: p => { p.augBuffs.soloAtk = 0.35; p.augBuffs.soloHeavy = 0.15; } },
-                { id: "u7", name: "집행인의 판결", desc: "적 HP 40% 이하 시 Atk x1.25 / 강타 추가 x1.2", effect: p => { p.augBuffs.executeAll = 0.25; p.augBuffs.heavyExecAll = 0.2; } },
-                { id: "u8", name: "연쇄 분쇄", desc: "강타 연속 사용(연속 턴) 시 공격력 ×1.50", effect: p => p.augBuffs.heavyChain = 0.5 },
-                { id: "u9", name: "정점의 호흡", desc: "턴 시작 시 AP 5 이상이면 공격력 ×1.25", effect: p => p.augBuffs.highApBuff = 0.25 },
-                { id: "u10", name: "완전무결", desc: "퍼펙트 패링 당 Atk x1.08 (최대 3) / 피격 시 소멸", effect: p => p.augBuffs.perfStackBuff = 0.08 }
-            ]
-        };
-
-        const ui = {
-            lobby: document.getElementById('lobby-overlay'),
-            battleScreen: document.getElementById('battle-screen'),
-            overlayAug: document.getElementById('augment-overlay'),
-            overlayEvent: document.getElementById('event-overlay'),
-            overlayGameOver: document.getElementById('game-over-overlay'),
-            inventory: document.getElementById('inventory-overlay'),
-            stageEditor: document.getElementById('stage-editor-overlay'),
-            overlayGuide: document.getElementById('guide-overlay'),
-            hp: document.getElementById('p-hp'),
-            atk: document.getElementById('p-atk'),
-            def: document.getElementById('p-def'),
-            ap: document.getElementById('p-ap'),
-            msg: document.getElementById('message'),
-            turn: document.getElementById('turn-indicator'),
-            vignette: document.getElementById('vignette'),
-            hitIcons: document.getElementById('hit-icons-container'),
-            btnReroll: document.getElementById('btn-reroll'),
-            btns: {
-                atk: document.getElementById('btn-atk'),
-                spin: document.getElementById('btn-spin'),
-                heavy: document.getElementById('btn-heavy'),
-                end: document.getElementById('btn-end')
-            }
-        };
-
-        const CONFIG = {
-            FPS: 60,
-            PARRY_STANCE_DURATION: 21,
-            PERFECT_WINDOW: 8,
-            ATTACK_DURATION: 15,
-            RETURN_DURATION: 20,
-            REACTION_WINDOW: 26, // [NEW] 신호 후 타격까지의 시간
-            K: 50
-        };
-
-        const Player = {
-            x: 200,
-            y: 600,
-            radius: 42,
-            hp: 100,
-            maxHp: 100,
-            atk: 50,
-            def: 0,
-            ap: 0,
-            color: "#4a9eff",
-            parryTimer: 0,
-            isParrying: false,
-            dashTimer: 0,
-            ghosts: [],
-            actionsUsed: { atk: false, spin: false, heavy: false },
-            augBuffs: {
-                atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
-                executeLow: 0, stackAtk: 0, heavySunder: 0, killAp: 0, perfectFocus: 0,
-                stackAtkEpic: 0, heavyOverheat: 0, spinKillAp: 0, turnAtkPerf: 0,
-                startTurnAtk: 0, killStackAtk: 0, heavyExecute: 0, lowApAtk: 1.0,
-                inertiaSlice: 0, firstAtkMult: 0, heavyKillAp: 0, spinMultiTarget: 0,
-                perfectApBonus: 0, unlimitKillAtk: 0, takeDmgMult: 1.0,
-                soloAtk: 0, soloHeavy: 0, executeAll: 0, heavyExecAll: 0,
-                heavyChain: 0, highApBuff: 0, perfStackBuff: 0
-            },
-            state: {
-                killsThisTurn: 0, parryApGained: 0, isPrefGainedThisTurn: false,
-                consecutiveTarget: null, consecutiveCount: 0,
-                heavyUsedLastTurn: false, heavyHitThisTurn: false,
-                perfFocusActive: false, perfParryThisTurn: false,
-                killStacks: 0, unlimitKills: 0, firstAttackThisTurn: true,
-                perfStacks: 0, multiAtkCount: 0, heavyLastTurn: false,
-                atkUsedLastTurn: false
-            },
-            activeAugments: []
-        };
-
-        let rerollAvailable = true;
-        let currentAugTier = "Common";
-        let forcedTier = null;
-
-        function showAugmentSelection(tier = null) {
-            currentTurn = "NONE";
-            updateInterfaceVisibility();
-            ui.overlayAug.style.display = "flex";
-            rerollAvailable = true;
-            ui.btnReroll.disabled = false;
-            ui.btnReroll.innerText = "Reroll (1 Remaining)";
-
-            if (tier) {
-                currentAugTier = tier;
-                forcedTier = tier;
-            } else {
-                forcedTier = null;
-                const rand = Math.random();
-                if (rand < 0.05) currentAugTier = "Unique";
-                else if (rand < 0.30) currentAugTier = "Epic";
-                else currentAugTier = "Common";
-            }
-
-            rollAugments();
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
         }
 
-        function rollAugments() {
-            const list = AUGMENT_DATA[currentAugTier];
-            const shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
-            const container = document.getElementById('augment-cards');
-            container.innerHTML = "";
-            shuffled.forEach(aug => {
-                const card = document.createElement('div');
-                card.className = `augment-card tier-${currentAugTier.toLowerCase()}`;
-                card.innerHTML = `<h3>${aug.name}</h3><p style="color:#aaa; font-size:12px; margin:5px 0;">${currentAugTier}</p><p>${aug.desc}</p>`;
-                card.setAttribute('style', 'display: flex !important; flex-direction: column !important; width: 100% !important; cursor: pointer !important; margin: 0 0 12px 0 !important; padding: 20px !important; border-radius: 16px !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid var(--glass-border) !important; z-index: 99999 !important;');
-                card.onclick = () => selectAugment(aug);
-                container.appendChild(card);
-            });
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        function selectAugment(aug) {
-            aug.effect(Player);
-            Player.activeAugments.push(aug);
-            ui.overlayAug.style.display = "none";
+    /* 시뮬레이션 오버레이 */
+    #sim-overlay {
+        background: rgba(0, 0, 0, 0.98);
+        color: var(--success);
+        font-family: monospace;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        overflow-y: auto;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 1rem;
+    }
+</style>
 
-            if (currentRound === 3) {
-                currentRound = 4;
-                spawnWave(4);
-            } else {
-                spawnWave(currentRound);
+<div id="sim-overlay" class="overlay">
+    <h2 style="color: var(--primary); margin-bottom: 1rem;">BALANCE SIMULATION REPORT</h2>
+    <div id="sim-log"></div>
+</div>
+
+<script>
+    // ==========================================
+    // [레이어 0] 시스템 초기화 및 전역 변수
+    // ==========================================
+    const CONFIG = {
+        FPS: 60, PARRY_STANCE_DURATION: 21, PERFECT_WINDOW: 8,
+        ATTACK_DURATION: 15, RETURN_DURATION: 20, REACTION_WINDOW: 26,
+        K: 50, CANVAS_W: 412, CANVAS_H: 600
+    };
+
+    const Player = {
+        x: 206, y: 510, radius: 42, hp: 100, maxHp: 100, atk: 50, def: 0, ap: 0, maxAp: 10,
+        color: "#4a9eff", parryTimer: 0, isParrying: false, dashTimer: 0, ghosts: [],
+        actionsUsed: { atk: false, spin: false, heavy: false },
+        augBuffs: { atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0, executeLow: 0, stackAtk: 0, spinMultiTarget: 0 },
+        state: { consecutiveTarget: null, killStacks: 0, firstAttackThisTurn: true },
+        activeAugments: []
+    };
+
+    class Monster {
+        constructor(name, hp, atk, telegraph, postdelay, hitstop) {
+            this.name = name; this.hp = hp; this.maxHp = hp; this.atk = atk;
+            this.x = 0; this.y = 0; this.homeX = 0; this.homeY = 0; this.radius = 45;
+            this.color = name.includes("지배자") ? "#ff0000" : (name.includes("제왕") ? "#ff8800" : "#ff4a4a");
+            this.timer = 0; this.settings = { telegraphMult: telegraph, postDelayMult: postdelay, hitStop: hitstop };
+        }
+    }
+
+    let monsters = [], currentTurn = "NONE", currentRound = 1, gameStarted = false;
+    let isTargeting = false, selectedSkill = null, damageTexts = [], lastTimestamp = 0;
+    let isSimulating = false;
+
+    // ==========================================
+    // [레이어 1] 데이터 저장소
+    // ==========================================
+    const monsterLibrary = [
+        { id: "mon_tuto_1", name: "나무 허수아비", hp: 150, atk: 12, telegraph: 1.6, postdelay: 1.2, hitstop: 3 },
+        { id: "mon_tuto_2", name: "녹슨 기갑병", hp: 250, atk: 18, telegraph: 1.3, postdelay: 1.0, hitstop: 4 },
+        { id: "mon_swarm_1", name: "그림자 슬라임", hp: 100, atk: 10, telegraph: 1.1, postdelay: 0.8, hitstop: 2 },
+        { id: "mon_elite_1", name: "침묵의 집행자", hp: 800, atk: 28, telegraph: 0.9, postdelay: 1.1, hitstop: 5 },
+        { id: "mon_boss_1", name: "폐허의 제왕", hp: 3000, atk: 45, telegraph: 0.7, postdelay: 1.3, hitstop: 8 },
+        { id: "mon_boss_final", name: "심연의 지배자", hp: 6000, atk: 65, telegraph: 0.6, postdelay: 1.4, hitstop: 10 }
+    ];
+
+    const customStages = {
+        1: ["mon_tuto_1"], 2: ["mon_tuto_2"], 3: ["mon_swarm_1", "mon_swarm_1"],
+        5: ["mon_elite_1"], 8: ["mon_boss_1"], 12: ["mon_elite_1", "mon_elite_1"], 15: ["mon_boss_final"]
+    };
+
+    // ==========================================
+    // [레이어 2] UI 관리자
+    // ==========================================
+    const ui = {
+        lobby: document.getElementById('lobby-overlay'),
+        battle: document.getElementById('battle-screen'),
+        over: document.getElementById('game-over-overlay'),
+        hp: document.getElementById('p-hp'), atk: document.getElementById('p-atk'),
+        ap: document.getElementById('p-ap'), msg: document.getElementById('message'),
+        btns: { atk: document.getElementById('btn-atk'), spin: document.getElementById('btn-spin'), heavy: document.getElementById('btn-heavy'), end: document.getElementById('btn-end') }
+    };
+
+    const UIManager = {
+        update() {
+            if (isSimulating) return;
+            ui.hp.innerText = Math.max(0, Math.ceil(Player.hp)); ui.atk.innerText = Math.ceil(Player.atk);
+            ui.ap.innerText = Math.floor(Player.ap);
+            const isPlayer = currentTurn === "PLAYER";
+            ui.btns.atk.disabled = !isPlayer || Player.ap < 2 || Player.actionsUsed.atk;
+            ui.btns.spin.disabled = !isPlayer || Player.ap < 3 || Player.actionsUsed.spin;
+            ui.btns.heavy.disabled = !isPlayer || Player.ap < 5 || Player.actionsUsed.heavy;
+            ui.btns.end.disabled = !isPlayer;
+        },
+        showFeedback(text, color = "#fff") {
+            if (isSimulating) return;
+            ui.msg.innerText = text; ui.msg.style.color = color; ui.msg.style.opacity = 1;
+            setTimeout(() => ui.msg.style.opacity = 0, 1000);
+        },
+        toggleScreen(screenId) {
+            if (isSimulating) return;
+            ui.lobby.style.display = (screenId === "lobby") ? "flex" : "none";
+            ui.battle.style.display = (screenId === "battle") ? "flex" : "none";
+        }
+    };
+
+    // ==========================================
+    // [레이어 3] 전투 및 스테이지 로직
+    // ==========================================
+    const BattleEngine = {
+        executeSkill(skill, target = null) {
+            if (target === null && monsters.length > 1 && skill !== "spin") {
+                isTargeting = true; selectedSkill = skill;
+                UIManager.showFeedback("Select Target!", "#fff"); return;
+            }
+            const t = target || monsters[0];
+            if (!t) return;
+            if (skill === "atk" && Player.ap >= 2) {
+                Player.ap -= 2; this.dealDamage(Player.atk * Player.augBuffs.atk, t); Player.actionsUsed.atk = true;
+            } else if (skill === "heavy" && Player.ap >= 5) {
+                Player.ap -= 5; this.dealDamage(Player.atk * 2 * Player.augBuffs.heavy, t); Player.actionsUsed.heavy = true;
+            } else if (skill === "spin" && Player.ap >= 3) {
+                Player.ap -= 3;
+                monsters.forEach(m => this.dealDamage(Player.atk * 1.2 * Player.augBuffs.spin, m));
+                Player.actionsUsed.spin = true;
+            }
+            UIManager.update();
+        },
+        dealDamage(amt, target) {
+            const final = Math.ceil(amt); target.hp -= final;
+            if (!isSimulating) damageTexts.push({ x: target.x, y: target.y - 30, text: `-${final}`, color: "#ff4a4a", timer: 60 });
+            if (target.hp <= 0) {
+                monsters = monsters.filter(m => m !== target);
+                if (monsters.length === 0) StageManager.winRound();
             }
         }
+    };
 
-        function rerollAugments() {
-            if (!rerollAvailable) return;
-            rerollAvailable = false;
-            ui.btnReroll.disabled = true;
-            ui.btnReroll.innerText = "Reroll (0 Remaining)";
-            rollAugments();
-        }
-
-        class Monster {
-            constructor(type, hp, atk, telegraph, postdelay, hitstop) {
-                this.type = type;
-                this.homeX = 0; this.homeY = 0; // Will be set by spawnWave
-                this.x = 0; this.y = 0;
-                this.radius = 50;
-                this.color = type.includes("BOSS") ? "#ff0000" : "#ff4a4a";
-                this.hp = hp; this.maxHp = hp; this.atk = atk;
-                this.state = "IDLE"; this.timer = 0;
-                // Default patterns for custom monsters
-                this.patterns = [{ hits: [PATTERN_SPEEDS["NORMAL"]] }];
-                if (type.includes("BOSS")) {
-                    this.patterns = [
-                        { hits: [PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["SLOW"]] },
-                        { hits: [PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["SLOW"]] },
-                        { hits: [PATTERN_SPEEDS["SLOW"], PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"]] }
-                    ];
-                }
-                this.currentPatternIdx = 0;
-                this.currentPattern = this.patterns[0];
-                this.patternStep = 0;
-                this.settings = {
-                    telegraphMult: telegraph,
-                    postDelayMult: postdelay,
-                    variance: 0,
-                    hitStop: hitstop
-                };
-            }
-            nextPattern() {
-                this.currentPatternIdx = (this.currentPatternIdx + 1) % this.patterns.length;
-                this.currentPattern = this.patterns[this.currentPatternIdx];
-                this.patternStep = 0;
-            }
-        }
-
-        const WAVE_DATA = {
-            1: [
-                { type: "Enemy 1", hp: 100, atk: 10, patterns: ["NORMAL"] },
-                { type: "Enemy 2", hp: 100, atk: 15, patterns: ["NORMAL", "FAST"] }
-            ],
-            2: [
-                { type: "Enemy A", hp: 80, atk: 9, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 120, atk: 12, patterns: ["NORMAL", "SLOW"] }
-            ],
-            3: [], // Event Round
-            4: [
-                { type: "Enemy A", hp: 150, atk: 15, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 180, atk: 18, patterns: ["NORMAL", "FAST"] },
-                { type: "Enemy C", hp: 220, atk: 20, patterns: ["NORMAL", "FAST", "SLOW"] }
-            ],
-            5: [
-                { type: "Enemy A", hp: 120, atk: 15, patterns: ["FAST"] },
-                { type: "Enemy B", hp: 150, atk: 18, patterns: ["NORMAL"] },
-                { type: "Enemy C", hp: 200, atk: 22, patterns: ["NORMAL", "FAST"] },
-                { type: "Enemy D", hp: 250, atk: 25, patterns: ["NORMAL", "FAST", "SLOW"] }
-            ],
-            6: [
-                {
-                    type: "BOSS", hp: 1200, atk: 30,
-                    multiPatterns: [
-                        ["NORMAL", "FAST", "SLOW"],
-                        ["FAST", "NORMAL", "FAST", "SLOW"],
-                        ["SLOW", "NORMAL", "FAST"]
-                    ]
-                }
-            ],
-            7: [{ type: "ANCIENT DRAGON", hp: 3500, atk: 45, patterns: ["NORMAL", "FAST", "FAST", "SLOW"] }],
-            8: [{ type: "Rhythm Crasher", hp: 1500, atk: 25, patterns: ["SLOW", "SLOW", "FAST"] }],
-            9: [{ type: "Cymbals Duo", hp: 1800, atk: 20, patterns: ["FAST", "FAST", "NORMAL"] }],
-            10: [{ type: "Fake Knight", hp: 2500, atk: 35, patterns: ["SLOW", "SLOW", "NORMAL"] }]
-            // Note: WAVE_DATA is now only used if customStages is empty for a round.
-            // The Monster constructor now handles pattern assignment based on type.
-        };
-
-        const PATTERN_SPEEDS = {
-            "FAST": 40,
-            "NORMAL": 60,
-            "SLOW": 90
-        };
-
-        let monsters = [];
-        let currentTurn = "NONE";
-        let currentMonsterIndex = 0;
-        let isTargeting = false;
-        let selectedSkill = null; // "atk", "spin", "heavy"
-        let damageTexts = []; // {x, y, text, timer, color}
-        let currentRound = 1;
-        let isEndingTurnAutomatically = false;
-        let gameStarted = false;
-        let roundStartTimer = 0;
-        let lastTimestamp = 0;
-
-        let monsterSettings = {
-            telegraphMult: 1.0,
-            postDelayMult: 1.0,
-            variance: 0,
-            hitStop: 3
-        };
-        let hitStopTimer = 0;
-
-        // --- Editor State & Storage ---
-        let monsterLibrary = []; // {id, name, hp, atk, telegraph, postdelay, hitstop}
-        let customStages = { // round -> [monsterIds]
-            1: [], 2: [], 4: [], 5: [], 6: []
-        };
-        let editingMonsterId = null;
-
-        function loadFromStorage() {
-            const savedLib = localStorage.getItem('monster_library');
-            const savedStages = localStorage.getItem('custom_stages');
-            if (savedLib) monsterLibrary = JSON.parse(savedLib);
-            if (savedStages) customStages = JSON.parse(savedStages);
-            renderLibrary();
-            renderStageEditor();
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('monster_library', JSON.stringify(monsterLibrary));
-            localStorage.setItem('custom_stages', JSON.stringify(customStages));
-            showFeedback("전체 저장 완료!", "#4ade80");
-        }
-
-        // --- Editor UI Logic ---
-        function toggleEditor(show) {
-            document.getElementById('editor-overlay').style.display = show ? "flex" : "none";
-            if (show) {
-                gameStarted = false;
-                renderLibrary();
-                renderStageEditor();
-            } else if (!gameStarted && !ui.lobby.style.display.includes("flex")) {
-                // If we closed editor and not in game, show lobby
-                ui.lobby.style.display = "flex";
-            }
-        }
-
-        function openMonsterCreator(id = null) {
-            editingMonsterId = id;
-            const panel = document.getElementById('monster-creator-panel');
-            panel.style.display = 'block';
-
-            if (id) {
-                const m = monsterLibrary.find(x => x.id === id);
-                document.getElementById('creator-title').innerText = "🛠️ 몬스터 수정";
-                document.getElementById('lib-name').value = m.name;
-                document.getElementById('lib-hp').value = m.hp;
-                document.getElementById('lib-atk').value = m.atk;
-                document.getElementById('lib-telegraph').value = m.telegraph;
-                document.getElementById('lib-postdelay').value = m.postdelay;
-                document.getElementById('lib-hitstop').value = m.hitstop;
-
-                document.getElementById('lib-val-telegraph').innerText = m.telegraph;
-                document.getElementById('lib-val-postdelay').innerText = m.postdelay;
-                document.getElementById('lib-val-hitstop').innerText = m.hitstop;
-            } else {
-                document.getElementById('creator-title').innerText = "🛠️ 신규 몬스터 생성";
-                document.getElementById('lib-name').value = "신규 몬스터";
-                document.getElementById('lib-hp').value = 100;
-                document.getElementById('lib-atk').value = 10;
-                document.getElementById('lib-telegraph').value = 1.0;
-                document.getElementById('lib-postdelay').value = 1.0;
-                document.getElementById('lib-hitstop').value = 3;
-
-                document.getElementById('lib-val-telegraph').innerText = "1.0";
-                document.getElementById('lib-val-postdelay').innerText = "1.0";
-                document.getElementById('lib-val-hitstop').innerText = "3";
-            }
-        }
-
-        function confirmMonsterSave() {
-            const mData = {
-                id: editingMonsterId || Date.now().toString(),
-                name: document.getElementById('lib-name').value,
-                hp: parseInt(document.getElementById('lib-hp').value),
-                atk: parseInt(document.getElementById('lib-atk').value),
-                telegraph: parseFloat(document.getElementById('lib-telegraph').value),
-                postdelay: parseFloat(document.getElementById('lib-postdelay').value),
-                hitstop: parseInt(document.getElementById('lib-hitstop').value)
-            };
-
-            if (editingMonsterId) {
-                const idx = monsterLibrary.findIndex(x => x.id === editingMonsterId);
-                monsterLibrary[idx] = mData;
-            } else {
-                monsterLibrary.push(mData);
-            }
-
-            document.getElementById('monster-creator-panel').style.display = 'none';
-            renderLibrary();
-        }
-
-        function deleteMonster(id) {
-            if (!confirm("이 몬스터를 삭제하시겠습니까?")) return;
-            monsterLibrary = monsterLibrary.filter(x => x.id !== id);
-            // Remove from stages too
-            for (let r in customStages) {
-                customStages[r] = customStages[r].filter(mid => mid !== id);
-            }
-            renderLibrary();
-            renderStageEditor();
-        }
-
-        function renderLibrary() {
-            const list = document.getElementById('monster-library-list');
-            if (monsterLibrary.length === 0) {
-                list.innerHTML = '<p style="opacity:0.5; font-size:12px;">저장된 몬스터가 없습니다.</p>';
-                return;
-            }
-            list.innerHTML = monsterLibrary.map(m => `
-                <div class="monster-list-item">
-                    <span><b>${m.name}</b> (HP:${m.hp} ATK:${m.atk})</span>
-                    <div>
-                        <button class="btn-sm action-str" onclick="addMonsterToStagePrompt('${m.id}')">배치</button>
-                        <button class="btn-sm action-atk" onclick="openMonsterCreator('${m.id}')">수정</button>
-                        <button class="btn-sm guide-close-btn" onclick="deleteMonster('${m.id}')">삭제</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addMonsterToStagePrompt(monsterId) {
-            const round = prompt("배치할 라운드를 입력하세요 (1, 2, 4, 5, 6)", "1");
-            if (customStages[round]) {
-                customStages[round].push(monsterId);
-                renderStageEditor();
-            } else if (round !== null) {
-                alert("유효한 라운드가 아닙니다.");
-            }
-        }
-
-        function removeFromStage(round, index) {
-            customStages[round].splice(index, 1);
-            renderStageEditor();
-        }
-
-        function renderStageEditor() {
-            const list = document.getElementById('stage-editor-list');
-            let html = '';
-            for (let r of [1, 2, 4, 5, 6]) {
-                const mIds = customStages[r] || [];
-                html += `
-                    <div class="stage-box">
-                        <div style="font-weight:bold; color:#4db8ff; margin-bottom:5px;">Round ${r}</div>
-                        <div id="stage-${r}-monsters">
-                            ${mIds.map((id, idx) => {
-                    const m = monsterLibrary.find(x => x.id === id);
-                    return m ? `<span class="stage-monster-pill">${m.name} <span style="margin-left:5px; cursor:pointer; color:#ff4a4a;" onclick="removeFromStage(${r}, ${idx})">×</span></span>` : '';
-                }).join('')}
-                            ${mIds.length === 0 ? '<span style="opacity:0.3; font-size:11px;">배치된 몬스터 없음</span>' : ''}
-                        </div>
-                    </div>
-                `;
-            }
-            list.innerHTML = html;
-        }
-
-        // UI 캐싱 필드
-        const uiCache = {
-            hp: -1, atk: -1, def: -1, ap: -1, turn: "",
-            atkBtn: null, spinBtn: null, heavyBtn: null, endBtn: null
-        };
-
-        function toggleGuide(show) {
-            ui.overlayGuide.style.display = show ? "flex" : "none";
-        }
-
-        function gameOver() {
-            gameStarted = false;
-            ui.overlayGameOver.style.display = "flex";
-        }
-
-        function retryGame() {
-            // 초기화
-            Player.hp = 100;
-            Player.ap = 0;
-            Player.activeAugments = [];
-            Player.augBuffs = {
-                atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
-                executeLow: 0, stackAtk: 0, heavySunder: 0, killAp: 0, perfectFocus: 0,
-                stackAtkEpic: 0, heavyOverheat: 0, spinKillAp: 0, turnAtkPerf: 0,
-                startTurnAtk: 0, killStackAtk: 0, heavyExecute: 0, lowApAtk: 1.0,
-                inertiaSlice: 0, firstAtkMult: 0, heavyKillAp: 0, spinMultiTarget: 0,
-                perfectApBonus: 0, unlimitKillAtk: 0, takeDmgMult: 1.0,
-                soloAtk: 0, soloHeavy: 0, executeAll: 0, heavyExecAll: 0,
-                heavyChain: 0, highApBuff: 0, perfStackBuff: 0
-            };
-            Player.state = {
-                killsThisTurn: 0, parryApGained: 0, isPrefGainedThisTurn: false,
-                consecutiveTarget: null, consecutiveCount: 0,
-                heavyUsedLastTurn: false, heavyHitThisTurn: false,
-                perfFocusActive: false, perfParryThisTurn: false,
-                killStacks: 0, unlimitKills: 0, firstAttackThisTurn: true,
-                perfStacks: 0, multiAtkCount: 0, heavyLastTurn: false,
-                atkUsedLastTurn: false
-            };
-            currentRound = 1;
-            ui.overlayGameOver.style.display = "none";
-            startGame();
-        }
-
-        function startGame() {
-            // 1. 전투 화면 컨테이너를 먼저 표시 (flex 적용)
-            ui.battleScreen.style.display = "flex";
-            ui.lobby.style.display = "none";
-
-            // 2. 레이아웃 확정 후 캔버스 리사이징 및 좌표 초기화
-            resizeCanvas();
-
-            gameStarted = true;
-            lastTimestamp = performance.now();
-            spawnWave(currentRound);
-            requestAnimationFrame(gameLoop);
-        }
-
-        function spawnWave(round) {
-            currentTurn = "NONE";
-            updateInterfaceVisibility();
-
-            // 상점/이벤트 구간 (3, 7, 12, 16 스테이지)
-            const eventRounds = [3, 7, 12, 16];
-            if (eventRounds.includes(round)) {
-                showEventOverlay();
-                return;
-            }
-
-            // [개선] 몬스터 정렬 및 배치 로직
-            monsters = [];
-            let ids = customStages[round];
-
-            // 데이터가 없는 스테이지라면 이전 데이터 재활용 또는 폴백
-            if (!ids || ids.length === 0) {
-                if (round > 20) {
-                    showFeedback("🎉 모든 구역 정복!", "#FFD700");
-                    gameStarted = false;
-                    return;
-                }
-                ids = ["mon_tuto_1"];
-            }
-
-            let count = ids.length;
-
+    const StageManager = {
+        spawnWave(round) {
+            UIManager.toggleScreen("battle"); resizeCanvas(); monsters = [];
+            const ids = customStages[round] || ["mon_tuto_1"];
             ids.forEach((id, i) => {
-                let m = createMonsterFromId(id);
-                if (!m) return;
-
-                // X축 균등 배분 (Portrait 최적화: 겹침 방지)
-                let xRatio = 0.5;
-                if (count === 2) xRatio = (i === 0) ? 0.28 : 0.72;
-                else if (count === 3) xRatio = [0.18, 0.5, 0.82][i];
-
-                m.homeX = CANVAS_W * xRatio;
-                m.homeY = CANVAS_H * 0.22;
-                m.x = m.homeX;
-                m.y = m.homeY;
+                const libM = monsterLibrary.find(x => x.id === id) || monsterLibrary[0];
+                const m = new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
+                const ratio = ids.length === 1 ? 0.5 : (i === 0 ? 0.3 : 0.7);
+                m.x = m.homeX = CONFIG.CANVAS_W * ratio; m.y = m.homeY = CONFIG.CANVAS_H * 0.25;
                 monsters.push(m);
             });
-
-            updateMessage(`WAVE ${round}`, 1200);
-
-            // 시뮬레이션용 로그 (상태 기록)
-            console.log(`[SIM] WAVE ${round} Started. Monsters: ${count}`);
-
-            currentMonsterIndex = 0;
-            currentTurn = "PLAYER"; // 몬스터 배치 완료 후 플레이어 턴으로 시작
-            Player.ap = Math.min(Player.maxAp, Player.ap + 3); // 턴 시작 AP 소폭 보정
-            updateInterfaceVisibility();
-        }
-
-        function createMonsterFromId(id) {
-            let libM = monsterLibrary.find(x => x.id === id);
-            if (!libM) {
-                const defaults = {
-                    "def_1": { name: "연습용 허수아비", hp: 100, atk: 10, telegraph: 1.2, postdelay: 1.0, hitstop: 3 },
-                    "def_2": { name: "강화 허수아비", hp: 150, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3 },
-                    "def_BOSS": { name: "최초의 시련", hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
-                };
-                let d = defaults[id] || defaults["def_1"];
-                libM = { ...d };
-            }
-            return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
-        }
-
-        if (waveToSpawn.length === 0) {
-            waveToSpawn = (WAVE_DATA[round] || []).map(t => ({ ...t }));
-        }
-
-        if (waveToSpawn.length === 0) {
-            showFeedback("Game Clear!", "#FFD700");
-            return;
-        }
-
-        // Distribute X coordinates horizontally (Portrait Optimized & Centered)
-        const count = waveToSpawn.length;
-        const screenMargin = CANVAS_W * 0.3; // Increased margin to center more
-        const availableWidth = CANVAS_W - (screenMargin * 2);
-        const spacing = count > 1 ? availableWidth / (count - 1) : 0;
-
-        // Safe Area for Monsters
-        const safeTop = 100;
-        const safeBottom = 350;
-        const playableH = CANVAS_H - safeTop - safeBottom;
-
-        waveToSpawn.forEach((m, i) => {
-            m.x = count > 1 ? screenMargin + (spacing * i) : CANVAS_W / 2;
-            m.y = safeTop + (playableH * 0.15); // Top alignment within playable area
-        });
-
-        monsters = waveToSpawn.map(t => {
-            let p_arr = [];
-            if (t.multiPatterns) {
-                p_arr = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
-            } else if (t.patterns) {
-                p_arr = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
-            } else {
-                p_arr = [{ hits: [30] }];
-            }
-            const mObj = new Monster(t.type, t.x, t.y, t.hp, t.atk, p_arr);
-            if (t.customSettings) mObj.settings = { ...monsterSettings, ...t.customSettings };
-            return mObj;
-        });
-
-        currentMonsterIndex = 0;
-        currentTurn = "MONSTER";
-        roundStartTimer = 40;
-        isEndingTurnAutomatically = false;
-        ui.turn.innerText = (round === 6) ? "Boss Round" : `Round ${round}`;
-        showFeedback((round === 6) || waveToSpawn[0].type.includes("BOSS") ? "Boss Appearance!" : `Wave ${round}`, "#fff");
-
-        Player.ap += Player.augBuffs.startAp;
-        Player.state.killsThisTurn = 0;
-        Player.state.firstAttackThisTurn = true;
-        updateHitIcons();
-        updateInterfaceVisibility();
-        }
-
-        function showEventOverlay() {
-            currentTurn = "NONE";
-            updateInterfaceVisibility();
-            ui.overlayEvent.style.display = "flex";
-        }
-
-        function selectEventOption(option) {
-            ui.overlayEvent.style.display = "none";
-            if (option === 1) {
-                showAugmentSelection("Common");
-            } else {
-                Player.hp = Math.min(Player.maxHp, Math.round(Player.hp + Player.maxHp * 0.35));
-                showFeedback("Healed 35% HP", "#4f4");
-                currentRound = 4;
-                spawnWave(4);
-            }
-        }
-
-        function winRound() {
-            // 최종 보스 클리어 체크
-            if (currentRound >= 20) {
-                showFeedback("심연을 정복했습니다!", "#FFD700");
-                gameStarted = false;
-                return;
-            }
-
-            currentRound++;
-
-            // 다음 라운드가 이벤트 라운드인지 확인
-            const eventRounds = [3, 7, 12, 16];
-            if (eventRounds.includes(currentRound)) {
-                showEventOverlay();
-            } else {
-                showAugmentSelection();
-            }
-        }
-
-        function openInventory() {
-            ui.inventory.style.display = "flex";
-            renderCompleteInventory();
-        }
-
-        function openStageEditor() {
-            ui.stageEditor.style.display = "flex";
-            renderFullStageEditor();
-        }
-
-        function closeOverlay(id) {
-            document.getElementById(id).style.display = "none";
-        }
-
-        function renderCompleteInventory() {
-            const list = document.getElementById('complete-inventory-list');
-
-            // 1. Default Monsters from WAVE_DATA
-            const defaults = [
-                { id: "def_1", name: "Enemy 1 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_2", name: "Enemy 2 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_A", name: "Enemy A (Default)", hp: 80, atk: 9, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_B", name: "Enemy B (Default)", hp: 120, atk: 8, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_BOSS", name: "BOSS (Default)", hp: 780, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true }
-            ];
-
-            const allMonsters = [...defaults, ...monsterLibrary];
-
-            list.innerHTML = allMonsters.map(m => `
-                <div class="monster-card ${m.isDefault ? 'system' : 'custom'}">
-                    <div class="monster-info">
-                        <h4>${m.name}</h4>
-                        <p>HP: ${m.hp} | ATK: ${m.atk} | TG: ${m.telegraph}x</p>
-                    </div>
-                    <div style="display: flex; gap: 5px;">
-                        <button class="btn-sm action-str" onclick="addMonsterToStagePrompt('${m.id}')">배치</button>
-                        ${!m.isDefault ? `
-                            <button class="btn-sm action-atk" onclick="openMonsterCreator('${m.id}')">수정</button>
-                            <button class="btn-sm guide-close-btn" onclick="deleteMonster('${m.id}')">삭제</button>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderFullStageEditor() {
-            const container = document.getElementById('full-stage-list');
-            let html = '';
-            const rounds = [1, 2, 4, 5, 6];
-
-            rounds.forEach(r => {
-                const mIds = customStages[r] || [];
-                html += `
-                    <div class="stage-box" style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <span style="font-weight:bold; color:#4db8ff; font-size: 18px;">Round ${r}</span>
-                            <span style="font-size: 12px; color: #666;">탭하여 편집</span>
-                        </div>
-                        <div style="min-height: 40px; border: 1px dashed #333; padding: 10px; border-radius: 8px;">
-                            ${mIds.map((id, idx) => {
-                    // Find in library or defaults
-                    let m = monsterLibrary.find(x => x.id === id);
-                    if (!m) {
-                        const defs = [
-                            { id: "def_1", name: "Enemy 1" }, { id: "def_2", name: "Enemy 2" },
-                            { id: "def_A", name: "Enemy A" }, { id: "def_B", name: "Enemy B" },
-                            { id: "def_BOSS", name: "BOSS" }
-                        ];
-                        m = defs.find(x => x.id === id);
-                    }
-                    return m ? `
-                                    <div class="stage-monster-pill">
-                                        ${m.name} <span style="margin-left:8px; cursor:pointer; color:#ff4a4a; font-weight:bold;" onclick="removeFromStage(${r}, ${idx})">×</span>
-                                    </div>
-                                ` : '';
-                }).join('')}
-                            ${mIds.length === 0 ? '<div style="color:#444; font-size:12px; text-align:center;">배치된 몬스터가 없습니다.</div>' : ''}
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        function resetStagesToDefault() {
-            if (!confirm("모든 스테이지 배치를 초기 상태로 되돌리시겠습니까?")) return;
-            // --- 확장된 몬스터 라이브러리 (학습 -> 다수 -> 엘리트 -> 보스 순환용) ---
-            const monsterLibrary = [
-                // 1. 학습용 (단일)
-                { id: "mon_tuto_1", name: "나무 허수아비", hp: 120, atk: 10, telegraph: 1.5, postdelay: 1.2, hitstop: 3 },
-                { id: "mon_tuto_2", name: "녹슨 기갑병", hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4 },
-
-                // 2. 다수 구성용 (약한 적들)
-                { id: "mon_swarm_1", name: "그림자 슬라임", hp: 80, atk: 8, telegraph: 1.0, postdelay: 0.8, hitstop: 2 },
-                { id: "mon_swarm_2", name: "떠도는 불꽃", hp: 60, atk: 12, telegraph: 0.9, postdelay: 1.2, hitstop: 2 },
-
-                // 3. 엘리트 (단일/쌍)
-                { id: "mon_elite_1", name: "침묵의 집행자", hp: 600, atk: 22, telegraph: 0.8, postdelay: 1.0, hitstop: 5 },
-                { id: "mon_elite_2", name: "고대의 기사", hp: 850, atk: 28, telegraph: 0.7, postdelay: 1.1, hitstop: 6 },
-                { id: "mon_elite_3", name: "광기어린 암살자", hp: 450, atk: 35, telegraph: 0.6, postdelay: 0.8, hitstop: 4 },
-
-                // 4. 보스 급
-                { id: "mon_boss_1", name: "폐허의 제왕", hp: 2500, atk: 40, telegraph: 0.65, postdelay: 1.3, hitstop: 8 },
-                { id: "mon_boss_final", name: "심연의 지배자", hp: 5000, atk: 55, telegraph: 0.55, postdelay: 1.4, hitstop: 10 },
-
-                // 5. 성장 체감용 (강한 단일몹)
-                { id: "mon_growth_1", name: "거대 바위 골렘", hp: 1200, atk: 30, telegraph: 1.1, postdelay: 1.5, hitstop: 8 },
-                { id: "mon_growth_2", name: "정예 방패병", hp: 1500, atk: 18, telegraph: 1.0, postdelay: 1.0, hitstop: 6 }
-            ];
-
-            // --- 순환형 난이도 스테이지 설계 (20단계 이상) ---
-            let customStages = {
-                1: ["mon_tuto_1"],                               // 1. 학습
-                2: ["mon_tuto_2"],                               // 2. 학습 심화
-                4: ["mon_swarm_1", "mon_swarm_1"],               // 4. 다수 (성장 시범)
-                5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"],// 5. 다수 (분기)
-                6: ["mon_elite_1"],                              // 6. 첫 엘리트
-                7: ["mon_growth_1"],                             // 7. 성장 체감 (보너스 느낌)
-                8: ["mon_swarm_1", "mon_swarm_2", "mon_elite_1"],// 8. 혼합 구성
-                9: ["mon_elite_2"],                              // 9. 중간 보스급 엘리트
-                10: ["mon_boss_1"],                              // 10. 1차 보스
-                11: ["mon_growth_2"],                             // 11. 강화된 성장 체감 (강력해진 유저)
-                12: ["mon_elite_1", "mon_elite_1"],               // 12. 엘리트 듀오
-                13: ["mon_elite_2", "mon_elite_3"],               // 13. 엘리트 듀오 (변칙)
-                14: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_1"],// 14. 물량전
-                15: ["mon_elite_3"],                              // 15. 속도형 엘리트
-                16: ["mon_growth_1", "mon_growth_2"],             // 16. 거대 몹 듀오
-                17: ["mon_elite_2", "mon_elite_2", "mon_elite_2"],// 17. 극한의 3인 엘리트
-                18: ["mon_boss_1", "mon_elite_1"],                // 18. 보스 + 엘리트
-                19: ["mon_growth_2"],                             // 19. 최종 결전 전 숨고르기
-                20: ["mon_boss_final"]                            // 20. 최종 보스
-            };
-            localStorage.removeItem('custom_stages');
-            renderFullStageEditor();
-            showFeedback("초기화 완료!", "#4db8ff");
-        }
-
-        function startSkill(skill) {
-            const alive = monsters.filter(m => m.hp > 0);
-            if (alive.length === 0) return;
-
-            // If only 1 target remains, auto-attack
-            if (alive.length === 1) {
-                if (skill === "atk") executeAttack(alive[0]);
-                else if (skill === "heavy") executeHeavyStrike(alive[0]);
-                return;
-            }
-
-            isTargeting = true;
-            selectedSkill = skill;
-            showFeedback("Select Target!", "#fff");
-        }
-
-
-
-        function handleTargeting(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-
-            monsters.forEach((m) => {
-                const dist = Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2);
-                if (dist < m.radius * 2 && m.hp > 0) {
-                    if (selectedSkill === "atk") executeAttack(m);
-                    else if (selectedSkill === "heavy") executeHeavyStrike(m);
-                    isTargeting = false;
-                    selectedSkill = null;
-                }
-            });
-        }
-
-        function executeAttack(target) {
-            if (Player.ap < 2) return;
-            Player.ap -= 2;
-            dealDamage(Player.atk, target, "normal");
-            Player.actionsUsed.atk = true;
-            Player.state.multiAtkCount++;
-            updateUI();
-        }
-
-        function executeHeavyStrike(target) {
-            if (Player.ap < 5) return;
-            Player.ap -= 5;
-            dealDamage(Player.atk * 2, target, "heavy");
-            Player.actionsUsed.heavy = true;
-            updateUI();
-        }
-
-        function executeSpinSlash() {
-            if (Player.ap < 3) return;
-            const alive = monsters.filter(m => m.hp > 0);
-            if (alive.length === 0) return;
-            Player.ap -= 3;
-            let mult = 1.2;
-            if (alive.length >= 2) mult *= (1 + Player.augBuffs.spinMultiTarget);
-            const totalDmg = Player.atk * mult;
-            const dmgPer = totalDmg / alive.length;
-            alive.forEach(m => dealDamage(dmgPer, m, "spin"));
-            Player.actionsUsed.spin = true;
-            showFeedback("SPIN SLASH!", "#4a4");
-            updateUI();
-        }
-
-        function dealDamage(amount, target, type = "normal") {
-            let mult = Player.augBuffs.atk;
-            if (type === "spin") mult = Player.augBuffs.spin;
-            if (type === "heavy") {
-                mult = Player.augBuffs.heavy;
-                // 증강: 단두의 각
-                if (target.hp / target.maxHp <= 0.3) mult *= (1 + Player.augBuffs.heavyExecute);
-                // 증강: 집행인의 판결
-                if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.heavyExecAll);
-            }
-
-            // 공통 증강 효과
-            if (target.hp / target.maxHp <= Player.augBuffs.executeLow) mult *= 1.15;
-            if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.executeAll);
-
-            // 약점 파악/해부
-            if (Player.state.consecutiveTarget === target) {
-                if (Player.state.consecutiveCount >= 1) mult *= (1 + Player.augBuffs.stackAtk);
-                mult *= (1 + Player.augBuffs.stackAtkEpic * Math.min(Player.state.consecutiveCount, 5));
-            }
-
-            // 조건부 버프들
-            if (Player.state.heavyUsedLastTurn && Player.state.firstAttackThisTurn) {
-                mult *= (1 + Player.augBuffs.heavySunder);
-                mult *= (1 + Player.augBuffs.heavyOverheat);
-            }
-            if (Player.state.atkUsedLastTurn && Player.state.firstAttackThisTurn) {
-                mult *= (1 + Player.augBuffs.inertiaSlice); // Epic 9: 관성 베기
-            }
-            if (Player.state.perfParryThisTurn) mult *= (1 + Player.augBuffs.turnAtkPerf);
-            if (Player.state.perfFocusActive) {
-                mult *= (1 + Player.augBuffs.perfectFocus); // 집중력
-                Player.state.perfFocusActive = false;
-            }
-            if (Player.state.unlimitKills > 0) mult *= (1 + Player.augBuffs.unlimitKillAtk * Player.state.unlimitKills);
-            if (Player.state.killStacks > 0) mult *= (1 + Player.augBuffs.killStackAtk * Math.min(Player.state.killStacks, 10));
-
-            //  Unique: 정점의 호흡, 결투가
-            if (Player.state.highApAtkActive) mult *= (1 + Player.augBuffs.highApBuff);
-            if (monsters.length === 1) {
-                mult *= (1 + Player.augBuffs.soloAtk);
-                if (type === "heavy") mult *= (1 + Player.augBuffs.soloHeavy);
-            }
-            if (Player.state.perfStacks > 0) mult *= (1 + Player.augBuffs.perfStackBuff * Player.state.perfStacks);
-            if (Player.state.firstAttackThisTurn) {
-                mult *= (1 + Player.augBuffs.firstAtkMult);
-                if (type === "heavy") mult *= 1.08; // 파괴의 맥박(강타시 추가) -> +0.1 보정
-            }
-            // if (type === "normal" && Player.state.multiAtkCount >= 1) mult *= Player.augBuffs.multiAtkAtk; // This was removed in previous edits
-
-            const finalDmg = Math.ceil(amount * mult);
-            target.hp = Math.max(0, target.hp - finalDmg);
-            addDamageText(target.x, target.y - 30, `-${finalDmg}`, "#ff4a4a");
-
-            Player.state.firstAttackThisTurn = false;
-            Player.state.consecutiveTarget = target;
-            Player.state.consecutiveCount++;
-            if (type === "heavy") Player.state.heavyHitThisTurn = true;
-
-            if (target.hp <= 0) {
-                target.state = "DONE";
-                // 증강: 피의 회수, 원심 폭발
-                if (Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.killAp;
-                if (type === "spin" && Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.spinKillAp;
-                if (type === "heavy" && Player.state.killsThisTurn < 1) Player.ap += Player.augBuffs.heavyKillAp;
-
-                Player.state.killStacks++;
-                Player.state.unlimitKills++;
-                Player.state.killsThisTurn++;
-
-                setTimeout(() => {
-                    monsters = monsters.filter(m => m.hp > 0);
-                    if (monsters.length === 0) {
-                        winRound();
-                    }
-                }, 100);
-            }
-        }
-
-        function endPlayerTurn() {
-            if (currentTurn !== "PLAYER") return;
-            currentTurn = "MONSTER";
-            currentMonsterIndex = 0;
-            // 턴 종료 시 상태 갱신
-            Player.state.heavyUsedLastTurn = Player.actionsUsed.heavy;
-            Player.state.atkUsedLastTurn = Player.actionsUsed.atk; // Epic 9 위해 저장
-            Player.state.killsThisTurn = 0;
-            isTargeting = false;
-            selectedSkill = null;
+            currentTurn = "PLAYER"; Player.ap = Math.min(Player.maxAp, Player.ap + 3);
             Player.actionsUsed = { atk: false, spin: false, heavy: false };
-            isEndingTurnAutomatically = false;
-            roundStartTimer = 25;
-
-            // UI Toggle
-            updateInterfaceVisibility();
-
-            monsters.forEach(m => {
-                if (m.hp > 0) {
-                    m.state = "IDLE";
-                    m.patternStep = 0;
-                    m.timer = 0;
-                }
-            });
-            ui.turn.innerText = "Monster's Turn";
-            updateHitIcons();
-            updateUI();
+            UIManager.update(); UIManager.showFeedback(`WAVE ${round}`);
+        },
+        winRound() {
+            currentRound++;
+            if (currentRound > 15) {
+                UIManager.showFeedback("VICTORY!", "#FFD700");
+                if (!isSimulating) { gameStarted = false; setTimeout(() => UIManager.toggleScreen("lobby"), 2000); }
+            } else this.spawnWave(currentRound);
         }
+    };
 
-        function updateHitIcons() {
-            ui.hitIcons.innerHTML = "";
-            const m = monsters[currentMonsterIndex];
-            if (!m || !m.patterns || !m.currentPattern || currentTurn !== "MONSTER") return;
+    // ==========================================
+    // [레이어 4] 시뮬레이션 엔진
+    // ==========================================
+    const Simulator = {
+        results: [],
+        log(msg) { document.getElementById('sim-log').innerHTML += `<p>${msg}</p>`; },
+        async runMultiple(count, mode = "Expert") {
+            isSimulating = true; gameStarted = true;
+            this.results = [];
+            document.getElementById('sim-overlay').style.display = 'flex';
+            this.log(`Starting ${count} simulations in ${mode} mode...`);
 
-            const p = m.currentPattern;
-            p.hits.forEach((h, i) => {
-                const icon = document.createElement("div");
-                icon.className = "hit-icon" + (i < m.patternStep ? " used" : "");
-                ui.hitIcons.appendChild(icon);
-            });
-        }
-
-        function showFeedback(text, color) {
-            ui.msg.innerText = text;
-            ui.msg.style.color = color;
-            ui.msg.style.opacity = 1;
-            setTimeout(() => ui.msg.style.opacity = 0, 800);
-        }
-
-        function addDamageText(x, y, text, color) {
-            damageTexts.push({ x, y, text, color, timer: 60 });
-        }
-
-        function triggerVignette() {
-            ui.vignette.classList.add('active');
-            setTimeout(() => ui.vignette.classList.remove('active'), 300);
-        }
-
-        function update(dt) {
-            if (!gameStarted) return;
-
-            // Hit Stop
-            if (hitStopTimer > 0) {
-                hitStopTimer -= 1; // Approx 1 frame
-                return;
+            for (let i = 1; i <= count; i++) {
+                const res = await this.runOne(mode);
+                this.results.push(res);
+                if (i % 10 === 0) this.log(`Completed ${i}/${count}... (Win Rate: ${this.getWinRate()}%)`);
             }
 
-            // 파워 텍스트 업데이트
-            for (let i = damageTexts.length - 1; i >= 0; i--) {
-                const dt_item = damageTexts[i];
-                dt_item.y -= 0.5 * dt;
-                dt_item.timer -= dt;
-                if (dt_item.timer <= 0) damageTexts.splice(i, 1);
-            }
-
-            if (currentTurn === "PLAYER") {
-                updateUI();
-                checkAutoTurnEnd();
-                return;
-            }
-
-            if (roundStartTimer > 0) {
-                roundStartTimer -= dt;
-                if (roundStartTimer <= 0) {
-                    roundStartTimer = 0;
-                    ui.turn.innerText = (currentRound === 6) ? "Boss Round" : "Monster's Turn";
-                    updateHitIcons();
-                    // 증강: 정점의 호흡 (턴 시작 시 체크)
-                    Player.state.highApAtkActive = (Player.ap >= 5);
-                }
-                updateUI();
-                return;
-            }
-
-            // --- 몬스터 턴 로직 ---
-            if (Player.parryTimer > 0) Player.parryTimer -= dt;
-            else { Player.parryTimer = 0; Player.isParrying = false; }
-
-            if (Player.dashTimer > 0) {
-                Player.dashTimer -= dt;
-                if (Math.random() < 0.3) Player.ghosts.push({ x: Player.x, y: Player.y, a: 0.5 });
-            }
-            Player.ghosts.forEach(g => g.a -= 0.02 * dt);
-            Player.ghosts = Player.ghosts.filter(g => g.a > 0);
-
-            const m = monsters[currentMonsterIndex];
-            if (!m) { nextMonsterOrTurn(); return; }
-            if (m.hp <= 0) { m.state = "DONE"; nextMonsterOrTurn(); return; }
-
-            if (m.state === "IDLE") {
-                m.timer += dt;
-                const set = m.settings || monsterSettings;
-                if (m.timer > (30 * set.postDelayMult)) {
-                    m.currentPattern = m.patterns[m.currentPatternIdx];
-                    m.state = "TELEGRAPH";
-                    m.timer = 0;
-                    m.startX = m.homeX; m.startY = m.homeY;
-                    updateHitIcons();
-                }
-            } else if (m.state === "TELEGRAPH") {
-                m.timer += dt;
-                const set = m.settings || monsterSettings;
-                const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
-                const prepRatio = Math.min(m.timer / waitFrames, 1);
-                // Vertical Shake
-                m.y = m.homeY + Math.sin(prepRatio * Math.PI) * 15;
-
-                // [NEW] 26프레임 반응 기준용 Cue(신호) 발생 로직
-                const remainingTelegraph = waitFrames - m.timer;
-                if (remainingTelegraph + CONFIG.ATTACK_DURATION <= CONFIG.REACTION_WINDOW) {
-                    m.cueActive = true;
+            this.report();
+        },
+        async runOne(mode) {
+            Player.hp = 100; Player.ap = 0; Player.atk = 50; currentRound = 1;
+            let turns = 0;
+            while (currentRound <= 15 && Player.hp > 0 && turns < 500) {
+                if (currentTurn === "PLAYER") {
+                    // AI Player Logic
+                    if (Player.ap >= 5 && !Player.actionsUsed.heavy) BattleEngine.executeSkill("heavy");
+                    else if (Player.ap >= 3 && monsters.length > 1 && !Player.actionsUsed.spin) BattleEngine.executeSkill("spin");
+                    else if (Player.ap >= 2 && !Player.actionsUsed.atk) BattleEngine.executeSkill("atk");
+                    else endPlayerTurn();
                 } else {
-                    m.cueActive = false;
-                }
-
-                if (m.timer >= waitFrames) {
-                    m.state = "ATTACK";
-                    m.timer = 0;
-                    m.startX = m.x;
-                    m.startY = m.y;
-                    m.cueActive = false; // 공격 시작 시 신호 종료
-                }
-            } else if (m.state === "ATTACK") {
-                m.timer += dt;
-                let t = m.timer / CONFIG.ATTACK_DURATION;
-                m.x = m.startX + (Player.x - m.startX) * (t * t);
-                m.y = m.startY + (Player.y - Player.radius - m.startY) * (t * t);
-
-                // 판정 타이밍 (0~2프레임 오차 허용을 위해 범위 체크)
-                if (m.timer >= CONFIG.ATTACK_DURATION - 2 && m.timer < CONFIG.ATTACK_DURATION && !m.hitTriggered) {
-                    m.hitTriggered = true;
-                    if (Player.dashTimer > 0) {
-                        showFeedback("EVADE", "#aaa");
-                    } else if (Player.isParrying) {
-                        const elapsed = CONFIG.PARRY_STANCE_DURATION - Player.parryTimer;
-                        if (elapsed <= CONFIG.PERFECT_WINDOW) {
-                            showFeedback("PERFECT!", "#FFD700");
-                            Player.ap += 2.0;
-                            if (!Player.state.isPrefGainedThisTurn) {
-                                Player.ap += Player.augBuffs.parryAp;
-                                Player.state.isPrefGainedThisTurn = true;
-                            }
-                            if (Player.state.parryApGained < 2) {
-                                Player.ap += Player.augBuffs.perfectApBonus;
-                                Player.state.parryApGained++;
-                            }
-                            Player.state.perfFocusActive = true;
-                            Player.state.perfParryThisTurn = true;
-                            Player.state.perfStacks = Math.min(Player.state.perfStacks + 1, 3);
-                        } else {
-                            showFeedback("GOOD", "#00FF00");
-                            Player.ap += 1.0;
-                            if (!Player.state.isPrefGainedThisTurn) {
-                                Player.ap += Player.augBuffs.parryAp;
-                                Player.state.isPrefGainedThisTurn = true;
-                            }
+                    // AI Monster Turn Simulation
+                    monsters.forEach(m => {
+                        let dmg = Math.ceil(m.atk * (CONFIG.K / (CONFIG.K + Player.def)));
+                        if (mode === "Expert") {
+                            // 80% chance to 'Parry' in Expert mode (simplified)
+                            if (Math.random() < 0.8) { dmg = 0; Player.ap = Math.min(Player.maxAp, Player.ap + 2); }
                         }
-                    } else {
-                        const finalDmg = Math.round(m.atk * (CONFIG.K / (CONFIG.K + Player.def)) * Player.augBuffs.takeDmgMult);
-                        Player.hp = Math.max(0, Player.hp - finalDmg);
-                        addDamageText(Player.x, Player.y - 40, `-${finalDmg}`, "#ff4a4a");
-                        Player.state.perfStacks = 0;
-                        triggerVignette();
-
-                        const set = m.settings || monsterSettings;
-                        hitStopTimer = set.hitStop;
-
-                        if (Player.hp <= 0) gameOver();
-                    }
+                        Player.hp -= dmg;
+                    });
+                    currentTurn = "PLAYER"; turns++;
                 }
+                if (monsters.length === 0) StageManager.winRound();
+            }
+            return { win: currentRound > 15, turns, lastRound: currentRound };
+        },
+        getWinRate() {
+            const wins = this.results.filter(r => r.win).length;
+            return Math.floor((wins / this.results.length) * 100);
+        },
+        report() {
+            const winRate = this.getWinRate();
+            const avgTurns = Math.floor(this.results.reduce((a, b) => a + b.turns, 0) / this.results.length);
+            this.log(`--- FINAL REPORT ---`);
+            this.log(`Total Games: ${this.results.length}`);
+            this.log(`Win Rate: ${winRate}%`);
+            this.log(`Avg Turns to Clear: ${avgTurns}`);
+            this.log(`<button onclick="location.reload()" class="btn-primary" style="margin-top:1rem">CLOSE & RELOAD</button>`);
+        }
+    };
 
-                if (m.timer >= CONFIG.ATTACK_DURATION) {
-                    m.state = "RETURN"; m.returnStartX = m.x; m.returnStartY = m.y; m.timer = 0; m.hitTriggered = false;
-                    m.patternStep++; updateHitIcons();
-                }
-            } else if (m.state === "RETURN") {
+    // ==========================================
+    // [레이어 5] 인프라: 렌더링 및 루프
+    // ==========================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        const playArea = document.getElementById('play-area');
+        if (!playArea) return;
+        const rect = playArea.getBoundingClientRect();
+        canvas.width = rect.width; canvas.height = rect.height;
+        CONFIG.CANVAS_W = canvas.width; CONFIG.CANVAS_H = canvas.height;
+        Player.x = CONFIG.CANVAS_W / 2; Player.y = CONFIG.CANVAS_H * 0.85;
+    }
+
+    function gameLoop(time) {
+        if (!lastTimestamp) lastTimestamp = time;
+        const dt = (time - lastTimestamp) / 16.66; lastTimestamp = time;
+        if (gameStarted && !isSimulating) { update(dt); draw(); }
+        requestAnimationFrame(gameLoop);
+    }
+
+    function update(dt) {
+        damageTexts.forEach((d, i) => { d.y -= 0.5 * dt; d.timer -= dt; if (d.timer <= 0) damageTexts.splice(i, 1); });
+        if (currentTurn === "MONSTER") {
+            const m = monsters[0];
+            if (m) {
                 m.timer += dt;
-                const isLastHit = m.patternStep === m.currentPattern.hits.length;
-                const duration = isLastHit ? CONFIG.RETURN_DURATION : 25;
-                const targetX = isLastHit ? m.homeX : (m.homeX + m.returnStartX) / 2;
-                const targetY = isLastHit ? m.homeY : (m.homeY + m.returnStartY) / 2;
-
-                let t = m.timer / duration;
-                m.x = m.returnStartX + (targetX - m.returnStartX) * (1 - Math.pow(1 - t, 2));
-                m.y = m.returnStartY + (targetY - m.returnStartY) * (1 - Math.pow(1 - t, 2));
-
-                if (m.timer >= duration) {
-                    if (m.patternStep < m.currentPattern.hits.length) {
-                        m.state = "ATTACK"; m.timer = 0; m.startX = m.x; m.startY = m.y;
-                    } else {
-                        if (currentRound === 6) m.nextPattern();
-                        m.state = "DONE";
-                        nextMonsterOrTurn();
-                    }
+                if (m.timer > 60) {
+                    const dmg = Math.ceil(m.atk * (CONFIG.K / (CONFIG.K + Player.def)));
+                    Player.hp -= dmg; damageTexts.push({ x: Player.x, y: Player.y - 30, text: `-${dmg}`, color: "#f44", timer: 60 });
+                    m.timer = 0; if (Player.hp <= 0) { gameStarted = false; ui.over.style.display = 'flex'; }
                 }
-            }
-            updateUI();
+            } else { currentTurn = "PLAYER"; UIManager.update(); }
         }
+    }
 
-        function checkAutoTurnEnd() {
-            if (isEndingTurnAutomatically) return;
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        monsters.forEach(m => {
+            ctx.fillStyle = m.color; ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#fff"; ctx.font = "bold 12px Inter"; ctx.textAlign = "center";
+            ctx.fillText(m.name, m.x, m.y - m.radius - 20);
+            ctx.fillText(`${Math.ceil(m.hp)} HP`, m.x, m.y - m.radius - 5);
+        });
+        ctx.fillStyle = Player.color; ctx.beginPath(); ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2); ctx.fill();
+        damageTexts.forEach(d => { ctx.fillStyle = d.color; ctx.fillText(d.text, d.x, d.y); });
+    }
 
-            // 소수점 오차 방지를 위해 floor 처리된 AP 사용 및 약간의 마진(0.1) 추가
-            const fAp = Math.floor(Player.ap + 0.01);
-            const canAtk = !Player.actionsUsed.atk && fAp >= 2;
-            const canSpin = !Player.actionsUsed.spin && fAp >= 3;
-            const canHeavy = !Player.actionsUsed.heavy && fAp >= 5;
+    // ==========================================
+    // [레이어 6] 전역 인터페이스
+    // ==========================================
+    function startGame() { gameStarted = true; StageManager.spawnWave(currentRound); }
+    function startSkill(s) { BattleEngine.executeSkill(s); }
+    function executeSpinSlash() { BattleEngine.executeSkill("spin"); }
+    function endPlayerTurn() { currentTurn = "MONSTER"; UIManager.update(); }
+    function retryGame() { Player.hp = 100; Player.ap = 0; currentRound = 1; ui.over.style.display = 'none'; startGame(); }
+    function openInventory() { Simulator.runMultiple(150, "Expert"); } // 임시로 연구소 누르면 시뮬레이션
+    function toggleGuide(v) { document.getElementById('guide-overlay').style.display = v ? 'flex' : 'none'; }
 
-            if (!canAtk && !canSpin && !canHeavy) {
-                isEndingTurnAutomatically = true;
-                setTimeout(endPlayerTurn, 800);
-            }
-        }
-
-        function nextMonsterOrTurn() {
-            if (currentMonsterIndex < monsters.length - 1) {
-                currentMonsterIndex++;
-                // 다음 몬스터가 죽어있을 경우에 대한 예외 처리
-                if (monsters[currentMonsterIndex].hp <= 0) {
-                    monsters[currentMonsterIndex].state = "DONE";
-                    nextMonsterOrTurn();
-                }
-                updateHitIcons();
-            } else {
-                currentTurn = "PLAYER";
-                ui.turn.innerText = "Player's Turn";
-                ui.hitIcons.innerHTML = "";
-
-                // UI Toggle
-                updateInterfaceVisibility();
-            }
-        }
-
-        function updateInterfaceVisibility() {
-            const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver];
-            const isAnyOverlayVisible = overlays.some(o => o.style.display === "flex" || o.style.display === "block");
-
-            const bottomUI = document.getElementById('bottom-ui');
-            const topHUD = document.getElementById('top-status');
-
-            if (isAnyOverlayVisible || !gameStarted || currentTurn === "NONE") {
-                if (bottomUI) bottomUI.style.opacity = "0";
-                if (topHUD) topHUD.style.opacity = "0";
-                if (bottomUI) bottomUI.style.pointerEvents = "none";
-                return;
-            }
-
-            if (bottomUI) bottomUI.style.opacity = "1";
-            if (topHUD) topHUD.style.opacity = "1";
-            if (bottomUI) bottomUI.style.pointerEvents = "auto";
-
-            document.getElementById('player-actions').style.display = currentTurn === "PLAYER" ? "flex" : "none";
-            document.getElementById('monster-actions').style.display = currentTurn === "MONSTER" ? "flex" : "none";
-        }
-
-        function updateUI() {
-            updateInterfaceVisibility();
-
-            if (uiCache.hp !== Player.hp) { ui.hp.innerText = Player.hp; uiCache.hp = Player.hp; }
-            if (uiCache.atk !== Player.atk) { ui.atk.innerText = Player.atk; uiCache.atk = Player.atk; }
-            if (uiCache.def !== Player.def) { ui.def.innerText = Player.def; uiCache.def = Player.def; }
-
-            const fAp = Math.floor(Player.ap);
-            if (uiCache.ap !== fAp) { ui.ap.innerText = fAp; uiCache.ap = fAp; }
-
-            const isPlayer = currentTurn === "PLAYER";
-            const atkD = !isPlayer || Player.ap < 2 || Player.actionsUsed.atk;
-            const spinD = !isPlayer || Player.ap < 3 || Player.actionsUsed.spin;
-            const heavyD = !isPlayer || Player.ap < 5 || Player.actionsUsed.heavy;
-            const endD = !isPlayer;
-
-            if (uiCache.atkBtn !== atkD) { ui.btns.atk.disabled = atkD; uiCache.atkBtn = atkD; }
-            if (uiCache.spinBtn !== spinD) { ui.btns.spin.disabled = spinD; uiCache.spinBtn = spinD; }
-            if (uiCache.heavyBtn !== heavyD) { ui.btns.heavy.disabled = heavyD; uiCache.heavyBtn = heavyD; }
-            if (uiCache.endBtn !== endD) { ui.btns.end.disabled = endD; uiCache.endBtn = endD; }
-
-            // AP 부족 시 자동 턴 종료 체크
-            if (isPlayer && !isEndingTurnAutomatically && atkD && spinD && heavyD) {
-                isEndingTurnAutomatically = true;
-                setTimeout(() => {
-                    if (currentTurn === "PLAYER") endPlayerTurn();
-                }, 800);
-            }
-        }
-
-        let canvasShake = 0;
-        function shakeCanvas(amt) { canvasShake = amt; }
-
-        function draw() {
-            ctx.save();
-            if (canvasShake > 0) {
-                ctx.translate(Math.random() * canvasShake - canvasShake / 2, Math.random() * canvasShake - canvasShake / 2);
-                canvasShake *= 0.9;
-                if (canvasShake < 0.5) canvasShake = 0;
-            }
-            ctx.clearRect(-100, -100, canvas.width + 200, canvas.height + 200);
-            if (!gameStarted) { ctx.restore(); return; }
-
-            // 1. Draw Monsters
-            monsters.forEach((m) => {
-                let color = m.color;
-                if (m.state === "TELEGRAPH") {
-                    const set = m.settings || monsterSettings;
-                    const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
-                    const alpha = Math.min(m.timer / waitFrames, 1);
-                    color = `rgb(${255}, ${74 + 181 * alpha}, ${74 + 181 * alpha})`;
-
-                    // 신호(Cue) 발생 시 하얀색으로 강조
-                    if (m.cueActive) {
-                        color = "#ffffff";
-                        ctx.shadowBlur = 20;
-                        ctx.shadowColor = "#ffffff";
-                    }
-                }
-
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
-                ctx.fill();
-
-                // 몬스터 HP 수치만 표시
-                ctx.fillStyle = "#fff";
-                ctx.font = "bold 14px Inter";
-                ctx.textAlign = "center";
-                ctx.fillText(`${Math.ceil(m.hp)}`, m.x, m.y - m.radius - 10);
-
-                // 타겟팅 하이라이트
-                if (isTargeting && m.hp > 0) {
-                    ctx.strokeStyle = "#fff";
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(m.x, m.y, m.radius + 5, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-            });
-
-            // 2. Draw Damage Texts
-            damageTexts.forEach(dt => {
-                ctx.fillStyle = dt.color;
-                ctx.font = "bold 24px Inter";
-                ctx.fillText(dt.text, dt.x, dt.y);
-            });
-
-            // 3. Draw Player & Ghosts
-            Player.ghosts.forEach(g => {
-                ctx.fillStyle = `rgba(74, 158, 255, ${g.a})`;
-                ctx.beginPath(); ctx.arc(g.x, g.y, Player.radius, 0, Math.PI * 2); ctx.fill();
-            });
-
-            if (Player.isParrying) {
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = "#FFD700";
-                ctx.strokeStyle = "#FFD700";
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
-                ctx.stroke();
-            } else if (Player.dashTimer > 0) {
-                ctx.strokeStyle = "#aaa";
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.setLineDash([]); // Reset dash
-            }
-
-            ctx.fillStyle = Player.color;
-            ctx.beginPath();
-            ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        function gameLoop(timestamp) {
-            if (!lastTimestamp) lastTimestamp = timestamp;
-            let elapsed = timestamp - lastTimestamp;
-            lastTimestamp = timestamp;
-
-            // 델타 타임 계산 (60FPS 기준 1.0)
-            // 브라우저 탭 전환 등으로 인한 과도한 점프 방지 (최대 100ms)
-            let dt = (Math.min(elapsed, 100) / 16.66);
-
-            update(dt);
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function executeDash() {
-            if (Player.dashTimer > 0) return;
-            Player.dashTimer = 20;
-            showFeedback("DASH!", "#aaa");
-        }
-
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        function resizeCanvas() {
-            const root = document.getElementById('game-container');
-            const playArea = document.getElementById('play-area');
-
-            if (!root || !playArea) return;
-
-            // 1. 실제 렌더링된 컨테이너의 크기를 정확히 파악
-            const rect = playArea.getBoundingClientRect();
-
-            // 2. 캔버스의 내부 해상도를 CSS 크기와 1:1로 일치시켜 왜곡 방지
-            canvas.width = rect.width || 412;
-            canvas.height = rect.height || 500;
-
-            CANVAS_W = canvas.width;
-            CANVAS_H = canvas.height;
-
-            // 3. 캐릭터 좌표 설정 (캔버스 크기 대비 백분율 유지)
-            Player.x = CANVAS_W / 2;
-            Player.y = CANVAS_H * 0.85;
-
+    canvas.addEventListener('mousedown', e => {
+        if (isTargeting) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
             monsters.forEach(m => {
-                m.homeX = CANVAS_W / 2;
-                m.homeY = CANVAS_H * 0.22;
-                if (m.state === "IDLE" || m.state === "DONE") {
-                    m.x = m.homeX;
-                    m.y = m.homeY;
+                if (Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2) < m.radius * 2) {
+                    BattleEngine.executeSkill(selectedSkill, m);
+                    isTargeting = false; selectedSkill = null;
                 }
             });
-
-            // 4. CSS 스케일링으로 인한 찌그러짐 방지 (auto 설정)
-            canvas.style.width = "100%";
-            canvas.style.height = "100%";
         }
+    });
 
-        function init() {
-            try {
-                loadFromStorage();
-                window.addEventListener('resize', resizeCanvas);
-
-                // 전역 컨텍스트 메뉴 차단 (PC 우클릭 조작을 위해 필수)
-                window.addEventListener('contextmenu', e => e.preventDefault());
-
-                // 입력 핸들링 (캔버스 본체)
-                canvas.addEventListener('mousedown', handleInput);
-                canvas.addEventListener('touchstart', handleInput, { passive: false });
-
-                // 조작 가이드 / 버튼 설정
-                const pcGuide = document.getElementById('pc-guide');
-                const mobBtns = document.getElementById('mobile-buttons');
-                const btnParry = document.getElementById('btn-parry');
-                const btnDash = document.getElementById('btn-dash');
-
-                if (isMobile) {
-                    if (mobBtns) mobBtns.style.display = 'flex';
-                    if (pcGuide) pcGuide.style.display = 'none';
-                    if (btnParry) {
-                        btnParry.addEventListener('touchstart', (e) => {
-                            e.preventDefault();
-                            Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                            Player.isParrying = true;
-                        }, { passive: false });
-                    }
-                    if (btnDash) btnDash.onclick = executeDash;
-                } else {
-                    if (pcGuide) pcGuide.style.display = 'block';
-                    if (mobBtns) mobBtns.style.display = 'none';
-                }
-
-                resizeCanvas();
-                requestAnimationFrame(gameLoop);
-            } catch (e) {
-                console.error("Critical Init Error:", e);
-            }
-        }
-
-        function handleInput(e) {
-            if (!gameStarted) return;
-            if (currentTurn === "PLAYER") {
-                if (isTargeting) handleTargeting(e);
-                return;
-            }
-            if (currentTurn === "MONSTER") {
-                if (e.target !== canvas) return;
-                e.preventDefault();
-                if (!isMobile) {
-                    if (e.button === 0) { // 좌클릭 (Parry)
-                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                        Player.isParrying = true;
-                    } else if (e.button === 2) { // 우클릭 (Dash)
-                        executeDash();
-                    }
-                } else {
-                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
-                    Player.isParrying = true;
-                }
-            }
-        }
-
-        init();
-    </script>
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    requestAnimationFrame(gameLoop);
+</script>
 </body>
 
 </html>
