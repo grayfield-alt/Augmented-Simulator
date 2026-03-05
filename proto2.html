@@ -2,20 +2,36 @@
 <html lang="ko">
 
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Augmented Simulator - Portrait</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@500;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@500;800;900&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { background: "#050507", surface: "#0c0d12", primary: "#fae133", secondary: "#10b981", danger: "#ff4a4a", accent: "#a020f0", gold: "#fbbf24" },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], title: ['Outfit', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
-            --bg: #0a0a0c;
+            --bg: #050507;
             --primary: #fae133;
             --danger: #ff4a4a;
             --info: #4a9eff;
-            --success: #4ade80;
+            --success: #10b981;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
             --font-main: 'Inter', system-ui, -apple-system, sans-serif;
             --font-title: 'Outfit', sans-serif;
         }
@@ -304,77 +320,100 @@
 <body>
     <div id="game-container">
         <!-- Battle Screen: 전투 중 모든 HUD, 플레이 영역, 하단 조작계가 표시되는 영역 -->
-        <div id="battle-screen" style="display: none; height: 100%; flex-direction: column;">
-            <!-- 1. HUD: Vitality, Power, Defense 등 상태 표시부 -->
-            <header id="top-status">
-                <div class="status-group">
-                    <div class="status-item">
-                        <span class="status-label">Vitality</span>
-                        <span id="p-hp" class="status-value hp-text">100</span>
+        <!-- Battle Screen -->
+        <div id="battle-screen" class="hidden flex-col h-full bg-background">
+            <!-- 1. HUD -->
+            <header id="top-status"
+                class="flex-none h-[70px] px-6 bg-surface/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center z-[100] transition-opacity duration-300">
+                <div class="flex gap-6">
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Vitality</span>
+                        <span id="p-hp" class="text-xl font-black text-danger font-title">100</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Power</span>
-                        <span id="p-atk" class="status-value atk-text">50</span>
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Power</span>
+                        <span id="p-atk" class="text-xl font-black text-primary font-title">50</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Defense</span>
-                        <span id="p-def" class="status-value def-text">0</span>
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Defense</span>
+                        <span id="p-def" class="text-xl font-black text-info font-title">0</span>
                     </div>
                 </div>
-                <button class="btn-secondary" style="min-height: 2rem; padding: 0 0.5rem; font-size: 0.75rem;"
-                    onclick="toggleEditor(true)">⚙️ EDIT</button>
+                <button onclick="toggleEditor(true)"
+                    class="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 border border-white/5 uppercase tracking-tighter transition-all">
+                    <i data-lucide="settings" class="w-3 h-3 inline-block mr-1"></i> DEV-OPs
+                </button>
             </header>
 
-            <!-- 2. Play Area: 실제 게임 캐릭터와 이펙트가 그려지는 Canvas 영역 -->
-            <main id="play-area" style="flex: 1; position: relative;">
-                <canvas id="gameCanvas"
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
-                <div id="visual-overlays" style="position: absolute; inset: 0; pointer-events: none; z-index: 2;">
-                    <div id="vignette" class="vignette"></div>
-                    <div id="hit-icons-container"
-                        style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <!-- 2. Play Area -->
+            <main id="play-area" class="flex-1 relative overflow-hidden bg-black/20">
+                <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
+                <div id="visual-overlays" class="absolute inset-0 pointer-events-none z-20">
+                    <div id="vignette" class="absolute inset-0 transition-opacity duration-300 pointer-events-none">
                     </div>
-                    <div id="msg-container">
-                        <div id="message"></div>
+                    <div id="hit-icons-container" class="absolute top-6 right-6 flex flex-col gap-2"></div>
+                    <div id="msg-container"
+                        class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
+                        <div id="message"
+                            class="text-5xl font-black italic text-white font-title drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-0 transition-all duration-300 uppercase tracking-tighter">
+                        </div>
                     </div>
                     <div id="turn-indicator"
-                        style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 0.75rem; letter-spacing: 2px; color: #444; font-weight: 800; text-transform: uppercase; pointer-events: none;">
+                        class="absolute top-[10%] left-1/2 -translate-x-1/2 text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">
                         Player's Turn</div>
                 </div>
             </main>
 
             <!-- 3. Footer Control Area -->
-            <footer id="bottom-ui">
-                <div class="ui-stack-container">
-                    <div class="ap-wrapper">
-                        <span class="ap-label">ENERGY</span>
-                        <span id="p-ap" class="ap-text">0</span>
+            <footer id="bottom-ui"
+                class="flex-none h-[280px] px-8 py-6 bg-surface border-t-2 border-primary/20 z-[100] transition-opacity duration-300 overflow-hidden relative">
+                <div class="flex flex-col h-full justify-between items-center max-w-sm mx-auto">
+                    <div class="flex items-center gap-4 px-6 py-2 bg-white/5 rounded-2xl border border-white/5 mb-4">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">ENERGY</span>
+                        <span id="p-ap" class="text-3xl font-black text-primary font-title">0</span>
                     </div>
 
-                    <div id="player-actions" class="btn-stack">
-                        <div class="btn-row">
-                            <button id="btn-atk" class="btn-primary" onclick="startSkill('atk')">🗡️ 공격 (2)</button>
-                            <button id="btn-spin" class="btn-secondary" onclick="executeSpinSlash()">🌀 회전 베기
-                                (3)</button>
+                    <!-- Player Actions -->
+                    <div id="player-actions" class="w-full flex-col gap-3 transition-all duration-300">
+                        <div class="flex gap-3">
+                            <button id="btn-atk" onclick="startSkill('atk')"
+                                class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-1 transition-all active:scale-95 disabled:opacity-20">
+                                <span class="text-sm font-black text-white uppercase"><i data-lucide="sword"
+                                        class="w-4 h-4 inline-block mr-1"></i> ATTACK</span>
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">2 AP</span>
+                            </button>
+                            <button id="btn-spin" onclick="executeSpinSlash()"
+                                class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-1 transition-all active:scale-95 disabled:opacity-20 text-secondary">
+                                <span class="text-sm font-black uppercase"><i data-lucide="rotate-cw"
+                                        class="w-4 h-4 inline-block mr-1"></i> SPIN</span>
+                                <span class="text-[9px] font-bold opacity-60 uppercase tracking-widest">3 AP</span>
+                            </button>
                         </div>
-                        <button id="btn-heavy" class="btn-primary btn-wide" onclick="startSkill('heavy')">💥 강력한 강타
-                            (5)</button>
-                        <button id="btn-end" class="btn-secondary btn-wide"
-                            style="min-height: 2.25rem; font-size: 0.8rem; opacity: 0.5;" onclick="endPlayerTurn()">턴
-                            종료</button>
+                        <button id="btn-heavy" onclick="startSkill('heavy')"
+                            class="w-full bg-primary hover:bg-primary/80 p-5 rounded-2xl font-black text-background text-lg uppercase transition-all active:scale-98 disabled:opacity-20 shadow-[0_10px_40px_rgba(250,225,51,0.2)] mt-2">
+                            HEAVY STRIKE <span class="text-[10px] ml-2 opacity-60">5 AP</span>
+                        </button>
+                        <button id="btn-end" onclick="endPlayerTurn()"
+                            class="w-full mt-2 text-[10px] font-black text-slate-600 hover:text-slate-400 uppercase tracking-[0.2em] py-2 transition-colors">
+                            END OPERATION
+                        </button>
                     </div>
 
-                    <div id="monster-actions" class="btn-stack"
-                        style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -10%); width: 85%;">
-                        <div id="pc-guide" class="pulse"
-                            style="text-align: center; color: #888; font-size: 0.875rem; display: none;">L-Click: Parry
-                            |
-                            R-Click: Dodge</div>
-                        <div id="mobile-buttons" class="btn-row" style="display: none;">
-                            <button id="btn-parry" class="btn-secondary btn-wide"
-                                style="background: #fff; color: #000;">🛡️
-                                PARRY NOW</button>
-                            <button id="btn-dash" class="btn-secondary btn-wide">💨 EMERGENCY DASH</button>
+                    <!-- Monster Actions (Defense Mode) -->
+                    <div id="monster-actions"
+                        class="hidden w-full flex-col items-center gap-4 transition-all duration-300">
+                        <div id="pc-guide"
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] pulse mb-2">L-CLICK:
+                            PARRY | R-CLICK: DASH</div>
+                        <div id="mobile-buttons" class="hidden w-full flex-col gap-3">
+                            <button id="btn-parry"
+                                class="w-full bg-white p-5 rounded-2xl font-black text-background text-lg uppercase shadow-[0_10px_40px_rgba(255,255,255,0.2)]">PARRY
+                                NOW</button>
+                            <button id="btn-dash"
+                                class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white text-lg uppercase tracking-widest">DASH</button>
                         </div>
                     </div>
                 </div>
@@ -383,175 +422,337 @@
     </div>
 
     <!-- Overlays -->
-    <div id="lobby-overlay" class="overlay" style="display: flex;">
+    <!-- Lobby Overlay -->
+    <div id="lobby-overlay"
+        class="fixed inset-0 bg-background/95 backdrop-blur-2xl z-[200] flex flex-col items-center justify-center p-8 text-center transition-all duration-500">
         <div
-            style="font-family: var(--font-title); font-size: 3rem; font-weight: 900; text-align: center; line-height: 1; margin-bottom: 3rem;">
-            AUGMENTED<br>SIMULATOR</div>
-        <div class="btn-stack" style="max-width: 250px;">
-            <button class="btn-primary btn-wide" onclick="startGame()">⚔️ 전투 시작</button>
-            <button class="btn-secondary btn-wide" onclick="openInventory()">🧪 몬스터 연구소</button>
-            <button class="lobby-btn btn-secondary btn-wide" onclick="openStageEditor()" style="display:none">🗺️ 스테이지
-                에디터</button>
-            <button class="btn-secondary btn-wide" onclick="toggleGuide(true)">❓ 가이드</button>
+            class="bg-primary/10 p-8 rounded-[3rem] border border-primary/20 mb-12 animate-pulse shadow-[0_0_80px_rgba(250,225,51,0.15)]">
+            <i data-lucide="shield-check" class="w-16 h-16 text-primary"></i>
         </div>
-        <p style="margin-top: 3rem; color: #333; font-size: 0.75rem; font-weight: 700;">VERSION 2.7 PORTRAIT</p>
+
+        <h1 class="text-6xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
+            AUGMENTED<br /><span class="text-primary">SIMULATOR</span>
+        </h1>
+        <p class="text-slate-500 font-bold text-[10px] uppercase tracking-[0.6em] mb-12 opacity-60">High Fidelity Combat
+            Simulator</p>
+
+        <div class="flex flex-col gap-4 w-full max-w-[280px]">
+            <button onclick="startGame()"
+                class="w-full bg-primary hover:bg-primary/80 p-6 rounded-[2rem] font-black text-background text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_60px_rgba(250,225,51,0.3)]">
+                Start Operation
+            </button>
+
+            <div class="grid grid-cols-2 gap-4 mt-2">
+                <button onclick="openInventory()"
+                    class="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all">
+                    <i data-lucide="beaker" class="w-5 h-5 text-slate-400"></i>
+                    <span class="text-[9px] font-black text-slate-500 uppercase">Archive</span>
+                </button>
+                <button onclick="toggleGuide(true)"
+                    class="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all">
+                    <i data-lucide="info" class="w-5 h-5 text-slate-400"></i>
+                    <span class="text-[9px] font-black text-slate-500 uppercase">Briefing</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-16 text-[9px] font-black text-slate-700 uppercase tracking-widest opacity-40">
+            SYSTEM_VERSION: 1.0.PRT_FLA
+        </div>
     </div>
 
-    <div id="augment-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 100%; max-width: 400px; padding: 30px; display: flex; flex-direction: column; align-items: center;">
-            <h2 style="font-family: var(--font-title); font-size: 24px; margin-bottom: 30px; color: var(--primary);">
-                Choose an Augment</h2>
-            <div id="augment-cards" class="augment-container"></div>
-            <button id="btn-reroll" class="lobby-btn" style="margin-top: 20px; width: 100%;"
-                onclick="rerollAugments()">🔄 Reroll (1 Remaining)</button>
+    <!-- Augment Overlay -->
+    <div id="augment-overlay"
+        class="hidden fixed inset-0 bg-background/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8 transition-all duration-500">
+        <div
+            class="w-full max-w-[420px] bg-surface/50 border border-white/10 rounded-[2.5rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center gap-8 relative overflow-hidden">
+            <div class="absolute -top-20 -left-20 w-40 h-40 bg-primary/20 rounded-full blur-[80px]"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-accent/20 rounded-full blur-[80px]"></div>
+
+            <div class="flex flex-col items-center gap-2">
+                <h2 class="text-3xl font-black italic text-primary font-title uppercase tracking-tighter">SELECT AUGMENT
+                </h2>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Enhance combat performance
+                </p>
+            </div>
+
+            <div id="augment-cards" class="w-full flex flex-col gap-4"></div>
+
+            <button id="btn-reroll" onclick="rerollAugments()"
+                class="w-full bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest transition-all disabled:opacity-20">
+                <i data-lucide="refresh-cw" class="w-3 h-3 inline-block mr-1"></i> Reroll Available (1)
+            </button>
         </div>
     </div>
 
-    <div id="event-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 100%; max-width: 400px; padding: 30px; display: flex; flex-direction: column; align-items: center;">
-            <h2 style="font-family: var(--font-title); font-size: 24px; margin-bottom: 30px; color: var(--success);">
-                Round 3: Event Option</h2>
-            <div id="event-options" class="event-container"
-                style="display: flex !important; flex-direction: column !important; gap: 12px !important; width: 100%;">
-                <div class="augment-card" style="width: 100% !important; cursor: pointer;"
-                    onclick="selectEventOption(1)">
-                    <h3 style="color: var(--primary);">🎁 선물</h3>
-                    <p>Common 증강 1개 선택</p>
+    <!-- Event Overlay -->
+    <div id="event-overlay"
+        class="hidden fixed inset-0 bg-background/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8 transition-all duration-500">
+        <div
+            class="w-full max-w-[420px] bg-surface/50 border border-white/10 rounded-[2.5rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center gap-8 relative overflow-hidden">
+            <div class="flex flex-col items-center gap-2">
+                <h2 class="text-3xl font-black italic text-success font-title uppercase tracking-tighter">ANOMALY
+                    DETECTED</h2>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Standard operation
+                    interrupted</p>
+            </div>
+
+            <div id="event-options" class="w-full flex flex-col gap-4">
+                <button onclick="selectEventOption(1)"
+                    class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-6 rounded-[2rem] text-left transition-all active:scale-95 group">
+                    <span
+                        class="block text-primary text-xl font-black italic uppercase italic mb-1 group-hover:translate-x-1 transition-transform">Protocol:
+                        SUPPLY</span>
+                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Extract common quality augment
+                        memory</span>
+                </button>
+                <button onclick="selectEventOption(2)"
+                    class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-6 rounded-[2rem] text-left transition-all active:scale-95 group">
+                    <span
+                        class="block text-success text-xl font-black italic uppercase italic mb-1 group-hover:translate-x-1 transition-transform">Protocol:
+                        RECOVERY</span>
+                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Restore 35% vitality from local
+                        reserves</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monster Archive (Inventory) -->
+    <div id="inventory-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[480px] h-[85vh] flex flex-col p-8 bg-surface/50 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-8 px-2">
+                <div class="flex flex-col">
+                    <h2 class="text-3xl font-black italic text-info font-title uppercase tracking-tighter italic">
+                        MONSTER ARCHIVE</h2>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Extracted Threat Data</p>
                 </div>
-                <div class="augment-card" style="width: 100% !important; cursor: pointer;"
-                    onclick="selectEventOption(2)">
-                    <h3 style="color: var(--success);">🍕 휴식</h3>
-                    <p>HP 회복 35%</p>
+                <button onclick="closeOverlay('inventory-overlay')"
+                    class="bg-white/5 hover:bg-white/10 p-3 rounded-full text-slate-400 transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="complete-inventory-list" class="flex-1 overflow-y-auto space-y-4 pr-3 custom-scrollbar mb-8"></div>
+
+            <div class="flex gap-4">
+                <button onclick="openMonsterCreator()"
+                    class="flex-1 bg-primary p-5 rounded-2xl font-black text-background uppercase text-sm tracking-widest transition-all active:scale-95 shadow-[0_10px_40px_rgba(250,225,51,0.2)]">
+                    Create New Entry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stage Editor Overlay -->
+    <div id="stage-editor-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[480px] h-[85vh] flex flex-col p-8 bg-surface/50 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-8 px-2">
+                <div class="flex flex-col">
+                    <h2 class="text-3xl font-black italic text-primary font-title uppercase tracking-tighter">STAGE
+                        CONFIG</h2>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Level Sequence Management
+                    </p>
                 </div>
+                <button onclick="closeOverlay('stage-editor-overlay')"
+                    class="bg-white/5 hover:bg-white/10 p-3 rounded-full text-slate-400 transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="full-stage-list" class="flex-1 overflow-y-auto space-y-4 pr-3 custom-scrollbar mb-8"></div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="saveToStorage()"
+                    class="w-full bg-info p-5 rounded-2xl font-black text-background uppercase text-sm tracking-widest transition-all active:scale-95 shadow-[0_10px_40px_rgba(74,158,255,0.2)]">
+                    Save Configuration
+                </button>
+                <button onclick="resetStagesToDefault()"
+                    class="w-full bg-white/5 hover:bg-white/10 border border-danger/20 p-4 rounded-2xl text-[10px] font-black text-danger uppercase tracking-widest">
+                    Reset Factory Defaults
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="inventory-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 95%; max-width: 450px; height: 85%; display: flex; flex-direction: column; padding: 20px;">
-            <h2 style="font-family: var(--font-title); color: var(--info); margin-bottom: 20px;">🧪 몬스터 연구소</h2>
-            <div id="complete-inventory-list"
-                style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;"></div>
-            <div style="display: flex; gap: 10px;">
-                <button style="flex: 1; background: var(--success);" onclick="openMonsterCreator()">New
-                    Monster</button>
-                <button style="flex: 1;" onclick="closeOverlay('inventory-overlay')">Close</button>
+    <!-- Briefing (Guide) Overlay -->
+    <div id="guide-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[420px] bg-surface/80 border border-white/10 rounded-[3rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <h2 class="text-3xl font-black italic text-primary font-title uppercase tracking-tighter mb-8">OPERATION
+                BRIEFING</h2>
+            <div class="space-y-8 text-slate-400 text-sm leading-relaxed">
+                <section>
+                    <h3
+                        class="text-[10px] font-black text-white uppercase tracking-widest mb-3 border-l-2 border-primary pl-3">
+                        Combat Controls</h3>
+                    <ul class="space-y-2">
+                        <li><span class="text-white font-bold">Skills:</span> Click skill then select target</li>
+                        <li><span class="text-white font-bold">Parry:</span> Hold during telegraphed impact</li>
+                        <li><span class="text-white font-bold">Dash:</span> Right-click or button for evasion</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3
+                        class="text-[10px] font-black text-white uppercase tracking-widest mb-3 border-l-2 border-primary pl-3">
+                        Sim Systems</h3>
+                    <ul class="space-y-2">
+                        <li><span class="text-white font-bold">AP:</span> Energy required for all actions</li>
+                        <li><span class="text-white font-bold">Augments:</span> Permanent combat enhancements</li>
+                    </ul>
+                </section>
+            </div>
+            <button onclick="toggleGuide(false)"
+                class="w-full bg-primary p-5 rounded-2xl font-black text-background uppercase text-sm tracking-widest transition-all active:scale-95 shadow-[0_10px_40px_rgba(250,225,51,0.2)] mt-10">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="game-over-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 text-center transition-all duration-700">
+        <div class="mb-8 scale-150 text-danger animate-bounce">
+            <i data-lucide="alert-triangle" class="w-20 h-20"></i>
+        </div>
+        <h2 class="text-7xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
+            OPERATION<br /><span class="text-danger">TERMINATED</span>
+        </h2>
+        <p class="text-danger/40 font-black text-[12px] uppercase tracking-[1em] mb-12 italic">Target loss imminent</p>
+
+        <button onclick="retryGame()"
+            class="w-full max-w-[280px] bg-danger hover:bg-danger/80 p-6 rounded-[2rem] font-black text-white text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_60px_rgba(255,74,74,0.3)]">
+            Restart Cycle
+        </button>
+    </div>
+
+    <!-- Dev-OPs (Editor) Overlay -->
+    <div id="editor-overlay"
+        class="hidden fixed inset-0 bg-background/95 backdrop-blur-3xl z-[600] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[520px] h-[90vh] flex flex-col p-8 bg-surface/50 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black italic text-primary font-title uppercase tracking-tighter italic">DEV-OPS
+                    TERMINAL</h2>
+                <button onclick="toggleEditor(false)"
+                    class="bg-white/5 hover:bg-white/10 p-3 rounded-full text-slate-400 transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-8 pr-3 custom-scrollbar mb-8">
+                <section>
+                    <h3 class="text-[10px] font-black text-info uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="database" class="w-3 h-3"></i> Monster Data
+                    </h3>
+                    <div id="monster-library-list" class="space-y-4"></div>
+                </section>
+                <section>
+                    <h3
+                        class="text-[10px] font-black text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="map" class="w-3 h-3"></i> Level Sequence
+                    </h3>
+                    <div id="stage-editor-list" class="space-y-4"></div>
+                </section>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="openMonsterCreator()"
+                    class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white uppercase text-xs tracking-widest transition-all">
+                    Core Creation
+                </button>
+                <button onclick="saveToStorage()"
+                    class="flex-1 bg-success p-5 rounded-2xl font-black text-background uppercase text-xs tracking-widest transition-all shadow-[0_10px_40px_rgba(16,185,129,0.2)]">
+                    Commit Changes
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="stage-editor-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 95%; max-width: 450px; height: 85%; display: flex; flex-direction: column; padding: 20px;">
-            <h2 style="font-family: var(--font-title); color: var(--primary); margin-bottom: 20px;">🗺️ 스테이지 에디터
-            </h2>
-            <div id="full-stage-list" style="flex: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 5px;">
+    <!-- Core Creation (Monster Creator) Overlay -->
+    <div id="monster-creator-panel"
+        class="hidden fixed inset-0 bg-background/95 backdrop-blur-3xl z-[700] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[420px] bg-surface/50 border border-white/10 rounded-[3rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex flex-col items-center gap-2 mb-8">
+                <h2 id="creator-title"
+                    class="text-3xl font-black italic text-success font-title uppercase tracking-tighter italic">CORE
+                    CREATION</h2>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Synthesize New Threat Pattern
+                </p>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button style="background: var(--info);" onclick="saveToStorage()">All Save</button>
-                <div style="display: flex; gap: 10px;">
-                    <button style="flex: 1; border-color: var(--danger); color: var(--danger);"
-                        onclick="resetStagesToDefault()">Reset</button>
-                    <button style="flex: 1;" onclick="closeOverlay('stage-editor-overlay')">Close</button>
+
+            <div class="space-y-6">
+                <div class="space-y-2">
+                    <label
+                        class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Identifier</label>
+                    <input id="lib-name" type="text" placeholder="Designation..."
+                        class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:border-primary/50">
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="guide-overlay" class="overlay">
-        <div class="glass-panel"
-            style="width: 90%; max-width: 400px; padding: 30px; text-align: left; max-height: 80%; overflow-y: auto;">
-            <h2 style="font-family: var(--font-title); color: var(--primary); margin-bottom: 20px;">❓ 게임 가이드</h2>
-            <div style="font-size: 14px; line-height: 1.6; color: #ccc;">
-                <p><b>■ 기본 조작</b><br>• 강타/회전베기: 스킬 버튼 누른 후 적 선택<br>• 패링: 적 공격 타이밍에 맞춰 버튼 유지</p>
-                <p><b>■ 시스템</b><br>• <b>AP:</b> 행동 시 소모되는 자원입니다.<br>• <b>패링:</b> 성공 시 대량의 AP를 획득합니다.<br>• <b>증강:</b>
-                    라운드
-                    종료 시 영구적인 버프를 획득합니다.</p>
-                <p><b>■ 에디터</b><br>• 자신의 스테이지를 직접 구성하고 저장할 수 있습니다.</p>
-            </div>
-            <button class="lobby-btn" style="margin-top: 30px; width: 100%; background: var(--primary); color: #000;"
-                onclick="toggleGuide(false)">닫기</button>
-        </div>
-    </div>
-
-    <div id="game-over-overlay" class="overlay">
-        <h2 style="font-family: var(--font-title); font-size: 48px; color: var(--danger); margin-bottom: 20px;">GAME
-            OVER</h2>
-        <button class="lobby-btn" style="width: 200px; background: var(--primary); color: #000;"
-            onclick="retryGame()">RETRY</button>
-    </div>
-
-    <div id="editor-overlay" class="overlay" style="background: rgba(0,0,0,0.98);">
-        <div class="glass-panel"
-            style="width: 96%; max-width: 480px; height: 90%; display: flex; flex-direction: column; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h2 style="font-family: var(--font-title); font-size: 20px;">⚙️ STAGE & MONSTER EDITOR</h2>
-                <button class="btn-sm" onclick="toggleEditor(false)">✕</button>
-            </div>
-            <div style="flex: 1; overflow-y: auto; padding-right: 5px;">
-                <h3 style="font-size: 14px; margin: 15px 0 10px; color: var(--info);">👾 Monster Library</h3>
-                <div id="monster-library-list" style="margin-bottom: 20px;"></div>
-                <h3 style="font-size: 14px; margin: 15px 0 10px; color: var(--primary);">🗺️ Stage Configuration
-                </h3>
-                <div id="stage-editor-list"></div>
-            </div>
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button style="flex: 1; background: var(--info);" onclick="openMonsterCreator()">Create
-                    Monster</button>
-                <button style="flex: 1; background: var(--success);" onclick="saveToStorage()">Save All</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="monster-creator-panel" class="overlay" style="background: rgba(0,0,0,0.95);">
-        <div class="glass-panel" style="width: 90%; max-width: 400px; padding: 25px;">
-            <h2 id="creator-title" style="font-family: var(--font-title); color: var(--success); margin-bottom: 20px;">
-                🛠️ 몬스터 생성</h2>
-            <div class="btn-stack" style="gap: 15px;">
-                <div class="input-group">
-                    <label style="font-size: 12px; color: #888;">Name</label>
-                    <input id="lib-name" type="text"
-                        style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; color: #888;">HP</label>
-                        <input id="lib-hp" type="number"
-                            style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Durability
+                            (HP)</label>
+                        <input id="lib-hp" type="number" value="100"
+                            class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white focus:outline-none focus:border-primary/50">
                     </div>
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; color: #888;">ATK</label>
-                        <input id="lib-atk" type="number"
-                            style="width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px;">
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Output
+                            (ATK)</label>
+                        <input id="lib-atk" type="number" value="10"
+                            class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white focus:outline-none focus:border-primary/50">
                     </div>
                 </div>
-                <div>
-                    <label style="font-size: 12px; color: #888;">Telegraph Mult: <span
-                            id="lib-val-telegraph">1.0</span>x</label>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Telegraph
+                            Window</label>
+                        <span id="lib-val-telegraph" class="text-[10px] font-black text-primary">1.0x</span>
+                    </div>
                     <input id="lib-telegraph" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
-                        oninput="document.getElementById('lib-val-telegraph').innerText=this.value"
-                        style="width: 100%;">
+                        oninput="document.getElementById('lib-val-telegraph').innerText=this.value+'x'"
+                        class="w-full h-1 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary">
                 </div>
-                <div>
-                    <label style="font-size: 12px; color: #888;">Post-Delay Mult: <span
-                            id="lib-val-postdelay">1.0</span>x</label>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Recovery
+                            Delay</label>
+                        <span id="lib-val-postdelay" class="text-[10px] font-black text-primary">1.0x</span>
+                    </div>
                     <input id="lib-postdelay" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
-                        oninput="document.getElementById('lib-val-postdelay').innerText=this.value"
-                        style="width: 100%;">
+                        oninput="document.getElementById('lib-val-postdelay').innerText=this.value+'x'"
+                        class="w-full h-1 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary">
                 </div>
-                <div>
-                    <label style="font-size: 12px; color: #888;">Hit Stop: <span id="lib-val-hitstop">3</span></label>
+
+                <div class="space-y-4 pb-4">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Impact
+                            Stall</label>
+                        <span id="lib-val-hitstop" class="text-[10px] font-black text-primary">3</span>
+                    </div>
                     <input id="lib-hitstop" type="range" min="0" max="10" step="1" value="3"
-                        oninput="document.getElementById('lib-val-hitstop').innerText=this.value" style="width: 100%;">
+                        oninput="document.getElementById('lib-val-hitstop').innerText=this.value"
+                        class="w-full h-1 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary">
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="btn-primary" style="flex: 1;" onclick="confirmMonsterSave()">Save</button>
-                    <button class="btn-secondary" style="flex: 1;"
-                        onclick="document.getElementById('monster-creator-panel').style.display='none'">Cancel</button>
-                </div>
+            </div>
+
+            <div class="flex gap-4 mt-8">
+                <button onclick="document.getElementById('monster-creator-panel').classList.add('hidden')"
+                    class="flex-1 bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest transition-all">
+                    Cancel
+                </button>
+                <button onclick="confirmMonsterSave()"
+                    class="flex-1 bg-success p-4 rounded-2xl font-black text-background uppercase text-xs tracking-widest transition-all shadow-[0_10px_40px_rgba(16,185,129,0.2)]">
+                    Commit Entry
+                </button>
             </div>
         </div>
     </div>
@@ -1040,9 +1241,10 @@
         }
 
         function startGame() {
-            // 1. 전투 화면 컨테이너를 먼저 표시 (flex 적용)
-            ui.battleScreen.style.display = "flex";
-            ui.lobby.style.display = "none";
+            // 1. 전투 화면 컨테이너를 먼저 표시
+            ui.battleScreen.classList.remove('hidden');
+            ui.battleScreen.classList.add('flex');
+            ui.lobby.classList.add('hidden');
 
             // 2. 레이아웃 확정 후 캔버스 리사이징 및 좌표 초기화
             resizeCanvas();
@@ -1111,67 +1313,14 @@
             let libM = monsterLibrary.find(x => x.id === id);
             if (!libM) {
                 const defaults = {
-                    "def_1": { name: "연습용 허수아비", hp: 100, atk: 10, telegraph: 1.2, postdelay: 1.0, hitstop: 3 },
-                    "def_2": { name: "강화 허수아비", hp: 150, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3 },
-                    "def_BOSS": { name: "최초의 시련", hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
+                    "mon_tuto_1": { name: "연습용 허수아비", hp: 100, atk: 10, telegraph: 1.2, postdelay: 1.0, hitstop: 3 },
+                    "mon_tuto_2": { name: "강화 허수아비", hp: 150, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3 },
+                    "mon_boss_1": { name: "디-스톰파", hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
                 };
-                let d = defaults[id] || defaults["def_1"];
+                let d = defaults[id] || defaults["mon_tuto_1"];
                 libM = { ...d };
             }
             return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
-        }
-
-        if (waveToSpawn.length === 0) {
-            waveToSpawn = (WAVE_DATA[round] || []).map(t => ({ ...t }));
-        }
-
-        if (waveToSpawn.length === 0) {
-            showFeedback("Game Clear!", "#FFD700");
-            return;
-        }
-
-        // Distribute X coordinates horizontally (Portrait Optimized & Centered)
-        const count = waveToSpawn.length;
-        const screenMargin = CANVAS_W * 0.3; // Increased margin to center more
-        const availableWidth = CANVAS_W - (screenMargin * 2);
-        const spacing = count > 1 ? availableWidth / (count - 1) : 0;
-
-        // Safe Area for Monsters
-        const safeTop = 100;
-        const safeBottom = 350;
-        const playableH = CANVAS_H - safeTop - safeBottom;
-
-        waveToSpawn.forEach((m, i) => {
-            m.x = count > 1 ? screenMargin + (spacing * i) : CANVAS_W / 2;
-            m.y = safeTop + (playableH * 0.15); // Top alignment within playable area
-        });
-
-        monsters = waveToSpawn.map(t => {
-            let p_arr = [];
-            if (t.multiPatterns) {
-                p_arr = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
-            } else if (t.patterns) {
-                p_arr = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
-            } else {
-                p_arr = [{ hits: [30] }];
-            }
-            const mObj = new Monster(t.type, t.x, t.y, t.hp, t.atk, p_arr);
-            if (t.customSettings) mObj.settings = { ...monsterSettings, ...t.customSettings };
-            return mObj;
-        });
-
-        currentMonsterIndex = 0;
-        currentTurn = "MONSTER";
-        roundStartTimer = 40;
-        isEndingTurnAutomatically = false;
-        ui.turn.innerText = (round === 6) ? "Boss Round" : `Round ${round}`;
-        showFeedback((round === 6) || waveToSpawn[0].type.includes("BOSS") ? "Boss Appearance!" : `Wave ${round}`, "#fff");
-
-        Player.ap += Player.augBuffs.startAp;
-        Player.state.killsThisTurn = 0;
-        Player.state.firstAttackThisTurn = true;
-        updateHitIcons();
-        updateInterfaceVisibility();
         }
 
         function showEventOverlay() {
@@ -1748,24 +1897,34 @@
 
         function updateInterfaceVisibility() {
             const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver];
-            const isAnyOverlayVisible = overlays.some(o => o.style.display === "flex" || o.style.display === "block");
+            const isAnyOverlayVisible = overlays.some(o => o && (o.style.display === "flex" || o.style.display === "block" || !o.classList.contains('hidden')));
 
             const bottomUI = document.getElementById('bottom-ui');
             const topHUD = document.getElementById('top-status');
 
             if (isAnyOverlayVisible || !gameStarted || currentTurn === "NONE") {
-                if (bottomUI) bottomUI.style.opacity = "0";
-                if (topHUD) topHUD.style.opacity = "0";
-                if (bottomUI) bottomUI.style.pointerEvents = "none";
+                if (bottomUI) { bottomUI.classList.add('opacity-0'); bottomUI.classList.add('pointer-events-none'); }
+                if (topHUD) topHUD.classList.add('opacity-0');
                 return;
             }
 
-            if (bottomUI) bottomUI.style.opacity = "1";
-            if (topHUD) topHUD.style.opacity = "1";
-            if (bottomUI) bottomUI.style.pointerEvents = "auto";
+            if (bottomUI) { bottomUI.classList.remove('opacity-0'); bottomUI.classList.remove('pointer-events-none'); }
+            if (topHUD) topHUD.classList.remove('opacity-0');
 
-            document.getElementById('player-actions').style.display = currentTurn === "PLAYER" ? "flex" : "none";
-            document.getElementById('monster-actions').style.display = currentTurn === "MONSTER" ? "flex" : "none";
+            const playerActions = document.getElementById('player-actions');
+            const monsterActions = document.getElementById('monster-actions');
+
+            if (currentTurn === "PLAYER") {
+                playerActions.classList.remove('hidden');
+                playerActions.classList.add('flex');
+                monsterActions.classList.add('hidden');
+                monsterActions.classList.remove('flex');
+            } else if (currentTurn === "MONSTER") {
+                playerActions.classList.add('hidden');
+                playerActions.classList.remove('flex');
+                monsterActions.classList.remove('hidden');
+                monsterActions.classList.add('flex');
+            }
         }
 
         function updateUI() {
@@ -1946,6 +2105,7 @@
 
         function init() {
             try {
+                lucide.createIcons();
                 loadFromStorage();
                 window.addEventListener('resize', resizeCanvas);
 

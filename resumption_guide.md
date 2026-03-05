@@ -26,15 +26,15 @@
 | **기능 분류** | **파일/폴더 경로** | **핵심 역할** |
 | :--- | :--- | :--- |
 | **웹 배포 주소** | **[바로가기(Proto2)](https://grayfield-alt.github.io/Augmented-Simulator/proto2.html)** | **GitHub Pages 실시간 배포 경로** |
-| **핵심 로직** | [GameEngine.js](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/src/logic/GameEngine.js) | 게임의 핵심 루틴 및 상태 관리 |
-| | [constants.js](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/src/logic/constants.js) | 몬스터 데이터, 웨이브 설정 (한글화 완료) |
-| **컴포넌트** | [App.jsx](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/src/App.jsx) | 메인 UI 및 렌더링 루프 제어 |
-| | [MonsterDebugger.jsx](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/src/components/MonsterDebugger.jsx) | [NEW] 몬스터 상태 모니터링 및 디버깅 도구 |
-| **데이터/설정** | [augments.json](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/augments.json) | 증강(Augments) 시스템 데이터 |
-| | [vite.config.js](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/vite.config.js) | 웹 배포 및 빌드 설정 |
-| **프로토타입** | [proto2.html](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/proto2.html) | 단일 파일 기반 최신 테스트 버전 |
-| **지침/문서** | [PROJECT_RULES.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/PROJECT_RULES.md) | 통합된 프로젝트 규칙 및 지침 |
-| | [task.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/task.md) | 현재 작업 진행 상황 관리 |
+| **핵심 로직** | [GameEngine.js](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/src/logic/GameEngine.js) | 게임의 핵심 루틴 및 상태 관리 |
+| | [constants.js](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/src/logic/constants.js) | 몬스터 데이터, 웨이브 설정 (한글화 완료) |
+| **컴포넌트** | [App.jsx](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/src/App.jsx) | 메인 UI 및 렌더링 루프 제어 |
+| | [MonsterDebugger.jsx](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/src/components/MonsterDebugger.jsx) | [NEW] 몬스터 상태 모니터링 및 디버깅 도구 |
+| **데이터/설정** | [augments.json](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/augments.json) | 증강(Augments) 시스템 데이터 |
+| | [vite.config.js](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/vite.config.js) | 웹 배포 및 빌드 설정 |
+| **프로토타입** | [proto2.html](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/proto2.html) | 단일 파일 기반 최신 테스트 버전 |
+| **지침/문서** | [PROJECT_RULES.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/PROJECT_RULES.md) | 통합된 프로젝트 규칙 및 지침 |
+| | [task.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/task.md) | 현재 작업 진행 상황 관리 |
 
 ---
 
@@ -42,14 +42,14 @@
 새로운 세션을 시작할 때, AI는 반드시 다음 순서로 프로젝트를 파악해야 합니다:
 
 1. **필수 문서 숙지**: 다음 문서들을 최우선으로 읽고 지침을 적용합니다.
-   - [PROJECT_RULES.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/PROJECT_RULES.md): 언어, 코딩, 아키텍처 통합 규칙
-   - [MONSTERS.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/MONSTERS.md): 몬스터 데이터 규격
-   - [AUGMENTS.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/AUGMENTS.md): 증강 상세 스펙
+   - [PROJECT_RULES.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/PROJECT_RULES.md): 언어, 코딩, 아키텍처 통합 규칙
+   - [MONSTERS.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/MONSTERS.md): 몬스터 데이터 규격
+   - [AUGMENTS.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/AUGMENTS.md): 증강 상세 스펙
 
 2. **진행 상황 파악**:
-   - [task.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/task.md)를 통해 현재 할 일과 완료된 일을 확인합니다.
-   - [resumption_guide.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/resumption_guide.md)를 통해 프로젝트 전체 요약을 파악합니다.
+   - [task.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/task.md)를 통해 현재 할 일과 완료된 일을 확인합니다.
+   - [resumption_guide.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/resumption_guide.md)를 통해 프로젝트 전체 요약을 파악합니다.
 
-> **"Augmented Simulator 프로젝트 작업을 재개할게. [PROJECT_RULES.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/PROJECT_RULES.md), [MONSTERS.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/MONSTERS.md), [AUGMENTS.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/AUGMENTS.md)를 모두 정독하고 나서, [task.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/task.md)의 다음 작업을 진행해줘."**
+> **"Augmented Simulator 프로젝트 작업을 재개할게. [PROJECT_RULES.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/PROJECT_RULES.md), [MONSTERS.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/MONSTERS.md), [AUGMENTS.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/AUGMENTS.md)를 모두 정독하고 나서, [task.md](file:///c:/Users/grayfield/.gemini/antigravity/scratch/augmented_simulator/task.md)의 다음 작업을 진행해줘."**
 
 이 문구 하나면 안티그라비티가 모든 맥락을 이해하고 즉시 작업을 재개할 것입니다.
