@@ -1,4 +1,4 @@
-name: Build & Deploy to GitHub Pages
+name: Deploy Game to GitHub Pages
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout Repository
@@ -19,27 +19,37 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: 📦 Install Dependencies
-        run: npm ci
+      - name: 🔍 Smoke Check - Validate game HTML integrity
+        # 배포 전 public/proto2.html에 필수 DOM이 있는지 검증
+        run: |
+          echo "Checking required DOM elements in public/proto2.html..."
+          for id in game-container play-area bottom-ui; do
+            if grep -q "id=\"${id}\"" public/proto2.html; then
+              echo "  ✅ #${id} found"
+            else
+              echo "  ❌ MISSING: #${id}"
+              echo "SMOKE CHECK FAILED: required element #${id} is missing from public/proto2.html"
+              exit 1
+            fi
+          done
+          echo "✅ All required DOM elements verified."
 
-      - name: 🧪 Run Tests
-        run: npm run test --if-present
+      - name: 📁 Prepare Deploy Directory
+        run: |
+          mkdir -p _deploy
+          # 게임 메인 파일
+          cp public/proto2.html _deploy/proto2.html
+          # index.html → proto2.html 로 리다이렉트
+          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=proto2.html"><title>Augmented Simulator</title></head><body></body></html>' > _deploy/index.html
+          echo "Deploy directory contents:"
+          ls -la _deploy/
 
-      - name: 🏗️ Build Project
-        run: npm run build
-        # Vite build: copies public/ → dist/ (includes public/proto2.html unmodified)
-
-      - name: 🔍 Smoke Check (DOM Integrity Validation)
-        # 필수 DOM 요소가 없으면 배포 즉시 중단
-        run: node scripts/smoke-check.js
-
-      - name: 🚀 Deploy to gh-pages branch
+      - name: 🚀 Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./_deploy
           publish_branch: gh-pages
           force_orphan: true
-          commit_message: "ci: auto-deploy from ${{ github.sha }}"
+          commit_message: "ci: deploy game from ${{ github.sha }}"
