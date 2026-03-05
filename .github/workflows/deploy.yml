@@ -1,4 +1,4 @@
-name: Deploy Game to GitHub Pages
+name: Build & Deploy to GitHub Pages
 
 on:
   push:
@@ -20,12 +20,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: 🔍 Smoke Check - Validate game HTML integrity
-        # 배포 전 public/proto2.html에 필수 DOM이 있는지 검증
+      - name: 🔍 Smoke Check - Validate source game HTML integrity
+        # 배포 전 소스 파일(public/proto2.html)에 핵심 DOM이 있는지 검증
         run: |
           echo "Checking required DOM elements in public/proto2.html..."
-          for id in game-container play-area bottom-ui; do
-            if grep -q "id=\"${id}\"" public/proto2.html; then
+          for id in game-container play-area bottom-ui gameCanvas lobby-overlay; do
+            if grep -q "id=\"${id}\"\|id='${id}'" public/proto2.html; then
               echo "  ✅ #${id} found"
             else
               echo "  ❌ MISSING: #${id}"
@@ -33,23 +33,33 @@ jobs:
               exit 1
             fi
           done
-          echo "✅ All required DOM elements verified."
+          echo "✅ All required DOM elements verified in source."
 
       - name: 📁 Prepare Deploy Directory
         run: |
           mkdir -p _deploy
-          # 게임 메인 파일
-          cp public/proto2.html _deploy/proto2.html
-          # index.html → proto2.html 로 리다이렉트
-          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=proto2.html"><title>Augmented Simulator</title></head><body></body></html>' > _deploy/index.html
+          # [핵심] 실제 게임 본체는 index.html이 됨
+          cp public/proto2.html _deploy/index.html
+          # [핵심] 기존 URL 호환성을 위해 proto2.html은 index.html로 리다이렉트만 수행
+          echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.html"><title>Redirecting...</title></head><body>Redirecting to index.html...</body></html>' > _deploy/proto2.html
           echo "Deploy directory contents:"
           ls -la _deploy/
 
-      - name: 🚀 Deploy to gh-pages
+      - name: 🔍 Final Smoke Check - Test deployed index.html
+        run: |
+          echo "Verifying deployed index.html (the game)..."
+          if grep -q "id=\"game-container\"" _deploy/index.html; then
+             echo "  ✅ game-container exists in deployment entry point."
+          else
+             echo "  ❌ FAILED: deployment entry point is broken!"
+             exit 1
+          fi
+
+      - name: 🚀 Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_deploy
           publish_branch: gh-pages
           force_orphan: true
-          commit_message: "ci: deploy game from ${{ github.sha }}"
+          commit_message: "ci: deploy game as index.html from ${{ github.sha }}"
