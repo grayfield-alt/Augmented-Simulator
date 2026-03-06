@@ -19,45 +19,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: 🔍 Smoke Check - Validate source game HTML integrity
-        # 배포 전 소스 파일(public/proto2.html)에 핵심 DOM이 있는지 검증
-        run: |
-          echo "Checking required DOM elements in public/proto2.html..."
-          for id in game-container play-area bottom-ui gameCanvas lobby-overlay; do
-            if grep -q "id=\"${id}\"\|id='${id}'" public/proto2.html; then
-              echo "  ✅ #${id} found"
-            else
-              echo "  ❌ MISSING: #${id}"
-              echo "SMOKE CHECK FAILED: required element #${id} is missing from public/proto2.html"
-              exit 1
-            fi
-          done
-          echo "✅ All required DOM elements verified in source."
+      - name: 📦 Install Dependencies
+        run: npm ci
 
-      - name: 📁 Prepare Deploy Directory
-        run: |
-          mkdir -p _deploy
-          # 1. 루트 index.html (실제 게임 본체) 복사
-          cp index.html _deploy/index.html
-          # 2. 리다이렉트 스텁 proto2.html 복사
-          cp proto2.html _deploy/proto2.html
-          # 3. 기타 에셋 복사 (필요 시)
-          if [ -d "public" ]; then cp -r public/* _deploy/ 2>/dev/null || true; fi
+      - name: 🧪 Run Unit Tests
+        run: npm test
 
-      - name: 🔍 Final Smoke Check - Test deployed files
-        run: |
-          # index.html (게임 본체) 검증
-          grep -q 'id="gameCanvas"' _deploy/index.html || { echo "CRITICAL: gameCanvas missing in index.html"; exit 1; }
-          grep -q 'id="lobby-overlay"' _deploy/index.html || { echo "CRITICAL: lobby-overlay missing in index.html"; exit 1; }
-          # proto2.html (리다이렉트 스텁) 검증
-          grep -q 'http-equiv="refresh"' _deploy/proto2.html || { echo "CRITICAL: Redirect logic missing in proto2.html"; exit 1; }
+      - name: 🏗️ Build Application
+        run: npm run build
+
+      - name: 🔍 Smoke Check - Validate Build Output
+        run: npm run smoke-check
 
       - name: 🚀 Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_deploy
+          publish_dir: ./dist
           publish_branch: gh-pages
           force_orphan: true
-          commit_message: "ci: deploy game as index.html from ${{ github.sha }}"
+          commit_message: "ci: deploy build outputs from ${{ github.sha }}"

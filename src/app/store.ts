@@ -1,5 +1,6 @@
 // src/app/store.ts (한글)
 import { GameState, getInitialGameState } from '../core/state';
+import { processTurn } from '../core/engine';
 
 export type Subscriber = (state: GameState) => void;
 
@@ -21,8 +22,8 @@ export class AppStore {
 
     dispatch(action: any) {
         console.log(`[ACTION] ${action.type}`, action);
-        // Core 리듀서 연동 (실제 배포 시 processTurn 호출)
-        // this.state = processTurn(this.state, action);
+        // Core 리듀서 연동 (실제 배포 시 processTurn 호출) (한글)
+        this.state = processTurn(this.state, action);
         this.notify();
     }
 

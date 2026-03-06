@@ -1,7 +1,10 @@
 // scripts/smoke-check.js
-// CI에서 실행: 빌드 산출물(dist/proto2.html)에 핵심 DOM ID가 존재하는지 검증합니다.
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DIST_FILE = path.resolve(__dirname, '..', 'dist', 'proto2.html');
 const REQUIRED_IDS = [
@@ -30,6 +33,14 @@ for (const id of REQUIRED_IDS) {
     } else {
         console.log(`  ✅ #${id} 존재 확인`);
     }
+}
+
+// 스크립트 로드 확인 (한글)
+if (!content.includes('type="module"') && !content.includes('<script')) {
+    console.error(`❌ [SMOKE CHECK FAILED] 스크립트 태그가 없습니다!`);
+    failed = true;
+} else {
+    console.log(`  ✅ 스크립트 로드 태그 확인`);
 }
 
 if (failed) {

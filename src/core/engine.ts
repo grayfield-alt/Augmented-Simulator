@@ -28,6 +28,11 @@ export function processTurn(state: GameState, action: any): GameState {
     const p = next.player;
 
     switch (action.type) {
+        case 'START_GAME':
+            next.gameStarted = true;
+            next.currentTurn = 'PLAYER';
+            break;
+
         case 'START_TURN':
             next.currentTurn = action.turn;
             if (action.turn === 'PLAYER') {

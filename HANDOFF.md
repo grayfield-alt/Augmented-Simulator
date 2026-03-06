@@ -13,68 +13,37 @@
 ---
 
 ## 🕒 Last Updated
-- **Time**: 2026-03-06 20:40 (KST)
-- **Commit**: 오늘 작업분 push 완료 (see `git log --oneline -5`)
+- **Time**: 2026-03-07 01:45 (KST)
+- **Commit**: `[All Structure Fixes Included]` (Vite single entry & CI/CD)
 
 ---
 
 ## 🎯 Current Goal
-**`npm test` 100% 통과 만들기** → 그 다음 Start 버튼 스모크 테스트
+**배포 안정성 및 구조적 무결성 확보 완료**
 
 ---
 
-## 🔴 0순위: 집에서 바로 할 일 (vitest 설정 완료 후 테스트 통과)
-
-### 배경
-vitest가 `getInitialGameState is not a function` 에러를 냄. 코드 자체 문제가 아닌 **vitest ESM/SSR import 모드 충돌** 문제임.
-
-오늘 이미 구조 수정 완료:
-- ✅ `vitest.config.ts` 신규 생성 (include: `tests/**/*.test.ts`, environment: `node`)
-- ✅ `tests/core.test.ts` 경로 수정 (`../src/core/state` 등 올바른 상대경로)
-- ✅ `src/tests/` 구버전 폴더 삭제 (혼선 제거)
-- ✅ `package.json` → `"test": "vitest run"` 스크립트 추가
-
-### 집에서 바로 실행 순서
-
-**Step 1: 테스트 통과 확인**
-```bash
-npm test
-```
-- ✅ 통과하면 → Step 2로
-- ❌ 실패하면: `npx vitest run --reporter=verbose` 로 에러 내용 확인
-
-**Step 2: 남은 이슈 - stage.test.ts 경로도 확인**
-```bash
-# tests/stage.test.ts 에서 import 경로가 ../src/... 형식인지 확인
-cat tests/stage.test.ts | head -5
-```
-
-**Step 3: 모두 통과하면 Start 버튼 스모크 테스트**
-```bash
-npm run dev   # http://localhost:5173/ 접속
-```
-DevTools Console에서:
-- `typeof window.startGame` → `"function"` 이어야 함
-- Start 클릭 → Debug HUD에 `Last Action: CLICK: BUTTON#btn-start` 표시 확인
-- 500ms 내에 게임 시작 안 되면 `Last Error`에 원인 표시됨
+## ✅ 완료된 작업 (2026-03-07)
+- � **구조적 개선**: `proto2.html` 인라인 JS 제거 및 리다이렉트 스텁 전환 (호환성 유지)
+- 🚨 **빌드 단일화**: `index.html`을 Vite 단일 진입점으로 설정 (소스 관리 효율화)
+- 🚨 **CI/CD 정착**: `deploy.yml` 개편 (`npm build` -> `smoke-check` -> `gh-pages`)
+- �🔴 **이슈해결**: `State.js` 대소문자 충돌 및 `getInitialGameState` undefined 오류 해결
+- 🔴 **이슈해결**: `AppStore.dispatch` 및 `START_GAME` 액션 누락 복구
+- ✅ `npm run check` (Test + Lint + Build + Smoke) 전과정 통과
 
 ---
 
-## ✅ 오늘 완료된 작업 (2026-03-06)
-- `index.html` parse5 control-character 오류 완전 제거 (`npm run build` 경고 0)
-- `proto2.html` 리다이렉트 스텁으로 고정 (직접 수정 금지)
-- `src/utils/debugger.ts` 전역 디버그 HUD 신설
-- `src/main.ts` Event Delegation으로 `btn-start`/`btn-archive`/`btn-briefing` 바인딩
-- `vite.config.js` 환경별 base 동적 분기 (`serve`=`/`, `build`=`/Augmented-Simulator/`)
-- `vitest.config.ts` 생성 및 테스트 구조 단일화 (`tests/` 폴더 단일 진입점)
-- `npm run test` + `npm run check` 스크립트 추가
+## 🔍 RCA (근본 원인 분석) - 스타트 버튼 미작동
+- **현상**: 라이브 사이트 `proto2.html` 로드 시 `SyntaxError` 발생으로 전체 스크립트 중단.
+- **원인**: 인라인 JS 내부의 한글 주석 뒤 줄바꿈 유실로 인해 실제 실행 코드가 주석 처리됨.
+- **해결**: 인라인 방식을 버리고 Vite 빌드 에셋을 로드하는 `index.html` 체제로 전환하여 해결.
 
 ---
 
-## ⏳ Next 3 Steps (내일 집에서)
-1. `npm test` 통과 확인 (오늘 구조 수정 반영됐을 것)
-2. Start 버튼 스모크: `npm run dev` → F12 → `typeof window.startGame` 확인
-3. `/dev/` 프리뷰 채널 분리 배포 구성 (`.github/workflows/deploy-dev.yml` 신규)
+## ⏳ Next 3 Steps
+1. 라이브 사이트 배포 반영 확인 (GitHub Actions 완료 대기)
+2. 인벤토리/가이드 UI 기능 구체화 (메인 로직과 연결)
+3. 몬스터 공격 전조/패링 프레임 상관관계 정교화
 
 ---
 

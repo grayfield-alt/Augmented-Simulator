@@ -41,6 +41,22 @@ function boot() {
         }
     });
 
+    // 5. 전역 액션 브릿지 등록 (Legacy 호환성 및 버튼 바인딩용) (한글)
+    (window as any).startGame = () => {
+        console.log("Game Start Signal Received.");
+        store.dispatch({ type: 'START_GAME' });
+    };
+
+    (window as any).openInventory = () => {
+        console.log("Inventory Open Signal Received.");
+        // 구현 예정 (한글)
+    };
+
+    (window as any).toggleGuide = (show: boolean) => {
+        console.log("Guide Toggle Signal Received:", show);
+        // 구현 예정 (한글)
+    };
+
     console.log("V3 Core Operational. Game Loop initialized via Event Delegation.");
 }
 

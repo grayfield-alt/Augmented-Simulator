@@ -8,7 +8,7 @@
     "build": "vite build",
     "build:deploy": "vite build && node scripts/sync-dist.js",
     "deploy": "npm run build && node scripts/smoke-check.js && npx gh-pages -d dist",
-    "postbuild": "node -e \"const fs=require('fs'); if(fs.existsSync('dist/index.html')) fs.copyFileSync('dist/index.html', 'dist/proto2.html')\"",
+    "postbuild": "node scripts/postbuild.js",
     "smoke-check": "node scripts/smoke-check.js",
     "test": "vitest run",
     "check": "npm run test && npm run lint && npm run build",
@@ -38,6 +38,8 @@
     "globals": "^16.5.0",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^3.0.0",
+    "@vitest/ui": "^3.0.0"
   }
 }
