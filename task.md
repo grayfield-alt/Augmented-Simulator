@@ -1,31 +1,21 @@
-# 작업 목록
+# 🛠️ 작업 목록 (최종 완료)
 
-## 문서 및 환경 설정
-- [x] 작업 목록(`task.md`) 및 구현 계획서(`implementation_plan.md`) 한글화 [x]
-- [x] 기술 문서(`README`, `engine_integration.md`) 한글화 [x]
-- [x] 몬스터 데이터 및 스펙(`constants.js` 내 `WAVE_DATA`) 한글화 [x]
-- [x] `.agent/skills/clean-architecture/SKILL.md` 생성 및 등록 [x]
-- [x] 프로젝트 루트에 `skills.md` 생성 [x]
-- [x] 나머지 잔여 문서([handoff.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/handoff.md), [resumption_guide.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/resumption_guide.md)) 한글화 [x]
-- [x] 전체 문서 검토 및 한글화 확인 [x]
-- [x] 중복 문서(`skills.md`) 통합 및 [PROJECT_RULES.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/PROJECT_RULES.md) 단일화 [x]
+## ✅ 배포 시스템 복구 및 최적화
+- [x] **무한 리다이렉트 루프 해결**
+  - 루트 `proto2.html`을 리다이렉트 전용 스텁으로 교체 (중복 호출 원인 제거)
+- [x] **빌드/배포 파이프라인(CI/CD) 구축**
+  - GitHub Actions를 통한 `gh-pages` 자동 배포 설정
+  - 배포 시 `index.html`을 실제 게임 엔트리로 자동 전송하는 구조 도입
+- [x] **자동화된 무결성 검증 추가**
+  - 필수 DOM 요소 누락 여부를 체크하는 스모크 테스트 구현 (Actions 내 포함)
+- [x] **운영 지침 문서화**
+  - `HANDOFF.md`에 배포 엔트리 직접 수정 금지 및 복구 방법 업데이트
 
-## 주요 경로 및 배포
-- [x] 주요 파일 경로 및 구조 확인 ([resumption_guide.md](file:///c:/Users/LEE/.gemini/antigravity/scratch/projects/AugmentedSimulator_Main/resumption_guide.md)에 상세 경로 기록 완료) [x]
-- [x] 웹 배포 기능(Vite/GitHub Pages) 설정 및 확인 [x]
-  - [x] GitHub Actions 워크플로우 설정 완료 (`.github/workflows/deploy.yml`) [x]
-  - [x] Vite base 경로 설정 완료 [x]
-- [x] 배포 가이드 문서 업데이트 [x]
+## ✅ 문서화 및 환경 설정 (한글화)
+- [x] 전체 문서(`task.md`, `README.md` 등) 한글화 완료 [x]
+- [x] 프로젝트 규칙 및 기술 지침(`PROJECT_RULES.md`) 정립 [x]
 
-## 전투 로직 고도화
-- [/] 전조/공격/패링 프레임 상관관계 정의 및 구현 (26프레임 반응 기준)
+## ⏳ 향후 과제 (참고용)
+- [/] 전조/공격/패링 프레임 상관관계 정교화
 - [ ] 몬스터 애니메이션 및 히트박스 타이밍 정교화
-
-## UI/UX 및 그래픽 고도화
-- [x] `proto2.html` UI 미작동 및 겹침 문제 해결 [x]
-- [x] 모바일 하단 버튼 잘림 및 정렬 쏠림 현상 수정 [x]
-- [x] 턴 전환 중 HUD 소실 버그 수정 및 턴 표시 오버레이 구현 [x]
-- [x] 스테이지 2 난이도 상향 및 플레이어 스탯 밸런스 조정 ([balance_sheet.md](file:///c:/Users/grayfield/scratch/augmented_simulator/balance_sheet.md)) [x]
-- [x] V2 Standalone 버전의 프리미엄 그래픽 스타일 이식 및 지침 준수 [x]
-- [x] 모든 기술 문서 및 구현 계획서 한글화 완료 [x]
-- [x] Git Push 및 최종 작업일지 업데이트 완료 [x]
+- [ ] 로더 셸을 통한 프로토타입 격리 관리
