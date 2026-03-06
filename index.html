@@ -20,7 +20,15 @@
         class="w-full max-w-[412px] h-full max-h-[850px] aspect-[9/18] m-auto flex flex-col bg-black relative shadow-2xl overflow-hidden">
         <!-- Battle Screen -->
         <div id="battle-screen" class="hidden flex-col h-full bg-[#050507]">
-            <header id="top-status"></header>
+            <header id="top-status" class="p-4 flex justify-between items-center bg-black/40 backdrop-blur-md z-30">
+                <div class="flex gap-4 font-mono text-xs italic tracking-tighter uppercase opacity-80">
+                    <div>HP <span id="p-hp" class="text-white font-bold">0</span></div>
+                    <div>ATK <span id="p-atk" class="text-white font-bold">0</span></div>
+                    <div>DEF <span id="p-def" class="text-white font-bold">0</span></div>
+                    <div>AP <span id="p-ap" class="text-white font-bold">0</span></div>
+                </div>
+                <div id="turn-indicator-overlay" class="text-[10px] font-black italic uppercase tracking-[0.2em]"></div>
+            </header>
             <main id="play-area" class="flex-1 relative overflow-hidden bg-black/20">
                 <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
                 <div id="visual-overlays" class="absolute inset-0 pointer-events-none z-20">
