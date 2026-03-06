@@ -28,6 +28,18 @@ export const SELECTORS = {
     msg: 'msg-container'
 };
 
+export const REQUIRED_IDS = [
+    SELECTORS.hp,
+    SELECTORS.atk,
+    SELECTORS.def,
+    SELECTORS.ap,
+    SELECTORS.canvas,
+    SELECTORS.lobby,
+    SELECTORS.battleScreen,
+    SELECTORS.turn,
+    SELECTORS.errorOverlay
+];
+
 // 에러 스로틀링 관리 (한글)
 const errorCounts: Record<string, number> = {};
 const ERROR_LIMIT = 3;

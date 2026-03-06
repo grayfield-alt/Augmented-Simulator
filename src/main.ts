@@ -15,11 +15,28 @@ function boot() {
 
     // 2. 스토어 변경 구독 (UI 렌더러 연결) (한글)
     store.subscribe((state) => {
+        // 전역 상태 동기화 (debugger.ts 등에서 활용) (한글)
+        (window as any).gameStarted = state.gameStarted;
         renderUI(state);
     });
 
     // 3. 초기 상태 갱신 (한글)
     store.dispatch({ type: 'INIT' });
+
+    // 3.5. 캔버스 렌더링 루프 시작 (한글)
+    const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            function loop() {
+                import('./ui/renderer').then(({ drawGame }) => {
+                    drawGame(ctx!, store.getState());
+                });
+                requestAnimationFrame(loop);
+            }
+            requestAnimationFrame(loop);
+        }
+    }
 
     // 4. 이벤트 위임(Event Delegation)을 통한 버튼 클릭 바인딩 (사용자 지침 A 반영) (한글)
     document.body.addEventListener('click', (e) => {
