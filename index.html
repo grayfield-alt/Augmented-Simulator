@@ -11,6 +11,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@500;800;900&display=swap"
         rel="stylesheet">
+    <!-- V3 엔트리 포인트 연동 (한글) -->
+    <script type="module" src="./src/main.ts"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
@@ -771,30 +773,30 @@
             "Common": [
                 { id: "c1", name: "?좎뭅濡쒖?", desc: "怨듦꺽??횞1.10", effect: p => p.augBuffs.atk *= 1.1 },
                 { id: "c2", name: "異뺤쟻??遺꾨끂", desc: "媛뺥? 怨듦꺽??횞1.20", effect: p => p.augBuffs.heavy *= 1.2 },
-                { id: "c3", name: "?뚯쟾 媛??, desc: "?뚯쟾踰좉린 怨듦꺽??횞1.15", effect: p => p.augBuffs.spin *= 1.15 },
+                { id: "c3", name: "?뚯쟾 媛??, desc: " ? 뚯쟾踰좉린 怨듦꺽?? 횞1.15", effect: p => p.augBuffs.spin *= 1.15 },
                 { id: "c4", name: "?뺣? 諛⑹뼱", desc: "?⑤쭅 ?깃났 ??AP +1 (?대떦 1??", effect: p => p.augBuffs.parryAp += 1 },
                 { id: "c5", name: "?곗냽 ?명씉", desc: "?꾪닾 ?쒖옉 ??AP +2", effect: p => p.augBuffs.startAp += 2 },
                 { id: "c6", name: "泥섑삎 蹂몃뒫", desc: "???HP 30% ?댄븯????怨듦꺽??횞1.15", effect: p => p.augBuffs.executeLow = 0.3 },
                 { id: "c7", name: "?쎌젏 ?뚯븙", desc: "媛숈? ???곗냽 怨듦꺽 ??2?遺??怨듦꺽??횞1.10", effect: p => p.augBuffs.stackAtk = 0.1 },
                 { id: "c8", name: "泥좉컩 遺꾩뇙", desc: "媛뺥? ?곸쨷 ???ㅼ쓬 ??泥?怨듦꺽 怨듦꺽??횞1.15", effect: p => p.augBuffs.heavySunder = 0.15 },
                 { id: "c9", name: "?쇱쓽 ?뚯닔", desc: "??泥섏튂 ??AP +1 (?대떦 2??", effect: p => p.augBuffs.killAp += 1 },
-                { id: "c10", name: "吏묒쨷??, desc: "?쇳럺???⑤쭅 ?깃났 ???ㅼ쓬 怨듦꺽??횞1.20", effect: p => p.augBuffs.perfectFocus = 0.20 }
+                { id: "c10", name: "吏묒쨷??, desc: " ? 쇳럺 ???⑤쭅?깃났 ??? ㅼ쓬 怨듦꺽 ?? 횞1.20", effect: p => p.augBuffs.perfectFocus = 0.20 }
             ],
             "Epic": [
                 { id: "e1", name: "?쎌젏 ?대?", desc: "媛숈? ???곗냽 怨듦꺽 ??怨듦꺽??횞1.06 (理쒕? 5以묒꺽)", effect: p => p.augBuffs.stackAtkEpic = 0.06 },
-                { id: "e2", name: "怨쇱뿴 ?寃?, desc: "媛뺥? ?ъ슜 ???ㅼ쓬 ??泥?怨듦꺽 怨듦꺽??횞1.35", effect: p => p.augBuffs.heavyOverheat = 0.35 },
+                { id: "e2", name: "怨쇱뿴 ?寃?, desc: "媛뺥? ?ъ슜 ??? ㅼ쓬 ?? 泥 ? 怨듦꺽 怨듦꺽 ?? 횞1.35", effect: p => p.augBuffs.heavyOverheat = 0.35 },
                 { id: "e3", name: "?먯떖 ??컻", desc: "?뚯쟾踰좉린 怨듦꺽??횞1.25 / 泥섏튂 ??AP +1", effect: p => { p.augBuffs.spin *= 1.25; p.augBuffs.spinKillAp += 1; } },
                 { id: "e4", name: "?꾨꼍??由щ벉", desc: "?쇳럺???⑤쭅 ???대쾲 ??怨듦꺽??횞1.20", effect: p => p.augBuffs.turnAtkPerf = 0.2 },
-                { id: "e5", name: "珥덈컲 媛??, desc: "?꾪닾 ?쒖옉 ??AP +3 / 泥???怨듦꺽??횞1.10", effect: p => { p.augBuffs.startAp += 3; p.augBuffs.startTurnAtk = 0.1; } },
+                { id: "e5", name: "珥덈컲 媛??, desc: " ? 꾪닾 ? 쒖옉 ?? AP + 3 / 泥 ??? 怨듦꺽 ?? 횞1.10", effect: p => { p.augBuffs.startAp += 3; p.augBuffs.startTurnAtk = 0.1; } },
                 { id: "e6", name: "?쇱쓽 ?섑솗", desc: "??泥섏튂 ??怨듦꺽??횞1.04 (理쒕? 10以묒꺽)", effect: p => p.augBuffs.killStackAtk = 0.04 },
-                { id: "e7", name: "?⑤몢??媛?, desc: "??HP 30% ?댄븯????媛뺥? 怨듦꺽??횞1.40", effect: p => p.augBuffs.heavyExecute = 0.4 },
+                { id: "e7", name: "?⑤몢??媛?, desc: " ?? HP 30% ? 댄븯 ???? 媛뺥 ? 怨듦꺽 ?? 횞1.40", effect: p => p.augBuffs.heavyExecute = 0.4 },
                 { id: "e8", name: "移⑥갑????젰", desc: "?꾩옱 AP 媛 0~2????怨듦꺽??횞1.18", effect: p => p.augBuffs.lowApAtk = 1.18 },
                 { id: "e9", name: "愿??踰좉린", desc: "湲곕낯 怨듦꺽 ?ъ슜 ???ㅼ쓬 ??泥?怨듦꺽 怨듦꺽??횞1.15", effect: p => p.augBuffs.inertiaSlice = 0.15 },
                 { id: "e10", name: "?뚭눼??留λ컯", desc: "留???泥?怨듦꺽 怨듦꺽??횞1.15 (媛뺥??쇰㈃ x1.25)", effect: p => p.augBuffs.firstAtkMult = 0.15 }
             ],
             "Unique": [
                 { id: "u1", name: "寃?깆쓽 ?쒖빟", desc: "紐⑤뱺 ?ㅽ궗 怨듦꺽??횞1.20", effect: p => { p.augBuffs.atk *= 1.2; p.augBuffs.spin *= 1.2; p.augBuffs.heavy *= 1.2; } },
-                { id: "u2", name: "????諛?, desc: "媛뺥? 怨듦꺽??횞1.60 / 媛뺥? 泥섏튂 ??AP +2", effect: p => { p.augBuffs.heavy *= 1.6; p.augBuffs.heavyKillAp += 2; } },
+                { id: "u2", name: "????諛?, desc: "媛뺥? 怨듦꺽?? 횞1.60 / 媛뺥 ? 泥섏튂 ?? AP + 2", effect: p => { p.augBuffs.heavy *= 1.6; p.augBuffs.heavyKillAp += 2; } },
                 { id: "u3", name: "??뭾??以묒떖", desc: "?뚯쟾踰좉린 怨듦꺽??횞1.50 / ??2留덈━ ?댁긽 ??異붽? x1.1", effect: p => { p.augBuffs.spin *= 1.5; p.augBuffs.spinMultiTarget = 0.1; } },
                 { id: "u4", name: "臾댄븳 ?쒗룷", desc: "?꾪닾 ?쒖옉 AP +4 / ?쇳럺???⑤쭅 ??AP +1 (?대떦 2)", effect: p => { p.augBuffs.startAp += 4; p.augBuffs.perfectApBonus += 1; } },
                 { id: "u5", name: "?쇱쓽 ?붿쭊", desc: "??泥섏튂 ??怨듦꺽??횞1.06 (臾댁젣?? / ?쇨꺽 ?쇳빐 x1.1", effect: p => { p.augBuffs.unlimitKillAtk = 0.06; p.augBuffs.takeDmgMult *= 1.1; } },
@@ -1313,80 +1315,81 @@
                 const defaults = {
                     "mon_tuto_1": { name: "?곗뒿???덉닔?꾨퉬", hp: 100, atk: 10, telegraph: 1.2, postdelay: 1.0, hitstop: 3 },
                     "mon_tuto_2": { name: "媛뺥솕 ?덉닔?꾨퉬", hp: 150, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3 },
-                    "mon_boss_1": { name: "???ㅽ넱??, hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
-                };
-                let d = defaults[id] || defaults["mon_tuto_1"];
-                libM = { ...d };
-            }
-            return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
-        }
-
-        function showEventOverlay() {
-            currentTurn = "NONE";
-            updateInterfaceVisibility();
-            ui.overlayEvent.style.display = "flex";
-        }
-
-        function selectEventOption(option) {
-            ui.overlayEvent.style.display = "none";
-            if (option === 1) {
-                showAugmentSelection("Common");
-            } else {
-                Player.hp = Math.min(Player.maxHp, Math.round(Player.hp + Player.maxHp * 0.35));
-                showFeedback("Healed 35% HP", "#4f4");
-                currentRound = 4;
-                spawnWave(4);
-            }
-        }
-
-        function winRound() {
-            // 理쒖쥌 蹂댁뒪 ?대━??泥댄겕
-            if (currentRound >= 20) {
-                showFeedback("?ъ뿰???뺣났?덉뒿?덈떎!", "#FFD700");
-                gameStarted = false;
-                return;
+                    "mon_boss_1": {
+                        name: "???ㅽ넱??, hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
+                    };
+                    let d = defaults[id] || defaults["mon_tuto_1"];
+                    libM = { ...d };
+                }
+                return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
             }
 
-            currentRound++;
-
-            // ?ㅼ쓬 ?쇱슫?쒓? ?대깽???쇱슫?쒖씤吏 ?뺤씤
-            const eventRounds = [3, 7, 12, 16];
-            if (eventRounds.includes(currentRound)) {
-                showEventOverlay();
-            } else {
-                showAugmentSelection();
+            function showEventOverlay() {
+                currentTurn = "NONE";
+                updateInterfaceVisibility();
+                ui.overlayEvent.style.display = "flex";
             }
-        }
 
-        function openInventory() {
-            ui.inventory.style.display = "flex";
-            renderCompleteInventory();
-        }
+            function selectEventOption(option) {
+                ui.overlayEvent.style.display = "none";
+                if (option === 1) {
+                    showAugmentSelection("Common");
+                } else {
+                    Player.hp = Math.min(Player.maxHp, Math.round(Player.hp + Player.maxHp * 0.35));
+                    showFeedback("Healed 35% HP", "#4f4");
+                    currentRound = 4;
+                    spawnWave(4);
+                }
+            }
 
-        function openStageEditor() {
-            ui.stageEditor.style.display = "flex";
-            renderFullStageEditor();
-        }
+            function winRound() {
+                // 理쒖쥌 蹂댁뒪 ?대━??泥댄겕
+                if (currentRound >= 20) {
+                    showFeedback("?ъ뿰???뺣났?덉뒿?덈떎!", "#FFD700");
+                    gameStarted = false;
+                    return;
+                }
 
-        function closeOverlay(id) {
-            document.getElementById(id).style.display = "none";
-        }
+                currentRound++;
 
-        function renderCompleteInventory() {
-            const list = document.getElementById('complete-inventory-list');
+                // ?ㅼ쓬 ?쇱슫?쒓? ?대깽???쇱슫?쒖씤吏 ?뺤씤
+                const eventRounds = [3, 7, 12, 16];
+                if (eventRounds.includes(currentRound)) {
+                    showEventOverlay();
+                } else {
+                    showAugmentSelection();
+                }
+            }
 
-            // 1. Default Monsters from WAVE_DATA
-            const defaults = [
-                { id: "def_1", name: "Enemy 1 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_2", name: "Enemy 2 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_A", name: "Enemy A (Default)", hp: 80, atk: 9, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_B", name: "Enemy B (Default)", hp: 120, atk: 8, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
-                { id: "def_BOSS", name: "BOSS (Default)", hp: 780, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true }
-            ];
+            function openInventory() {
+                ui.inventory.style.display = "flex";
+                renderCompleteInventory();
+            }
 
-            const allMonsters = [...defaults, ...monsterLibrary];
+            function openStageEditor() {
+                ui.stageEditor.style.display = "flex";
+                renderFullStageEditor();
+            }
 
-            list.innerHTML = allMonsters.map(m => `
+            function closeOverlay(id) {
+                document.getElementById(id).style.display = "none";
+            }
+
+            function renderCompleteInventory() {
+                const list = document.getElementById('complete-inventory-list');
+
+                // 1. Default Monsters from WAVE_DATA
+                const defaults = [
+                    { id: "def_1", name: "Enemy 1 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                    { id: "def_2", name: "Enemy 2 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                    { id: "def_A", name: "Enemy A (Default)", hp: 80, atk: 9, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                    { id: "def_B", name: "Enemy B (Default)", hp: 120, atk: 8, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                    { id: "def_BOSS", name: "BOSS (Default)", hp: 780, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true }
+                ];
+
+                const allMonsters = [...defaults, ...monsterLibrary];
+
+                list.innerHTML = allMonsters.map(m => `
                 <div class="monster-card ${m.isDefault ? 'system' : 'custom'}">
                     <div class="monster-info">
                         <h4>${m.name}</h4>
@@ -1401,16 +1404,16 @@
                     </div>
                 </div>
             `).join('');
-        }
+            }
 
-        function renderFullStageEditor() {
-            const container = document.getElementById('full-stage-list');
-            let html = '';
-            const rounds = [1, 2, 4, 5, 6];
+            function renderFullStageEditor() {
+                const container = document.getElementById('full-stage-list');
+                let html = '';
+                const rounds = [1, 2, 4, 5, 6];
 
-            rounds.forEach(r => {
-                const mIds = customStages[r] || [];
-                html += `
+                rounds.forEach(r => {
+                    const mIds = customStages[r] || [];
+                    html += `
                     <div class="stage-box" style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <span style="font-weight:bold; color:#4db8ff; font-size: 18px;">Round ${r}</span>
@@ -1418,161 +1421,161 @@
                         </div>
                         <div style="min-height: 40px; border: 1px dashed #333; padding: 10px; border-radius: 8px;">
                             ${mIds.map((id, idx) => {
-                    // Find in library or defaults
-                    let m = monsterLibrary.find(x => x.id === id);
-                    if (!m) {
-                        const defs = [
-                            { id: "def_1", name: "Enemy 1" }, { id: "def_2", name: "Enemy 2" },
-                            { id: "def_A", name: "Enemy A" }, { id: "def_B", name: "Enemy B" },
-                            { id: "def_BOSS", name: "BOSS" }
-                        ];
-                        m = defs.find(x => x.id === id);
-                    }
-                    return m ? `
+                        // Find in library or defaults
+                        let m = monsterLibrary.find(x => x.id === id);
+                        if (!m) {
+                            const defs = [
+                                { id: "def_1", name: "Enemy 1" }, { id: "def_2", name: "Enemy 2" },
+                                { id: "def_A", name: "Enemy A" }, { id: "def_B", name: "Enemy B" },
+                                { id: "def_BOSS", name: "BOSS" }
+                            ];
+                            m = defs.find(x => x.id === id);
+                        }
+                        return m ? `
                                     <div class="stage-monster-pill">
                                         ${m.name} <span style="margin-left:8px; cursor:pointer; color:#ff4a4a; font-weight:bold;" onclick="removeFromStage(${r}, ${idx})">횞</span>
                                     </div>
                                 ` : '';
-                }).join('')}
+                    }).join('')}
                             ${mIds.length === 0 ? '<div style="color:#444; font-size:12px; text-align:center;">諛곗튂??紐ъ뒪?곌? ?놁뒿?덈떎.</div>' : ''}
                         </div>
                     </div>
                 `;
-            });
-            container.innerHTML = html;
-        }
+                });
+                container.innerHTML = html;
+            }
 
-        function resetStagesToDefault() {
-            if (!confirm("紐⑤뱺 ?ㅽ뀒?댁? 諛곗튂瑜?珥덇린 ?곹깭濡??섎룎由ъ떆寃좎뒿?덇퉴?")) return;
-            // --- ?뺤옣??紐ъ뒪???쇱씠釉뚮윭由?(?숈뒿 -> ?ㅼ닔 -> ?섎━??-> 蹂댁뒪 ?쒗솚?? ---
-            const monsterLibrary = [
-                // 1. ?숈뒿??(?⑥씪)
-                { id: "mon_tuto_1", name: "?섎Т ?덉닔?꾨퉬", hp: 120, atk: 10, telegraph: 1.5, postdelay: 1.2, hitstop: 3 },
-                { id: "mon_tuto_2", name: "?뱀뒯 湲곌컩蹂?, hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4 },
+            function resetStagesToDefault() {
+                if (!confirm("紐⑤뱺 ?ㅽ뀒?댁? 諛곗튂瑜?珥덇린 ?곹깭濡??섎룎由ъ떆寃좎뒿?덇퉴?")) return;
+                // --- ?뺤옣??紐ъ뒪???쇱씠釉뚮윭由?(?숈뒿 -> ?ㅼ닔 -> ?섎━??-> 蹂댁뒪 ?쒗솚?? ---
+                const monsterLibrary = [
+                    // 1. ?숈뒿??(?⑥씪)
+                    { id: "mon_tuto_1", name: "?섎Т ?덉닔?꾨퉬", hp: 120, atk: 10, telegraph: 1.5, postdelay: 1.2, hitstop: 3 },
+                    { id: "mon_tuto_2", name: "?뱀뒯 湲곌컩蹂?, hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4 },
 
                 // 2. ?ㅼ닔 援ъ꽦??(?쏀븳 ?곷뱾)
                 { id: "mon_swarm_1", name: "洹몃┝???щ씪??, hp: 80, atk: 8, telegraph: 1.0, postdelay: 0.8, hitstop: 2 },
                 { id: "mon_swarm_2", name: "?좊룄??遺덇퐙", hp: 60, atk: 12, telegraph: 0.9, postdelay: 1.2, hitstop: 2 },
 
-                // 3. ?섎━??(?⑥씪/??
-                { id: "mon_elite_1", name: "移⑤У??吏묓뻾??, hp: 600, atk: 22, telegraph: 0.8, postdelay: 1.0, hitstop: 5 },
+                    // 3. ?섎━??(?⑥씪/??
+                    { id: "mon_elite_1", name: "移⑤У??吏묓뻾??, hp: 600, atk: 22, telegraph: 0.8, postdelay: 1.0, hitstop: 5 },
                 { id: "mon_elite_2", name: "怨좊???湲곗궗", hp: 850, atk: 28, telegraph: 0.7, postdelay: 1.1, hitstop: 6 },
-                { id: "mon_elite_3", name: "愿묎린?대┛ ?붿궡??, hp: 450, atk: 35, telegraph: 0.6, postdelay: 0.8, hitstop: 4 },
+                    { id: "mon_elite_3", name: "愿묎린?대┛ ?붿궡??, hp: 450, atk: 35, telegraph: 0.6, postdelay: 0.8, hitstop: 4 },
 
                 // 4. 蹂댁뒪 湲?                { id: "mon_boss_1", name: "?먰뿀???쒖솗", hp: 2500, atk: 40, telegraph: 0.65, postdelay: 1.3, hitstop: 8 },
                 { id: "mon_boss_final", name: "?ъ뿰??吏諛곗옄", hp: 5000, atk: 55, telegraph: 0.55, postdelay: 1.4, hitstop: 10 },
 
-                // 5. ?깆옣 泥닿컧??(媛뺥븳 ?⑥씪紐?
-                { id: "mon_growth_1", name: "嫄곕? 諛붿쐞 怨⑤젞", hp: 1200, atk: 30, telegraph: 1.1, postdelay: 1.5, hitstop: 8 },
-                { id: "mon_growth_2", name: "?뺤삁 諛⑺뙣蹂?, hp: 1500, atk: 18, telegraph: 1.0, postdelay: 1.0, hitstop: 6 }
+                    // 5. ?깆옣 泥닿컧??(媛뺥븳 ?⑥씪紐?
+                    { id: "mon_growth_1", name: "嫄곕? 諛붿쐞 怨⑤젞", hp: 1200, atk: 30, telegraph: 1.1, postdelay: 1.5, hitstop: 8 },
+                    { id: "mon_growth_2", name: "?뺤삁 諛⑺뙣蹂?, hp: 1500, atk: 18, telegraph: 1.0, postdelay: 1.0, hitstop: 6 }
             ];
 
-            // --- ?쒗솚???쒖씠???ㅽ뀒?댁? ?ㅺ퀎 (20?④퀎 ?댁긽) ---
-            let customStages = {
-                1: ["mon_tuto_1"],                               // 1. ?숈뒿
-                2: ["mon_tuto_2"],                               // 2. ?숈뒿 ?ы솕
-                4: ["mon_swarm_1", "mon_swarm_1"],               // 4. ?ㅼ닔 (?깆옣 ?쒕쾾)
-                5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"],// 5. ?ㅼ닔 (遺꾧린)
-                6: ["mon_elite_1"],                              // 6. 泥??섎━??                7: ["mon_growth_1"],                             // 7. ?깆옣 泥닿컧 (蹂대꼫???먮굦)
-                8: ["mon_swarm_1", "mon_swarm_2", "mon_elite_1"],// 8. ?쇳빀 援ъ꽦
-                9: ["mon_elite_2"],                              // 9. 以묎컙 蹂댁뒪湲??섎━??                10: ["mon_boss_1"],                              // 10. 1李?蹂댁뒪
-                11: ["mon_growth_2"],                             // 11. 媛뺥솕???깆옣 泥닿컧 (媛뺣젰?댁쭊 ?좎?)
-                12: ["mon_elite_1", "mon_elite_1"],               // 12. ?섎━?????                13: ["mon_elite_2", "mon_elite_3"],               // 13. ?섎━?????(蹂移?
-                14: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_1"],// 14. 臾쇰웾??                15: ["mon_elite_3"],                              // 15. ?띾룄???섎━??                16: ["mon_growth_1", "mon_growth_2"],             // 16. 嫄곕? 紐????                17: ["mon_elite_2", "mon_elite_2", "mon_elite_2"],// 17. 洹뱁븳??3???섎━??                18: ["mon_boss_1", "mon_elite_1"],                // 18. 蹂댁뒪 + ?섎━??                19: ["mon_growth_2"],                             // 19. 理쒖쥌 寃곗쟾 ???④퀬瑜닿린
-                20: ["mon_boss_final"]                            // 20. 理쒖쥌 蹂댁뒪
-            };
-            localStorage.removeItem('custom_stages');
-            renderFullStageEditor();
-            showFeedback("珥덇린???꾨즺!", "#4db8ff");
-        }
-
-        function startSkill(skill) {
-            const alive = monsters.filter(m => m.hp > 0);
-            if (alive.length === 0) return;
-
-            // If only 1 target remains, auto-attack
-            if (alive.length === 1) {
-                if (skill === "atk") executeAttack(alive[0]);
-                else if (skill === "heavy") executeHeavyStrike(alive[0]);
-                return;
+                // --- ?쒗솚???쒖씠???ㅽ뀒?댁? ?ㅺ퀎 (20?④퀎 ?댁긽) ---
+                let customStages = {
+                    1: ["mon_tuto_1"],                               // 1. ?숈뒿
+                    2: ["mon_tuto_2"],                               // 2. ?숈뒿 ?ы솕
+                    4: ["mon_swarm_1", "mon_swarm_1"],               // 4. ?ㅼ닔 (?깆옣 ?쒕쾾)
+                    5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"],// 5. ?ㅼ닔 (遺꾧린)
+                    6: ["mon_elite_1"],                              // 6. 泥??섎━??                7: ["mon_growth_1"],                             // 7. ?깆옣 泥닿컧 (蹂대꼫???먮굦)
+                    8: ["mon_swarm_1", "mon_swarm_2", "mon_elite_1"],// 8. ?쇳빀 援ъ꽦
+                    9: ["mon_elite_2"],                              // 9. 以묎컙 蹂댁뒪湲??섎━??                10: ["mon_boss_1"],                              // 10. 1李?蹂댁뒪
+                    11: ["mon_growth_2"],                             // 11. 媛뺥솕???깆옣 泥닿컧 (媛뺣젰?댁쭊 ?좎?)
+                    12: ["mon_elite_1", "mon_elite_1"],               // 12. ?섎━?????                13: ["mon_elite_2", "mon_elite_3"],               // 13. ?섎━?????(蹂移?
+                    14: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_1"],// 14. 臾쇰웾??                15: ["mon_elite_3"],                              // 15. ?띾룄???섎━??                16: ["mon_growth_1", "mon_growth_2"],             // 16. 嫄곕? 紐????                17: ["mon_elite_2", "mon_elite_2", "mon_elite_2"],// 17. 洹뱁븳??3???섎━??                18: ["mon_boss_1", "mon_elite_1"],                // 18. 蹂댁뒪 + ?섎━??                19: ["mon_growth_2"],                             // 19. 理쒖쥌 寃곗쟾 ???④퀬瑜닿린
+                    20: ["mon_boss_final"]                            // 20. 理쒖쥌 蹂댁뒪
+                };
+                localStorage.removeItem('custom_stages');
+                renderFullStageEditor();
+                showFeedback("珥덇린???꾨즺!", "#4db8ff");
             }
 
-            isTargeting = true;
-            selectedSkill = skill;
-            showFeedback("Select Target!", "#fff");
-        }
+            function startSkill(skill) {
+                const alive = monsters.filter(m => m.hp > 0);
+                if (alive.length === 0) return;
 
-
-
-        function handleTargeting(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left;
-            const my = e.clientY - rect.top;
-
-            monsters.forEach((m) => {
-                const dist = Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2);
-                if (dist < m.radius * 2 && m.hp > 0) {
-                    if (selectedSkill === "atk") executeAttack(m);
-                    else if (selectedSkill === "heavy") executeHeavyStrike(m);
-                    isTargeting = false;
-                    selectedSkill = null;
+                // If only 1 target remains, auto-attack
+                if (alive.length === 1) {
+                    if (skill === "atk") executeAttack(alive[0]);
+                    else if (skill === "heavy") executeHeavyStrike(alive[0]);
+                    return;
                 }
-            });
-        }
 
-        function executeAttack(target) {
-            if (Player.ap < 2) return;
-            Player.ap -= 2;
-            dealDamage(Player.atk, target, "normal");
-            Player.actionsUsed.atk = true;
-            Player.state.multiAtkCount++;
-            updateUI();
-        }
-
-        function executeHeavyStrike(target) {
-            if (Player.ap < 5) return;
-            Player.ap -= 5;
-            dealDamage(Player.atk * 2, target, "heavy");
-            Player.actionsUsed.heavy = true;
-            updateUI();
-        }
-
-        function executeSpinSlash() {
-            if (Player.ap < 3) return;
-            const alive = monsters.filter(m => m.hp > 0);
-            if (alive.length === 0) return;
-            Player.ap -= 3;
-            let mult = 1.2;
-            if (alive.length >= 2) mult *= (1 + Player.augBuffs.spinMultiTarget);
-            const totalDmg = Player.atk * mult;
-            const dmgPer = totalDmg / alive.length;
-            alive.forEach(m => dealDamage(dmgPer, m, "spin"));
-            Player.actionsUsed.spin = true;
-            showFeedback("SPIN SLASH!", "#4a4");
-            updateUI();
-        }
-
-        function dealDamage(amount, target, type = "normal") {
-            let mult = Player.augBuffs.atk;
-            if (type === "spin") mult = Player.augBuffs.spin;
-            if (type === "heavy") {
-                mult = Player.augBuffs.heavy;
-                // 利앷컯: ?⑤몢??媛?                if (target.hp / target.maxHp <= 0.3) mult *= (1 + Player.augBuffs.heavyExecute);
-                // 利앷컯: 吏묓뻾?몄쓽 ?먭껐
-                if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.heavyExecAll);
+                isTargeting = true;
+                selectedSkill = skill;
+                showFeedback("Select Target!", "#fff");
             }
 
-            // 怨듯넻 利앷컯 ?④낵
-            if (target.hp / target.maxHp <= Player.augBuffs.executeLow) mult *= 1.15;
-            if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.executeAll);
 
-            // ?쎌젏 ?뚯븙/?대?
-            if (Player.state.consecutiveTarget === target) {
-                if (Player.state.consecutiveCount >= 1) mult *= (1 + Player.augBuffs.stackAtk);
-                mult *= (1 + Player.augBuffs.stackAtkEpic * Math.min(Player.state.consecutiveCount, 5));
+
+            function handleTargeting(e) {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                monsters.forEach((m) => {
+                    const dist = Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2);
+                    if (dist < m.radius * 2 && m.hp > 0) {
+                        if (selectedSkill === "atk") executeAttack(m);
+                        else if (selectedSkill === "heavy") executeHeavyStrike(m);
+                        isTargeting = false;
+                        selectedSkill = null;
+                    }
+                });
             }
 
-            // 議곌굔遺 踰꾪봽??            if (Player.state.heavyUsedLastTurn && Player.state.firstAttackThisTurn) {
+            function executeAttack(target) {
+                if (Player.ap < 2) return;
+                Player.ap -= 2;
+                dealDamage(Player.atk, target, "normal");
+                Player.actionsUsed.atk = true;
+                Player.state.multiAtkCount++;
+                updateUI();
+            }
+
+            function executeHeavyStrike(target) {
+                if (Player.ap < 5) return;
+                Player.ap -= 5;
+                dealDamage(Player.atk * 2, target, "heavy");
+                Player.actionsUsed.heavy = true;
+                updateUI();
+            }
+
+            function executeSpinSlash() {
+                if (Player.ap < 3) return;
+                const alive = monsters.filter(m => m.hp > 0);
+                if (alive.length === 0) return;
+                Player.ap -= 3;
+                let mult = 1.2;
+                if (alive.length >= 2) mult *= (1 + Player.augBuffs.spinMultiTarget);
+                const totalDmg = Player.atk * mult;
+                const dmgPer = totalDmg / alive.length;
+                alive.forEach(m => dealDamage(dmgPer, m, "spin"));
+                Player.actionsUsed.spin = true;
+                showFeedback("SPIN SLASH!", "#4a4");
+                updateUI();
+            }
+
+            function dealDamage(amount, target, type = "normal") {
+                let mult = Player.augBuffs.atk;
+                if (type === "spin") mult = Player.augBuffs.spin;
+                if (type === "heavy") {
+                    mult = Player.augBuffs.heavy;
+                    // 利앷컯: ?⑤몢??媛?                if (target.hp / target.maxHp <= 0.3) mult *= (1 + Player.augBuffs.heavyExecute);
+                    // 利앷컯: 吏묓뻾?몄쓽 ?먭껐
+                    if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.heavyExecAll);
+                }
+
+                // 怨듯넻 利앷컯 ?④낵
+                if (target.hp / target.maxHp <= Player.augBuffs.executeLow) mult *= 1.15;
+                if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.executeAll);
+
+                // ?쎌젏 ?뚯븙/?대?
+                if (Player.state.consecutiveTarget === target) {
+                    if (Player.state.consecutiveCount >= 1) mult *= (1 + Player.augBuffs.stackAtk);
+                    mult *= (1 + Player.augBuffs.stackAtkEpic * Math.min(Player.state.consecutiveCount, 5));
+                }
+
+                // 議곌굔遺 踰꾪봽??            if (Player.state.heavyUsedLastTurn && Player.state.firstAttackThisTurn) {
                 mult *= (1 + Player.augBuffs.heavySunder);
                 mult *= (1 + Player.augBuffs.heavyOverheat);
             }
@@ -1984,51 +1987,51 @@
                 ctx.fillText(`${Math.ceil(m.hp)}`, m.x, m.y - m.radius - 10);
 
                 // ?寃잜똿 ?섏씠?쇱씠??                if (isTargeting && m.hp > 0) {
-                    ctx.strokeStyle = "#fff";
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(m.x, m.y, m.radius + 5, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-            });
-
-            // 2. Draw Damage Texts
-            damageTexts.forEach(dt => {
-                ctx.fillStyle = dt.color;
-                ctx.font = "bold 24px Inter";
-                ctx.fillText(dt.text, dt.x, dt.y);
-            });
-
-            // 3. Draw Player & Ghosts
-            Player.ghosts.forEach(g => {
-                ctx.fillStyle = `rgba(74, 158, 255, ${g.a})`;
-                ctx.beginPath(); ctx.arc(g.x, g.y, Player.radius, 0, Math.PI * 2); ctx.fill();
-            });
-
-            if (Player.isParrying) {
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = "#FFD700";
-                ctx.strokeStyle = "#FFD700";
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
-                ctx.stroke();
-            } else if (Player.dashTimer > 0) {
-                ctx.strokeStyle = "#aaa";
+                ctx.strokeStyle = "#fff";
                 ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
                 ctx.beginPath();
-                ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
+                ctx.arc(m.x, m.y, m.radius + 5, 0, Math.PI * 2);
                 ctx.stroke();
-                ctx.setLineDash([]); // Reset dash
             }
+            });
 
-            ctx.fillStyle = Player.color;
+        // 2. Draw Damage Texts
+        damageTexts.forEach(dt => {
+            ctx.fillStyle = dt.color;
+            ctx.font = "bold 24px Inter";
+            ctx.fillText(dt.text, dt.x, dt.y);
+        });
+
+        // 3. Draw Player & Ghosts
+        Player.ghosts.forEach(g => {
+            ctx.fillStyle = `rgba(74, 158, 255, ${g.a})`;
+            ctx.beginPath(); ctx.arc(g.x, g.y, Player.radius, 0, Math.PI * 2); ctx.fill();
+        });
+
+        if (Player.isParrying) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#FFD700";
+            ctx.strokeStyle = "#FFD700";
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
+            ctx.stroke();
+        } else if (Player.dashTimer > 0) {
+            ctx.strokeStyle = "#aaa";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset dash
+        }
 
-            ctx.restore();
+        ctx.fillStyle = Player.color;
+        ctx.beginPath();
+        ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
         }
 
         function gameLoop(timestamp) {
