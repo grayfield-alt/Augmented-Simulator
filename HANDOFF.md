@@ -2,7 +2,7 @@
 
 ## 💬 Agent Start Prompt (한 줄 복붙)
 ```
-git pull 받았어. 프로젝트 루트에 있는 HANDOFF.md 파일 읽고 하던 작업 이어서 해줘.
+집에 왔어. git pull 먼저 해주고 HANDOFF.md 읽고 이어서 작업해줘.
 ```
 
 ## 🏁 Start Checklist (작업 전 확인 사항)
