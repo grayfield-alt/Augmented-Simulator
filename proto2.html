@@ -1,15 +1,35 @@
-﻿<!DOCTYPE html>
-<html>
+﻿<!doctype html>
+<html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=./index.html">
-    <title>Redirecting...</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Redirecting to Augmented Simulator...</title>
+    <!-- 영구 리다이렉션 (index.html로 이동) -->
+    <meta http-equiv="refresh" content="0; url=./index.html" />
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        a {
+            color: #4a9eff;
+            text-decoration: none;
+        }
+    </style>
 </head>
 
 <body>
-    <p>Redirecting to <a href="./index.html">index.html</a>...</p>
+    <p>Redirecting to the main entry point...</p>
+    <p>If you are not redirected automatically, <a href="./index.html">click here</a>.</p>
+    <script>
+        // JS Fallback
+        window.location.replace('./index.html');
+    </script>
 </body>
 
 </html>
-<!-- DO NOT EDIT: This is a permanent redirect stub to prevent people from editing the game code directly here. The source of truth is public/proto2.html. -->
