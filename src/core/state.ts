@@ -22,6 +22,8 @@ export interface PlayerState {
 
 export interface GameState {
     gameStarted: boolean;
+    showAugmentOverlay: boolean;
+    showEventOverlay: boolean;
     currentTurn: "PLAYER" | "MONSTER" | "NONE";
     currentRound: number;
     currentStageId: string | null;  // 현재 진행 중인 스테이지 (한글)
@@ -70,6 +72,8 @@ export function getInitialPlayerState(): PlayerState {
 export function getInitialGameState(): GameState {
     return {
         gameStarted: false,
+        showAugmentOverlay: false,
+        showEventOverlay: false,
         currentTurn: "NONE",
         currentRound: 1,
         currentStageId: null,

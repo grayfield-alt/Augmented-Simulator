@@ -28,7 +28,26 @@ export function renderUI(state: GameState) {
         turnIndicator.style.display = "none";
     }
 
-    // 3. 스테이지 노드 기반 UI 렌더링 연동 (한글)
+    // 3. 화면 전환 (로비 vs 배틀) (한글)
+    const lobby = mustGet(SELECTORS.lobby);
+    const battle = mustGet(SELECTORS.battleScreen);
+
+    if (state.gameStarted) {
+        lobby.classList.add('hidden');
+        battle.classList.remove('hidden');
+        battle.classList.add('flex');
+    } else {
+        lobby.classList.remove('hidden');
+        battle.classList.add('hidden');
+    }
+
+    // 4. 오버레이 상태 관리 (한글) - 필요 시 추가 구현
+    const augOverlay = document.getElementById(SELECTORS.overlayAug);
+    if (augOverlay) {
+        augOverlay.classList.toggle('hidden', !state.showAugmentOverlay);
+    }
+
+    // 5. 스테이지 노드 기반 UI 렌더링 연동 (한글)
     renderStageFlow(state);
 }
 
