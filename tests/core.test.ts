@@ -1,8 +1,8 @@
-// src/tests/core.test.ts (한글)
+// tests/core.test.ts (한글)
 import { describe, it, expect } from 'vitest';
-import { getInitialGameState } from '../core/state';
-import { processTurn, calculateDamage } from '../core/engine';
-import { validateState } from '../core/validator';
+import { getInitialGameState } from '../src/core/state';
+import { processTurn, calculateDamage } from '../src/core/engine';
+import { validateState } from '../src/core/validator';
 
 describe('Augmented Simulator V3 Core Logic', () => {
 
