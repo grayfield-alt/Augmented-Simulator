@@ -1,21 +1,38 @@
+?
 <!DOCTYPE html>
 <html lang="ko">
 
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Augmented Simulator - Portrait</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Outfit:wght@500;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@500;800;900&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { background: "#050507", surface: "#0c0d12", primary: "#fae133", secondary: "#10b981", danger: "#ff4a4a", accent: "#a020f0", gold: "#fbbf24" },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], title: ['Outfit', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
-            --bg: #0a0a0c;
+            --bg: #050507;
             --primary: #fae133;
             --danger: #ff4a4a;
             --info: #4a9eff;
-            --success: #4ade80;
+            --success: #10b981;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
             --font-main: 'Inter', system-ui, -apple-system, sans-serif;
             --font-title: 'Outfit', sans-serif;
         }
@@ -45,14 +62,14 @@
         #game-container {
             width: 100%;
             max-width: 412px;
-            /* ?��? 모바???�비 */
+            /* ?��? 모바???�비 */
             height: 100%;
             max-height: 850px;
-            /* ?��? 모바???�이 ?�시 */
+            /* ?��? 모바???�이 ?�시 */
             aspect-ratio: 9 / 18;
-            /* ?�로�?�?비율 고정 */
+            /* ?�로�?�?비율 고정 */
             margin: auto;
-            /* ?�스?�톱 중앙 ?�렬 */
+            /* ?�스?�톱 중앙 ?�렬 */
             display: flex;
             flex-direction: column;
             background: #000;
@@ -64,7 +81,7 @@
         /* 1. HUD */
         header#top-status {
             flex: 0 0 60px;
-            /* ?�이 고정 */
+            /* ?�이 고정 */
             padding: 0 1rem;
             background: rgba(15, 15, 20, 0.95);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -152,7 +169,7 @@
         /* 3. Footer Control Area */
         footer#bottom-ui {
             flex: 0 0 280px;
-            /* ?�단 UI ?�역 ?�이 ?�전 고정 (가변 방�?) */
+            /* ?�단 UI ?�역 ?�이 ?�전 고정 (�?�? 방�?) */
             position: relative;
             background: rgba(10, 10, 12, 0.98);
             border-top: 2px solid rgba(250, 225, 51, 0.2);
@@ -160,7 +177,7 @@
             overflow: hidden;
         }
 
-        /* ???�환 ???�소?�이 공간??차�??��? ?�고 중앙 ?�렬?�도�???*/
+        /* ???�환 ???�소?�이 공간??차�??��? ?�고 중앙 ?�렬?�도�???*/
         .ui-stack-container {
             position: relative;
             width: 100%;
@@ -187,7 +204,7 @@
             font-size: 0.8125rem;
             font-weight: 800;
             color: #666;
-            /* ?�상 가?�성 개선 */
+            /* ?�상 �??�성 개선 */
         }
 
         .ap-text {
@@ -197,19 +214,9 @@
             color: var(--primary);
         }
 
-        /* 로비 ?�용 버튼 ?�택 (중앙 ?�렬) */
-        .lobby-btn-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            width: 100%;
-            max-width: 280px;
-            z-index: 10;
-        }
-
-        /* ?�투 ?�면 ?�용 버튼 ?�택 (?��? 좌표 고정) */
-        .battle-btn-stack {
+        .btn-stack {
             position: absolute;
+            /* ?�역 �?�? 방�?�??�해 ?��? 좌표 ?�용 */
             top: 50%;
             left: 50%;
             transform: translate(-50%, -30%);
@@ -227,7 +234,7 @@
         #monster-actions {
             z-index: 5;
             transform: translate(-50%, -10%);
-            /* ?�치 미세 조정 */
+            /* ?�치 미세 조정 */
         }
 
         .btn-row {
@@ -311,339 +318,1835 @@
     </style>
 </head>
 
-<style>
-    /* ?�리미엄 로비 ?��???추�? */
-    .lobby-title {
-        font-family: var(--font-title);
-        font-size: 2.5rem;
-        font-weight: 900;
-        text-align: center;
-        line-height: 1.1;
-        background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 2rem;
-        animation: fadeInDown 0.8s ease-out;
-    }
+<body>
+    <div id="game-container">
+        <!-- Battle Screen: ?�투 �?모든 HUD, ?�레???�역, ?�단 조작계�? ?�시?�는 ?�역 -->
+        <!-- Battle Screen -->
+        <div id="battle-screen" class="hidden flex-col h-full bg-background">
+            <!-- 1. HUD -->
+            <header id="top-status"
+                class="flex-none h-[70px] px-6 bg-surface/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center z-[100] transition-opacity duration-300">
+                <div class="flex gap-6">
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Vitality</span>
+                        <span id="p-hp" class="text-xl font-black text-danger font-title">100</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Power</span>
+                        <span id="p-atk" class="text-xl font-black text-primary font-title">50</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Defense</span>
+                        <span id="p-def" class="text-xl font-black text-info font-title">0</span>
+                    </div>
+                </div>
+                <button onclick="toggleEditor(true)"
+                    class="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 border border-white/5 uppercase tracking-tighter transition-all">
+                    <i data-lucide="settings" class="w-3 h-3 inline-block mr-1"></i> DEV-OPs
+                </button>
+            </header>
 
-    .lobby-version {
-        position: absolute;
-        bottom: 2rem;
-        color: rgba(255, 255, 255, 0.2);
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-    }
+            <!-- 2. Play Area -->
+            <main id="play-area" class="flex-1 relative overflow-hidden bg-black/20">
+                <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
+                <div id="visual-overlays" class="absolute inset-0 pointer-events-none z-20">
+                    <div id="vignette" class="absolute inset-0 transition-opacity duration-300 pointer-events-none">
+                    </div>
+                    <div id="hit-icons-container" class="absolute top-6 right-6 flex flex-col gap-2"></div>
+                    <div id="msg-container"
+                        class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
+                        <div id="message"
+                            class="text-5xl font-black italic text-white font-title drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-0 transition-all duration-300 uppercase tracking-tighter">
+                        </div>
+                    </div>
+                    <div id="turn-indicator"
+                        class="absolute top-[10%] left-1/2 -translate-x-1/2 text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">
+                        Player's Turn</div>
+                </div>
+            </main>
 
-    @keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
+            <!-- 3. Footer Control Area -->
+            <footer id="bottom-ui"
+                class="flex-none h-[280px] px-8 py-6 bg-surface border-t-2 border-primary/20 z-[100] transition-opacity duration-300 overflow-hidden relative">
+                <div class="flex flex-col h-full justify-between items-center max-w-sm mx-auto">
+                    <div class="flex items-center gap-4 px-6 py-2 bg-white/5 rounded-2xl border border-white/5 mb-4">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">ENERGY</span>
+                        <span id="p-ap" class="text-3xl font-black text-primary font-title">0</span>
+                    </div>
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+                    <!-- Player Actions -->
+                    <div id="player-actions" class="w-full flex-col gap-3 transition-all duration-300">
+                        <div class="flex gap-3">
+                            <button id="btn-atk" onclick="startSkill('atk')"
+                                class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-1 transition-all active:scale-95 disabled:opacity-20">
+                                <span class="text-sm font-black text-white uppercase"><i data-lucide="sword"
+                                        class="w-4 h-4 inline-block mr-1"></i> ATTACK</span>
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">2 AP</span>
+                            </button>
+                            <button id="btn-spin" onclick="executeSpinSlash()"
+                                class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-1 transition-all active:scale-95 disabled:opacity-20 text-secondary">
+                                <span class="text-sm font-black uppercase"><i data-lucide="rotate-cw"
+                                        class="w-4 h-4 inline-block mr-1"></i> SPIN</span>
+                                <span class="text-[9px] font-bold opacity-60 uppercase tracking-widest">3 AP</span>
+                            </button>
+                        </div>
+                        <button id="btn-heavy" onclick="startSkill('heavy')"
+                            class="w-full bg-primary hover:bg-primary/80 p-5 rounded-2xl font-black text-background text-lg uppercase transition-all active:scale-98 disabled:opacity-20 shadow-[0_10px_40px_rgba(250,225,51,0.2)] mt-2">
+                            HEAVY STRIKE <span class="text-[10px] ml-2 opacity-60">5 AP</span>
+                        </button>
+                        <button id="btn-end" onclick="endPlayerTurn()"
+                            class="w-full mt-2 text-[10px] font-black text-slate-600 hover:text-slate-400 uppercase tracking-[0.2em] py-2 transition-colors">
+                            END OPERATION
+                        </button>
+                    </div>
 
-    /* ?��??�이???�버?�이 */
-    #sim-overlay {
-        background: rgba(0, 0, 0, 0.98);
-        color: var(--success);
-        font-family: monospace;
-        font-size: 0.8rem;
-        line-height: 1.4;
-        overflow-y: auto;
-        align-items: flex-start;
-        justify-content: flex-start;
-        padding: 1rem;
-    }
-</style>
+                    <!-- Monster Actions (Defense Mode) -->
+                    <div id="monster-actions"
+                        class="hidden w-full flex-col items-center gap-4 transition-all duration-300">
+                        <div id="pc-guide"
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] pulse mb-2">L-CLICK:
+                            PARRY | R-CLICK: DASH</div>
+                        <div id="mobile-buttons" class="hidden w-full flex-col gap-3">
+                            <button id="btn-parry"
+                                class="w-full bg-white p-5 rounded-2xl font-black text-background text-lg uppercase shadow-[0_10px_40px_rgba(255,255,255,0.2)]">PARRY
+                                NOW</button>
+                            <button id="btn-dash"
+                                class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white text-lg uppercase tracking-widest">DASH</button>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
 
-<div id="sim-overlay" class="overlay">
-    <h2 style="color: var(--primary); margin-bottom: 1rem;">BALANCE SIMULATION REPORT</h2>
-    <div id="sim-log"></div>
-</div>
+    <!-- Overlays -->
+    <!-- Lobby Overlay -->
+    <div id="lobby-overlay"
+        class="fixed inset-0 bg-background/95 backdrop-blur-2xl z-[200] flex flex-col items-center justify-center p-8 text-center transition-all duration-500">
+        <div
+            class="bg-primary/10 p-8 rounded-[3rem] border border-primary/20 mb-12 animate-pulse shadow-[0_0_80px_rgba(250,225,51,0.15)]">
+            <i data-lucide="shield-check" class="w-16 h-16 text-primary"></i>
+        </div>
 
-<script>
-    // ==========================================
-    // [?�이??0] ?�스??초기??�??�역 변??
-    // ==========================================
-    const CONFIG = {
-        FPS: 60, PARRY_STANCE_DURATION: 21, PERFECT_WINDOW: 8,
-        ATTACK_DURATION: 15, RETURN_DURATION: 20, REACTION_WINDOW: 26,
-        K: 50, CANVAS_W: 412, CANVAS_H: 600
-    };
+        <h1 class="text-6xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
+            AUGMENTED<br /><span class="text-primary">SIMULATOR</span>
+        </h1>
+        <p class="text-slate-500 font-bold text-[10px] uppercase tracking-[0.6em] mb-12 opacity-60">High Fidelity Combat
+            Simulator</p>
 
-    const Player = {
-        x: 206, y: 510, radius: 42, hp: 100, maxHp: 100, atk: 50, def: 0, ap: 0, maxAp: 10,
-        color: "#4a9eff", parryTimer: 0, isParrying: false, dashTimer: 0, ghosts: [],
-        actionsUsed: { atk: false, spin: false, heavy: false },
-        augBuffs: { atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0, executeLow: 0, stackAtk: 0, spinMultiTarget: 0 },
-        state: { consecutiveTarget: null, killStacks: 0, firstAttackThisTurn: true },
-        activeAugments: []
-    };
+        <div class="flex flex-col gap-4 w-full max-w-[280px]">
+            <button onclick="startGame()"
+                class="w-full bg-primary hover:bg-primary/80 p-6 rounded-[2rem] font-black text-background text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_60px_rgba(250,225,51,0.3)]">
+                Start Operation
+            </button>
 
-    class Monster {
-        constructor(name, hp, atk, telegraph, postdelay, hitstop) {
-            this.name = name; this.hp = hp; this.maxHp = hp; this.atk = atk;
-            this.x = 0; this.y = 0; this.homeX = 0; this.homeY = 0; this.radius = 45;
-            this.color = name.includes("지배자") ? "#ff0000" : (name.includes("?�왕") ? "#ff8800" : "#ff4a4a");
-            this.timer = 0; this.settings = { telegraphMult: telegraph, postDelayMult: postdelay, hitStop: hitstop };
-        }
-    }
+            <div class="grid grid-cols-2 gap-4 mt-2">
+                <button onclick="openInventory()"
+                    class="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all">
+                    <i data-lucide="beaker" class="w-5 h-5 text-slate-400"></i>
+                    <span class="text-[9px] font-black text-slate-500 uppercase">Archive</span>
+                </button>
+                <button onclick="toggleGuide(true)"
+                    class="bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all">
+                    <i data-lucide="info" class="w-5 h-5 text-slate-400"></i>
+                    <span class="text-[9px] font-black text-slate-500 uppercase">Briefing</span>
+                </button>
+            </div>
+        </div>
 
-    let monsters = [], currentTurn = "NONE", currentRound = 1, gameStarted = false;
-    let isTargeting = false, selectedSkill = null, damageTexts = [], lastTimestamp = 0;
-    let isSimulating = false;
+        <div class="mt-16 text-[9px] font-black text-slate-700 uppercase tracking-widest opacity-40">
+            SYSTEM_VERSION: 1.0.PRT_FLA
+        </div>
+    </div>
 
-    // ==========================================
-    // [?�이??1] ?�이???�?�소
-    // ==========================================
-    const monsterLibrary = [
-        { id: "mon_tuto_1", name: "?�무 ?�수?�비", hp: 150, atk: 12, telegraph: 1.6, postdelay: 1.2, hitstop: 3 },
-        { id: "mon_tuto_2", name: "?�슨 기갑�?, hp: 250, atk: 18, telegraph: 1.3, postdelay: 1.0, hitstop: 4 },
-        { id: "mon_swarm_1", name: "그림???�라??, hp: 100, atk: 10, telegraph: 1.1, postdelay: 0.8, hitstop: 2 },
-        { id: "mon_elite_1", name: "침묵??집행??, hp: 800, atk: 28, telegraph: 0.9, postdelay: 1.1, hitstop: 5 },
-        { id: "mon_boss_1", name: "?�허???�왕", hp: 3000, atk: 45, telegraph: 0.7, postdelay: 1.3, hitstop: 8 },
-        { id: "mon_boss_final", name: "?�연??지배자", hp: 6000, atk: 65, telegraph: 0.6, postdelay: 1.4, hitstop: 10 }
-    ];
+    <!-- Augment Overlay -->
+    <div id="augment-overlay"
+        class="hidden fixed inset-0 bg-background/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8 transition-all duration-500">
+        <div
+            class="w-full max-w-[420px] bg-surface/50 border border-white/10 rounded-[2.5rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center gap-8 relative overflow-hidden">
+            <div class="absolute -top-20 -left-20 w-40 h-40 bg-primary/20 rounded-full blur-[80px]"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-accent/20 rounded-full blur-[80px]"></div>
 
-    const customStages = {
-        1: ["mon_tuto_1"], 2: ["mon_tuto_2"], 3: ["mon_swarm_1", "mon_swarm_1"],
-        5: ["mon_elite_1"], 8: ["mon_boss_1"], 12: ["mon_elite_1", "mon_elite_1"], 15: ["mon_boss_final"]
-    };
+            <div class="flex flex-col items-center gap-2">
+                <h2 class="text-3xl font-black italic text-primary font-title uppercase tracking-tighter">SELECT AUGMENT
+                </h2>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Enhance combat performance
+                </p>
+            </div>
 
-    // ==========================================
-    // [?�이??2] UI 관리자
-    // ==========================================
-    const ui = {
-        lobby: document.getElementById('lobby-overlay'),
-        battle: document.getElementById('battle-screen'),
-        over: document.getElementById('game-over-overlay'),
-        hp: document.getElementById('p-hp'), atk: document.getElementById('p-atk'),
-        ap: document.getElementById('p-ap'), msg: document.getElementById('message'),
-        btns: { atk: document.getElementById('btn-atk'), spin: document.getElementById('btn-spin'), heavy: document.getElementById('btn-heavy'), end: document.getElementById('btn-end') }
-    };
+            <div id="augment-cards" class="w-full flex flex-col gap-4"></div>
 
-    const UIManager = {
-        update() {
-            if (isSimulating) return;
-            ui.hp.innerText = Math.max(0, Math.ceil(Player.hp)); ui.atk.innerText = Math.ceil(Player.atk);
-            ui.ap.innerText = Math.floor(Player.ap);
-            const isPlayer = currentTurn === "PLAYER";
-            ui.btns.atk.disabled = !isPlayer || Player.ap < 2 || Player.actionsUsed.atk;
-            ui.btns.spin.disabled = !isPlayer || Player.ap < 3 || Player.actionsUsed.spin;
-            ui.btns.heavy.disabled = !isPlayer || Player.ap < 5 || Player.actionsUsed.heavy;
-            ui.btns.end.disabled = !isPlayer;
-        },
-        showFeedback(text, color = "#fff") {
-            if (isSimulating) return;
-            ui.msg.innerText = text; ui.msg.style.color = color; ui.msg.style.opacity = 1;
-            setTimeout(() => ui.msg.style.opacity = 0, 1000);
-        },
-        toggleScreen(screenId) {
-            if (isSimulating) return;
-            ui.lobby.style.display = (screenId === "lobby") ? "flex" : "none";
-            ui.battle.style.display = (screenId === "battle") ? "flex" : "none";
-        }
-    };
+            <button id="btn-reroll" onclick="rerollAugments()"
+                class="w-full bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest transition-all disabled:opacity-20">
+                <i data-lucide="refresh-cw" class="w-3 h-3 inline-block mr-1"></i> Reroll Available (1)
+            </button>
+        </div>
+    </div>
 
-    // ==========================================
-    // [?�이??3] ?�투 �??�테?��? 로직
-    // ==========================================
-    const BattleEngine = {
-        executeSkill(skill, target = null) {
-            if (target === null && monsters.length > 1 && skill !== "spin") {
-                isTargeting = true; selectedSkill = skill;
-                UIManager.showFeedback("Select Target!", "#fff"); return;
+    <!-- Event Overlay -->
+    <div id="event-overlay"
+        class="hidden fixed inset-0 bg-background/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8 transition-all duration-500">
+        <div
+            class="w-full max-w-[420px] bg-surface/50 border border-white/10 rounded-[2.5rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center gap-8 relative overflow-hidden">
+            <div class="flex flex-col items-center gap-2">
+                <h2 class="text-3xl font-black italic text-success font-title uppercase tracking-tighter">ANOMALY
+                    DETECTED</h2>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Standard operation
+                    interrupted</p>
+            </div>
+
+            <div id="event-options" class="w-full flex flex-col gap-4">
+                <button onclick="selectEventOption(1)"
+                    class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-6 rounded-[2rem] text-left transition-all active:scale-95 group">
+                    <span
+                        class="block text-primary text-xl font-black italic uppercase italic mb-1 group-hover:translate-x-1 transition-transform">Protocol:
+                        SUPPLY</span>
+                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Extract common quality augment
+                        memory</span>
+                </button>
+                <button onclick="selectEventOption(2)"
+                    class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-6 rounded-[2rem] text-left transition-all active:scale-95 group">
+                    <span
+                        class="block text-success text-xl font-black italic uppercase italic mb-1 group-hover:translate-x-1 transition-transform">Protocol:
+                        RECOVERY</span>
+                    <span class="block text-[10px] font-bold text-slate-500 uppercase">Restore 35% vitality from local
+                        reserves</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monster Archive (Inventory) -->
+    <div id="inventory-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[480px] h-[85vh] flex flex-col p-8 bg-surface/50 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-8 px-2">
+                <div class="flex flex-col">
+                    <h2 class="text-3xl font-black italic text-info font-title uppercase tracking-tighter italic">
+                        MONSTER ARCHIVE</h2>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Extracted Threat Data</p>
+                </div>
+                <button onclick="closeOverlay('inventory-overlay')"
+                    class="bg-white/5 hover:bg-white/10 p-3 rounded-full text-slate-400 transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="complete-inventory-list" class="flex-1 overflow-y-auto space-y-4 pr-3 custom-scrollbar mb-8"></div>
+
+            <div class="flex gap-4">
+                <button onclick="openMonsterCreator()"
+                    class="flex-1 bg-primary p-5 rounded-2xl font-black text-background uppercase text-sm tracking-widest transition-all active:scale-95 shadow-[0_10px_40px_rgba(250,225,51,0.2)]">
+                    Create New Entry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stage Editor Overlay -->
+    <div id="stage-editor-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[480px] h-[85vh] flex flex-col p-8 bg-surface/50 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-8 px-2">
+                <div class="flex flex-col">
+                    <h2 class="text-3xl font-black italic text-primary font-title uppercase tracking-tighter">STAGE
+                        CONFIG</h2>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Level Sequence Management
+                    </p>
+                </div>
+                <button onclick="closeOverlay('stage-editor-overlay')"
+                    class="bg-white/5 hover:bg-white/10 p-3 rounded-full text-slate-400 transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="full-stage-list" class="flex-1 overflow-y-auto space-y-4 pr-3 custom-scrollbar mb-8"></div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="saveToStorage()"
+                    class="w-full bg-info p-5 rounded-2xl font-black text-background uppercase text-sm tracking-widest transition-all active:scale-95 shadow-[0_10px_40px_rgba(74,158,255,0.2)]">
+                    Save Configuration
+                </button>
+                <button onclick="resetStagesToDefault()"
+                    class="w-full bg-white/5 hover:bg-white/10 border border-danger/20 p-4 rounded-2xl text-[10px] font-black text-danger uppercase tracking-widest">
+                    Reset Factory Defaults
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Briefing (Guide) Overlay -->
+    <div id="guide-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[420px] bg-surface/80 border border-white/10 rounded-[3rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <h2 class="text-3xl font-black italic text-primary font-title uppercase tracking-tighter mb-8">OPERATION
+                BRIEFING</h2>
+            <div class="space-y-8 text-slate-400 text-sm leading-relaxed">
+                <section>
+                    <h3
+                        class="text-[10px] font-black text-white uppercase tracking-widest mb-3 border-l-2 border-primary pl-3">
+                        Combat Controls</h3>
+                    <ul class="space-y-2">
+                        <li><span class="text-white font-bold">Skills:</span> Click skill then select target</li>
+                        <li><span class="text-white font-bold">Parry:</span> Hold during telegraphed impact</li>
+                        <li><span class="text-white font-bold">Dash:</span> Right-click or button for evasion</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3
+                        class="text-[10px] font-black text-white uppercase tracking-widest mb-3 border-l-2 border-primary pl-3">
+                        Sim Systems</h3>
+                    <ul class="space-y-2">
+                        <li><span class="text-white font-bold">AP:</span> Energy required for all actions</li>
+                        <li><span class="text-white font-bold">Augments:</span> Permanent combat enhancements</li>
+                    </ul>
+                </section>
+            </div>
+            <button onclick="toggleGuide(false)"
+                class="w-full bg-primary p-5 rounded-2xl font-black text-background uppercase text-sm tracking-widest transition-all active:scale-95 shadow-[0_10px_40px_rgba(250,225,51,0.2)] mt-10">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="game-over-overlay"
+        class="hidden fixed inset-0 bg-background/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 text-center transition-all duration-700">
+        <div class="mb-8 scale-150 text-danger animate-bounce">
+            <i data-lucide="alert-triangle" class="w-20 h-20"></i>
+        </div>
+        <h2 class="text-7xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
+            OPERATION<br /><span class="text-danger">TERMINATED</span>
+        </h2>
+        <p class="text-danger/40 font-black text-[12px] uppercase tracking-[1em] mb-12 italic">Target loss imminent</p>
+
+        <button onclick="retryGame()"
+            class="w-full max-w-[280px] bg-danger hover:bg-danger/80 p-6 rounded-[2rem] font-black text-white text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-[0_20px_60px_rgba(255,74,74,0.3)]">
+            Restart Cycle
+        </button>
+    </div>
+
+    <!-- Dev-OPs (Editor) Overlay -->
+    <div id="editor-overlay"
+        class="hidden fixed inset-0 bg-background/95 backdrop-blur-3xl z-[600] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[520px] h-[90vh] flex flex-col p-8 bg-surface/50 border border-white/10 rounded-[3rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black italic text-primary font-title uppercase tracking-tighter italic">DEV-OPS
+                    TERMINAL</h2>
+                <button onclick="toggleEditor(false)"
+                    class="bg-white/5 hover:bg-white/10 p-3 rounded-full text-slate-400 transition-all">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-8 pr-3 custom-scrollbar mb-8">
+                <section>
+                    <h3 class="text-[10px] font-black text-info uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="database" class="w-3 h-3"></i> Monster Data
+                    </h3>
+                    <div id="monster-library-list" class="space-y-4"></div>
+                </section>
+                <section>
+                    <h3
+                        class="text-[10px] font-black text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i data-lucide="map" class="w-3 h-3"></i> Level Sequence
+                    </h3>
+                    <div id="stage-editor-list" class="space-y-4"></div>
+                </section>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="openMonsterCreator()"
+                    class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white uppercase text-xs tracking-widest transition-all">
+                    Core Creation
+                </button>
+                <button onclick="saveToStorage()"
+                    class="flex-1 bg-success p-5 rounded-2xl font-black text-background uppercase text-xs tracking-widest transition-all shadow-[0_10px_40px_rgba(16,185,129,0.2)]">
+                    Commit Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Creation (Monster Creator) Overlay -->
+    <div id="monster-creator-panel"
+        class="hidden fixed inset-0 bg-background/95 backdrop-blur-3xl z-[700] flex flex-col items-center justify-center p-6 transition-all duration-500">
+        <div
+            class="glass-panel w-full max-w-[420px] bg-surface/50 border border-white/10 rounded-[3rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+            <div class="flex flex-col items-center gap-2 mb-8">
+                <h2 id="creator-title"
+                    class="text-3xl font-black italic text-success font-title uppercase tracking-tighter italic">CORE
+                    CREATION</h2>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Synthesize New Threat Pattern
+                </p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="space-y-2">
+                    <label
+                        class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Identifier</label>
+                    <input id="lib-name" type="text" placeholder="Designation..."
+                        class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white placeholder:text-slate-600 focus:outline-none focus:border-primary/50">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Durability
+                            (HP)</label>
+                        <input id="lib-hp" type="number" value="100"
+                            class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white focus:outline-none focus:border-primary/50">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Output
+                            (ATK)</label>
+                        <input id="lib-atk" type="number" value="10"
+                            class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white focus:outline-none focus:border-primary/50">
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Telegraph
+                            Window</label>
+                        <span id="lib-val-telegraph" class="text-[10px] font-black text-primary">1.0x</span>
+                    </div>
+                    <input id="lib-telegraph" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
+                        oninput="document.getElementById('lib-val-telegraph').innerText=this.value+'x'"
+                        class="w-full h-1 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary">
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Recovery
+                            Delay</label>
+                        <span id="lib-val-postdelay" class="text-[10px] font-black text-primary">1.0x</span>
+                    </div>
+                    <input id="lib-postdelay" type="range" min="0.5" max="2.0" step="0.1" value="1.0"
+                        oninput="document.getElementById('lib-val-postdelay').innerText=this.value+'x'"
+                        class="w-full h-1 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary">
+                </div>
+
+                <div class="space-y-4 pb-4">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Impact
+                            Stall</label>
+                        <span id="lib-val-hitstop" class="text-[10px] font-black text-primary">3</span>
+                    </div>
+                    <input id="lib-hitstop" type="range" min="0" max="10" step="1" value="3"
+                        oninput="document.getElementById('lib-val-hitstop').innerText=this.value"
+                        class="w-full h-1 bg-white/5 rounded-lg appearance-none cursor-pointer accent-primary">
+                </div>
+            </div>
+
+            <div class="flex gap-4 mt-8">
+                <button onclick="document.getElementById('monster-creator-panel').classList.add('hidden')"
+                    class="flex-1 bg-white/5 hover:bg-white/10 border border-white/5 p-4 rounded-2xl text-[10px] font-black text-slate-400 uppercase tracking-widest transition-all">
+                    Cancel
+                </button>
+                <button onclick="confirmMonsterSave()"
+                    class="flex-1 bg-success p-4 rounded-2xl font-black text-background uppercase text-xs tracking-widest transition-all shadow-[0_10px_40px_rgba(16,185,129,0.2)]">
+                    Commit Entry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Layout Constants
+        let CANVAS_W = 400;
+        let CANVAS_H = 700;
+
+
+
+        const AUGMENT_DATA = {
+            "Common": [
+                { id: "c1", name: "날카로움", desc: "공격력 ×1.10", effect: p => p.augBuffs.atk *= 1.1 },
+                { id: "c2", name: "축적된 분노", desc: "강타 공격력 ×1.20", effect: p => p.augBuffs.heavy *= 1.2 },
+                { id: "c3", name: "회전 가속", desc: "회전베기 공격력 ×1.15", effect: p => p.augBuffs.spin *= 1.15 },
+                { id: "c4", name: "정밀 방어", desc: "패링 성공 시 AP +1 (턴당 1회)", effect: p => p.augBuffs.parryAp += 1 },
+                { id: "c5", name: "연속 호흡", desc: "전투 시작 시 AP +2", effect: p => p.augBuffs.startAp += 2 },
+                { id: "c6", name: "처형 본능", desc: "대상 HP 30% 이하일 때 공격력 ×1.15", effect: p => p.augBuffs.executeLow = 0.3 },
+                { id: "c7", name: "약점 파악", desc: "같은 적 연속 공격 시 2타부터 공격력 ×1.10", effect: p => p.augBuffs.stackAtk = 0.1 },
+                { id: "c8", name: "철갑 분쇄", desc: "강타 적중 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.heavySunder = 0.15 },
+                { id: "c9", name: "피의 회수", desc: "적 처치 시 AP +1 (턴당 2회)", effect: p => p.augBuffs.killAp += 1 },
+                { id: "c10", name: "집중력", desc: "퍼펙트 패링 성공 시 다음 공격력 ×1.20", effect: p => p.augBuffs.perfectFocus = 0.20 }
+            ],
+            "Epic": [
+                { id: "e1", name: "약점 해부", desc: "같은 적 연속 공격 시 공격력 ×1.06 (최대 5중첩)", effect: p => p.augBuffs.stackAtkEpic = 0.06 },
+                { id: "e2", name: "과열 타격", desc: "강타 사용 후 다음 턴 첫 공격 공격력 ×1.35", effect: p => p.augBuffs.heavyOverheat = 0.35 },
+                { id: "e3", name: "원심 폭발", desc: "회전베기 공격력 ×1.25 / 처치 시 AP +1", effect: p => { p.augBuffs.spin *= 1.25; p.augBuffs.spinKillAp += 1; } },
+                { id: "e4", name: "완벽한 리듬", desc: "퍼펙트 패링 시 이번 턴 공격력 ×1.20", effect: p => p.augBuffs.turnAtkPerf = 0.2 },
+                { id: "e5", name: "초반 가속", desc: "전투 시작 시 AP +3 / 첫 턴 공격력 ×1.10", effect: p => { p.augBuffs.startAp += 3; p.augBuffs.startTurnAtk = 0.1; } },
+                { id: "e6", name: "피의 수확", desc: "적 처치 시 공격력 ×1.04 (최대 10중첩)", effect: p => p.augBuffs.killStackAtk = 0.04 },
+                { id: "e7", name: "단두의 각", desc: "적 HP 30% 이하일 때 강타 공격력 ×1.40", effect: p => p.augBuffs.heavyExecute = 0.4 },
+                { id: "e8", name: "침착한 폭력", desc: "현재 AP 가 0~2일 때 공격력 ×1.18", effect: p => p.augBuffs.lowApAtk = 1.18 },
+                { id: "e9", name: "관성 베기", desc: "기본 공격 사용 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.inertiaSlice = 0.15 },
+                { id: "e10", name: "파괴의 맥박", desc: "매 턴 첫 공격 공격력 ×1.15 (강타라면 x1.25)", effect: p => p.augBuffs.firstAtkMult = 0.15 }
+            ],
+            "Unique": [
+                { id: "u1", name: "검성의 서약", desc: "모든 스킬 공격력 ×1.20", effect: p => { p.augBuffs.atk *= 1.2; p.augBuffs.spin *= 1.2; p.augBuffs.heavy *= 1.2; } },
+                { id: "u2", name: "큰 한 방", desc: "강타 공격력 ×1.60 / 강타 처치 시 AP +2", effect: p => { p.augBuffs.heavy *= 1.6; p.augBuffs.heavyKillAp += 2; } },
+                { id: "u3", name: "폭풍의 중심", desc: "회전베기 공격력 ×1.50 / 적 2마리 이상 시 추가 x1.1", effect: p => { p.augBuffs.spin *= 1.5; p.augBuffs.spinMultiTarget = 0.1; } },
+                { id: "u4", name: "무한 템포", desc: "전투 시작 AP +4 / 퍼펙트 패링 시 AP +1 (턴당 2)", effect: p => { p.augBuffs.startAp += 4; p.augBuffs.perfectApBonus += 1; } },
+                { id: "u5", name: "피의 엔진", desc: "적 처치 시 공격력 ×1.06 (무제한) / 피격 피해 x1.1", effect: p => { p.augBuffs.unlimitKillAtk = 0.06; p.augBuffs.takeDmgMult *= 1.1; } },
+                { id: "u6", name: "결투가", desc: "적 1마리일 때 공격력 ×1.35 / 강타 추가 x1.15", effect: p => { p.augBuffs.soloAtk = 0.35; p.augBuffs.soloHeavy = 0.15; } },
+                { id: "u7", name: "집행인의 판결", desc: "적 HP 40% 이하 시 Atk x1.25 / 강타 추가 x1.2", effect: p => { p.augBuffs.executeAll = 0.25; p.augBuffs.heavyExecAll = 0.2; } },
+                { id: "u8", name: "연쇄 분쇄", desc: "강타 연속 사용(연속 턴) 시 공격력 ×1.50", effect: p => p.augBuffs.heavyChain = 0.5 },
+                { id: "u9", name: "정점의 호흡", desc: "턴 시작 시 AP 5 이상이면 공격력 ×1.25", effect: p => p.augBuffs.highApBuff = 0.25 },
+                { id: "u10", name: "완전무결", desc: "퍼펙트 패링 당 Atk x1.08 (최대 3) / 피격 시 소멸", effect: p => p.augBuffs.perfStackBuff = 0.08 }
+            ]
+        };
+
+        const ui = {
+            lobby: document.getElementById('lobby-overlay'),
+            battleScreen: document.getElementById('battle-screen'),
+            overlayAug: document.getElementById('augment-overlay'),
+            overlayEvent: document.getElementById('event-overlay'),
+            overlayGameOver: document.getElementById('game-over-overlay'),
+            inventory: document.getElementById('inventory-overlay'),
+            stageEditor: document.getElementById('stage-editor-overlay'),
+            overlayGuide: document.getElementById('guide-overlay'),
+            hp: document.getElementById('p-hp'),
+            atk: document.getElementById('p-atk'),
+            def: document.getElementById('p-def'),
+            ap: document.getElementById('p-ap'),
+            msg: document.getElementById('message'),
+            turn: document.getElementById('turn-indicator'),
+            vignette: document.getElementById('vignette'),
+            hitIcons: document.getElementById('hit-icons-container'),
+            btnReroll: document.getElementById('btn-reroll'),
+            btns: {
+                atk: document.getElementById('btn-atk'),
+                spin: document.getElementById('btn-spin'),
+                heavy: document.getElementById('btn-heavy'),
+                end: document.getElementById('btn-end')
             }
-            const t = target || monsters[0];
-            if (!t) return;
-            if (skill === "atk" && Player.ap >= 2) {
-                Player.ap -= 2; this.dealDamage(Player.atk * Player.augBuffs.atk, t); Player.actionsUsed.atk = true;
-            } else if (skill === "heavy" && Player.ap >= 5) {
-                Player.ap -= 5; this.dealDamage(Player.atk * 2 * Player.augBuffs.heavy, t); Player.actionsUsed.heavy = true;
-            } else if (skill === "spin" && Player.ap >= 3) {
-                Player.ap -= 3;
-                monsters.forEach(m => this.dealDamage(Player.atk * 1.2 * Player.augBuffs.spin, m));
-                Player.actionsUsed.spin = true;
+        };
+
+        const CONFIG = {
+            FPS: 60,
+            PARRY_STANCE_DURATION: 21,
+            PERFECT_WINDOW: 8,
+            ATTACK_DURATION: 15,
+            RETURN_DURATION: 20,
+            REACTION_WINDOW: 26, // [NEW] ?�호 ????격까�????�간
+            K: 50
+        };
+
+        const Player = {
+            x: 200,
+            y: 600,
+            radius: 42,
+            hp: 100,
+            maxHp: 100,
+            atk: 50,
+            def: 0,
+            ap: 0,
+            color: "#4a9eff",
+            parryTimer: 0,
+            isParrying: false,
+            dashTimer: 0,
+            ghosts: [],
+            actionsUsed: { atk: false, spin: false, heavy: false },
+            augBuffs: {
+                atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
+                executeLow: 0, stackAtk: 0, heavySunder: 0, killAp: 0, perfectFocus: 0,
+                stackAtkEpic: 0, heavyOverheat: 0, spinKillAp: 0, turnAtkPerf: 0,
+                startTurnAtk: 0, killStackAtk: 0, heavyExecute: 0, lowApAtk: 1.0,
+                inertiaSlice: 0, firstAtkMult: 0, heavyKillAp: 0, spinMultiTarget: 0,
+                perfectApBonus: 0, unlimitKillAtk: 0, takeDmgMult: 1.0,
+                soloAtk: 0, soloHeavy: 0, executeAll: 0, heavyExecAll: 0,
+                heavyChain: 0, highApBuff: 0, perfStackBuff: 0
+            },
+            state: {
+                killsThisTurn: 0, parryApGained: 0, isPrefGainedThisTurn: false,
+                consecutiveTarget: null, consecutiveCount: 0,
+                heavyUsedLastTurn: false, heavyHitThisTurn: false,
+                perfFocusActive: false, perfParryThisTurn: false,
+                killStacks: 0, unlimitKills: 0, firstAttackThisTurn: true,
+                perfStacks: 0, multiAtkCount: 0, heavyLastTurn: false,
+                atkUsedLastTurn: false
+            },
+            activeAugments: []
+        };
+
+        let rerollAvailable = true;
+        let currentAugTier = "Common";
+        let forcedTier = null;
+
+        function showAugmentSelection(tier = null) {
+            currentTurn = "NONE";
+            updateInterfaceVisibility();
+            ui.overlayAug.style.display = "flex";
+            rerollAvailable = true;
+            ui.btnReroll.disabled = false;
+            ui.btnReroll.innerText = "Reroll (1 Remaining)";
+
+            if (tier) {
+                currentAugTier = tier;
+                forcedTier = tier;
+            } else {
+                forcedTier = null;
+                const rand = Math.random();
+                if (rand < 0.05) currentAugTier = "Unique";
+                else if (rand < 0.30) currentAugTier = "Epic";
+                else currentAugTier = "Common";
             }
-            UIManager.update();
-        },
-        dealDamage(amt, target) {
-            const final = Math.ceil(amt); target.hp -= final;
-            if (!isSimulating) damageTexts.push({ x: target.x, y: target.y - 30, text: `-${final}`, color: "#ff4a4a", timer: 60 });
-            if (target.hp <= 0) {
-                monsters = monsters.filter(m => m !== target);
-                if (monsters.length === 0) StageManager.winRound();
+
+            rollAugments();
+        }
+
+        function rollAugments() {
+            const list = AUGMENT_DATA[currentAugTier];
+            const shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
+            const container = document.getElementById('augment-cards');
+            container.innerHTML = "";
+            shuffled.forEach(aug => {
+                const card = document.createElement('div');
+                card.className = `augment-card tier-${currentAugTier.toLowerCase()}`;
+                card.innerHTML = `<h3>${aug.name}</h3><p style="color:#aaa; font-size:12px; margin:5px 0;">${currentAugTier}</p><p>${aug.desc}</p>`;
+                card.setAttribute('style', 'display: flex !important; flex-direction: column !important; width: 100% !important; cursor: pointer !important; margin: 0 0 12px 0 !important; padding: 20px !important; border-radius: 16px !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid var(--glass-border) !important; z-index: 99999 !important;');
+                card.onclick = () => selectAugment(aug);
+                container.appendChild(card);
+            });
+        }
+
+        function selectAugment(aug) {
+            aug.effect(Player);
+            Player.activeAugments.push(aug);
+            ui.overlayAug.style.display = "none";
+
+            if (currentRound === 3) {
+                currentRound = 4;
+                spawnWave(4);
+            } else {
+                spawnWave(currentRound);
             }
         }
-    };
 
-    const StageManager = {
-        spawnWave(round) {
-            UIManager.toggleScreen("battle"); resizeCanvas(); monsters = [];
-            const ids = customStages[round] || ["mon_tuto_1"];
+        function rerollAugments() {
+            if (!rerollAvailable) return;
+            rerollAvailable = false;
+            ui.btnReroll.disabled = true;
+            ui.btnReroll.innerText = "Reroll (0 Remaining)";
+            rollAugments();
+        }
+
+        class Monster {
+            constructor(type, hp, atk, telegraph, postdelay, hitstop) {
+                this.type = type;
+                this.homeX = 0; this.homeY = 0; // Will be set by spawnWave
+                this.x = 0; this.y = 0;
+                this.radius = 50;
+                this.color = type.includes("BOSS") ? "#ff0000" : "#ff4a4a";
+                this.hp = hp; this.maxHp = hp; this.atk = atk;
+                this.state = "IDLE"; this.timer = 0;
+                // Default patterns for custom monsters
+                this.patterns = [{ hits: [PATTERN_SPEEDS["NORMAL"]] }];
+                if (type.includes("BOSS")) {
+                    this.patterns = [
+                        { hits: [PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["SLOW"]] },
+                        { hits: [PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"], PATTERN_SPEEDS["SLOW"]] },
+                        { hits: [PATTERN_SPEEDS["SLOW"], PATTERN_SPEEDS["NORMAL"], PATTERN_SPEEDS["FAST"]] }
+                    ];
+                }
+                this.currentPatternIdx = 0;
+                this.currentPattern = this.patterns[0];
+                this.patternStep = 0;
+                this.settings = {
+                    telegraphMult: telegraph,
+                    postDelayMult: postdelay,
+                    variance: 0,
+                    hitStop: hitstop
+                };
+            }
+            nextPattern() {
+                this.currentPatternIdx = (this.currentPatternIdx + 1) % this.patterns.length;
+                this.currentPattern = this.patterns[this.currentPatternIdx];
+                this.patternStep = 0;
+            }
+        }
+
+        const WAVE_DATA = {
+            1: [
+                { type: "Enemy 1", hp: 100, atk: 10, patterns: ["NORMAL"] },
+                { type: "Enemy 2", hp: 100, atk: 15, patterns: ["NORMAL", "FAST"] }
+            ],
+            2: [
+                { type: "Enemy A", hp: 80, atk: 9, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 120, atk: 12, patterns: ["NORMAL", "SLOW"] }
+            ],
+            3: [], // Event Round
+            4: [
+                { type: "Enemy A", hp: 150, atk: 15, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 180, atk: 18, patterns: ["NORMAL", "FAST"] },
+                { type: "Enemy C", hp: 220, atk: 20, patterns: ["NORMAL", "FAST", "SLOW"] }
+            ],
+            5: [
+                { type: "Enemy A", hp: 120, atk: 15, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 150, atk: 18, patterns: ["NORMAL"] },
+                { type: "Enemy C", hp: 200, atk: 22, patterns: ["NORMAL", "FAST"] },
+                { type: "Enemy D", hp: 250, atk: 25, patterns: ["NORMAL", "FAST", "SLOW"] }
+            ],
+            6: [
+                {
+                    type: "BOSS", hp: 1200, atk: 30,
+                    multiPatterns: [
+                        ["NORMAL", "FAST", "SLOW"],
+                        ["FAST", "NORMAL", "FAST", "SLOW"],
+                        ["SLOW", "NORMAL", "FAST"]
+                    ]
+                }
+            ],
+            7: [{ type: "ANCIENT DRAGON", hp: 3500, atk: 45, patterns: ["NORMAL", "FAST", "FAST", "SLOW"] }],
+            8: [{ type: "Rhythm Crasher", hp: 1500, atk: 25, patterns: ["SLOW", "SLOW", "FAST"] }],
+            9: [{ type: "Cymbals Duo", hp: 1800, atk: 20, patterns: ["FAST", "FAST", "NORMAL"] }],
+            10: [{ type: "Fake Knight", hp: 2500, atk: 35, patterns: ["SLOW", "SLOW", "NORMAL"] }]
+            // Note: WAVE_DATA is now only used if customStages is empty for a round.
+            // The Monster constructor now handles pattern assignment based on type.
+        };
+
+        const PATTERN_SPEEDS = {
+            "FAST": 40,
+            "NORMAL": 60,
+            "SLOW": 90
+        };
+
+        let monsters = [];
+        let currentTurn = "NONE";
+        let currentMonsterIndex = 0;
+        let isTargeting = false;
+        let selectedSkill = null; // "atk", "spin", "heavy"
+        let damageTexts = []; // {x, y, text, timer, color}
+        let currentRound = 1;
+        let isEndingTurnAutomatically = false;
+        let gameStarted = false;
+        let roundStartTimer = 0;
+        let lastTimestamp = 0;
+
+        let monsterSettings = {
+            telegraphMult: 1.0,
+            postDelayMult: 1.0,
+            variance: 0,
+            hitStop: 3
+        };
+        let hitStopTimer = 0;
+
+        // --- Editor State & Storage ---
+        let monsterLibrary = []; // {id, name, hp, atk, telegraph, postdelay, hitstop}
+        let customStages = { // round -> [monsterIds]
+            1: [], 2: [], 4: [], 5: [], 6: []
+        };
+        let editingMonsterId = null;
+
+        function loadFromStorage() {
+            const savedLib = localStorage.getItem('monster_library');
+            const savedStages = localStorage.getItem('custom_stages');
+            if (savedLib) monsterLibrary = JSON.parse(savedLib);
+            if (savedStages) customStages = JSON.parse(savedStages);
+            renderLibrary();
+            renderStageEditor();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('monster_library', JSON.stringify(monsterLibrary));
+            localStorage.setItem('custom_stages', JSON.stringify(customStages));
+            showFeedback("?�체 ?????�료!", "#4ade80");
+        }
+
+        // --- Editor UI Logic ---
+        function toggleEditor(show) {
+            document.getElementById('editor-overlay').style.display = show ? "flex" : "none";
+            if (show) {
+                gameStarted = false;
+                renderLibrary();
+                renderStageEditor();
+            } else if (!gameStarted && !ui.lobby.style.display.includes("flex")) {
+                // If we closed editor and not in game, show lobby
+                ui.lobby.style.display = "flex";
+            }
+        }
+
+        function openMonsterCreator(id = null) {
+            editingMonsterId = id;
+            const panel = document.getElementById('monster-creator-panel');
+            panel.style.display = 'block';
+
+            if (id) {
+                const m = monsterLibrary.find(x => x.id === id);
+                document.getElementById('creator-title').innerText = "몬스터 수정";
+                document.getElementById('lib-name').value = m.name;
+                document.getElementById('lib-hp').value = m.hp;
+                document.getElementById('lib-atk').value = m.atk;
+                document.getElementById('lib-telegraph').value = m.telegraph;
+                document.getElementById('lib-postdelay').value = m.postdelay;
+                document.getElementById('lib-hitstop').value = m.hitstop;
+
+                document.getElementById('lib-val-telegraph').innerText = m.telegraph;
+                document.getElementById('lib-val-postdelay').innerText = m.postdelay;
+                document.getElementById('lib-val-hitstop').innerText = m.hitstop;
+            } else {
+                document.getElementById('creator-title').innerText = "신규 몬스터 생성";
+                document.getElementById('lib-name').value = "신규 몬스터";
+                document.getElementById('lib-hp').value = 100;
+                document.getElementById('lib-atk').value = 10;
+                document.getElementById('lib-telegraph').value = 1.0;
+                document.getElementById('lib-postdelay').value = 1.0;
+                document.getElementById('lib-hitstop').value = 3;
+
+                document.getElementById('lib-val-telegraph').innerText = "1.0";
+                document.getElementById('lib-val-postdelay').innerText = "1.0";
+                document.getElementById('lib-val-hitstop').innerText = "3";
+            }
+        }
+
+        function confirmMonsterSave() {
+            const mData = {
+                id: editingMonsterId || Date.now().toString(),
+                name: document.getElementById('lib-name').value,
+                hp: parseInt(document.getElementById('lib-hp').value),
+                atk: parseInt(document.getElementById('lib-atk').value),
+                telegraph: parseFloat(document.getElementById('lib-telegraph').value),
+                postdelay: parseFloat(document.getElementById('lib-postdelay').value),
+                hitstop: parseInt(document.getElementById('lib-hitstop').value)
+            };
+
+            if (editingMonsterId) {
+                const idx = monsterLibrary.findIndex(x => x.id === editingMonsterId);
+                monsterLibrary[idx] = mData;
+            } else {
+                monsterLibrary.push(mData);
+            }
+
+            document.getElementById('monster-creator-panel').style.display = 'none';
+            renderLibrary();
+        }
+
+        function deleteMonster(id) {
+            if (!confirm("이 몬스터를 삭제하시겠습니까?")) return;
+            monsterLibrary = monsterLibrary.filter(x => x.id !== id);
+            // Remove from stages too
+            for (let r in customStages) {
+                customStages[r] = customStages[r].filter(mid => mid !== id);
+            }
+            renderLibrary();
+            renderStageEditor();
+        }
+
+        function renderLibrary() {
+            const list = document.getElementById('monster-library-list');
+            if (monsterLibrary.length === 0) {
+                list.innerHTML = '<p style="opacity:0.5; font-size:12px;">등록된 몬스터가 없습니다.</p>';
+                return;
+            }
+            list.innerHTML = monsterLibrary.map(m => `
+                <div class="monster-list-item">
+                    <span><b>${m.name}</b> (HP:${m.hp} ATK:${m.atk})</span>
+                    <div>
+                        <button class="btn-sm action-str" onclick="addMonsterToStagePrompt('${m.id}')">배치</button>
+                        <button class="btn-sm action-atk" onclick="openMonsterCreator('${m.id}')">수정</button>
+                        <button class="btn-sm guide-close-btn" onclick="deleteMonster('${m.id}')">삭제</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addMonsterToStagePrompt(monsterId) {
+            const round = prompt("배치할 라운드를 입력하세요 (1, 2, 4, 5, 6)", "1");
+            if (customStages[round]) {
+                customStages[round].push(monsterId);
+                renderStageEditor();
+            } else if (round !== null) {
+                alert("유효하지 않은 라운드입니다.");
+            }
+        }
+
+        function removeFromStage(round, index) {
+            customStages[round].splice(index, 1);
+            renderStageEditor();
+        }
+
+        function renderStageEditor() {
+            const list = document.getElementById('stage-editor-list');
+            let html = '';
+            for (let r of [1, 2, 4, 5, 6]) {
+                const mIds = customStages[r] || [];
+                html += `
+                    <div class="stage-box">
+                        <div style="font-weight:bold; color:#4db8ff; margin-bottom:5px;">Round ${r}</div>
+                        <div id="stage-${r}-monsters">
+                            ${mIds.map((id, idx) => {
+                    const m = monsterLibrary.find(x => x.id === id);
+                    return m ? `<span class="stage-monster-pill">${m.name} <span style="margin-left:5px; cursor:pointer; color:#ff4a4a;" onclick="removeFromStage(${r}, ${idx})">×</span></span>` : '';
+                }).join('')}
+                            ${mIds.length === 0 ? '<span style="opacity:0.3; font-size:11px;">배치된 몬스터가 없음</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
+        }
+
+        // UI 캐싱 코드
+        const uiCache = {
+            hp: -1, atk: -1, def: -1, ap: -1, turn: "",
+            atkBtn: null, spinBtn: null, heavyBtn: null, endBtn: null
+        };
+
+        function toggleGuide(show) {
+            ui.overlayGuide.style.display = show ? "flex" : "none";
+        }
+
+        function gameOver() {
+            gameStarted = false;
+            ui.overlayGameOver.style.display = "flex";
+        }
+
+        function retryGame() {
+            // 초기화
+            Player.hp = 100;
+            Player.ap = 0;
+            Player.activeAugments = [];
+            Player.augBuffs = {
+                atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
+                executeLow: 0, stackAtk: 0, heavySunder: 0, killAp: 0, perfectFocus: 0,
+                stackAtkEpic: 0, heavyOverheat: 0, spinKillAp: 0, turnAtkPerf: 0,
+                startTurnAtk: 0, killStackAtk: 0, heavyExecute: 0, lowApAtk: 1.0,
+                inertiaSlice: 0, firstAtkMult: 0, heavyKillAp: 0, spinMultiTarget: 0,
+                perfectApBonus: 0, unlimitKillAtk: 0, takeDmgMult: 1.0,
+                soloAtk: 0, soloHeavy: 0, executeAll: 0, heavyExecAll: 0,
+                heavyChain: 0, highApBuff: 0, perfStackBuff: 0
+            };
+            Player.state = {
+                killsThisTurn: 0, parryApGained: 0, isPrefGainedThisTurn: false,
+                consecutiveTarget: null, consecutiveCount: 0,
+                heavyUsedLastTurn: false, heavyHitThisTurn: false,
+                perfFocusActive: false, perfParryThisTurn: false,
+                killStacks: 0, unlimitKills: 0, firstAttackThisTurn: true,
+                perfStacks: 0, multiAtkCount: 0, heavyLastTurn: false,
+                atkUsedLastTurn: false
+            };
+            currentRound = 1;
+            ui.overlayGameOver.style.display = "none";
+            startGame();
+        }
+
+        function startGame() {
+            // 1. 전투 화면 컨테이너를 먼저 표시
+            ui.battleScreen.classList.remove('hidden');
+            ui.battleScreen.classList.add('flex');
+            ui.lobby.classList.add('hidden');
+
+            // 2. 레이아웃 조정 및 캔버스 리사이징 및 좌표 초기화
+            resizeCanvas();
+
+            gameStarted = true;
+            lastTimestamp = performance.now();
+            spawnWave(currentRound);
+            requestAnimationFrame(gameLoop);
+        }
+
+        function spawnWave(round) {
+            currentTurn = "NONE";
+            updateInterfaceVisibility();
+
+            // 특정/이벤트 구간 (3, 7, 12, 16 스테이지)
+            const eventRounds = [3, 7, 12, 16];
+            if (eventRounds.includes(round)) {
+                showEventOverlay();
+                return;
+            }
+
+            // [개선] 몬스터 배열 및 배치 로직
+            monsters = [];
+            let ids = customStages[round];
+
+            // 아이디가 없는 스테이지면 이전 아이디를 활성화하는 폴백
+            if (!ids || ids.length === 0) {
+                if (round > 20) {
+                    showFeedback("모든 구역 정복!", "#FFD700");
+                    gameStarted = false;
+                    return;
+                }
+                ids = ["mon_tuto_1"];
+            }
+
+            let count = ids.length;
+
             ids.forEach((id, i) => {
-                const libM = monsterLibrary.find(x => x.id === id) || monsterLibrary[0];
-                const m = new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
-                const ratio = ids.length === 1 ? 0.5 : (i === 0 ? 0.3 : 0.7);
-                m.x = m.homeX = CONFIG.CANVAS_W * ratio; m.y = m.homeY = CONFIG.CANVAS_H * 0.25;
+                let m = createMonsterFromId(id);
+                if (!m) return;
+
+                // X축 균등 배분 (Portrait 최적화, 겹침 방지)
+                let xRatio = 0.5;
+                if (count === 2) xRatio = (i === 0) ? 0.28 : 0.72;
+                else if (count === 3) xRatio = [0.18, 0.5, 0.82][i];
+
+                m.homeX = CANVAS_W * xRatio;
+                m.homeY = CANVAS_H * 0.22;
+                m.x = m.homeX;
+                m.y = m.homeY;
                 monsters.push(m);
             });
-            currentTurn = "PLAYER"; Player.ap = Math.min(Player.maxAp, Player.ap + 3);
-            Player.actionsUsed = { atk: false, spin: false, heavy: false };
-            UIManager.update(); UIManager.showFeedback(`WAVE ${round}`);
-        },
-        winRound() {
+
+            updateMessage(`WAVE ${round}`, 1200);
+
+            // 시뮬레이션용 로그 (상태 기록)
+            console.log(`[SIM] WAVE ${round} Started. Monsters: ${count}`);
+
+            currentMonsterIndex = 0;
+            currentTurn = "PLAYER"; // 몬스터 배치 완료 후 플레이어 턴으로 시작
+            Player.ap = Math.min(Player.maxAp, Player.ap + 3); // 턴 시작 AP 소폭 보정
+            updateInterfaceVisibility();
+        }
+
+        function createMonsterFromId(id) {
+            let libM = monsterLibrary.find(x => x.id === id);
+            if (!libM) {
+                const defaults = {
+                    "mon_tuto_1": { name: "연습용 허수아비", hp: 100, atk: 10, telegraph: 1.2, postdelay: 1.0, hitstop: 3 },
+                    "mon_tuto_2": { name: "강화 허수아비", hp: 150, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3 },
+                    "mon_boss_1": { name: "테스트 보스", hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
+                };
+                let d = defaults[id] || defaults["mon_tuto_1"];
+                libM = { ...d };
+            }
+            return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
+        }
+
+        function showEventOverlay() {
+            currentTurn = "NONE";
+            updateInterfaceVisibility();
+            ui.overlayEvent.style.display = "flex";
+        }
+
+        function selectEventOption(option) {
+            ui.overlayEvent.style.display = "none";
+            if (option === 1) {
+                showAugmentSelection("Common");
+            } else {
+                Player.hp = Math.min(Player.maxHp, Math.round(Player.hp + Player.maxHp * 0.35));
+                showFeedback("Healed 35% HP", "#4f4");
+                currentRound = 4;
+                spawnWave(4);
+            }
+        }
+
+        function winRound() {
+            // 최종 보스 ?�리??체크
+            if (currentRound >= 20) {
+                showFeedback("?�연???�복?�습?�다!", "#FFD700");
+                gameStarted = false;
+                return;
+            }
+
             currentRound++;
-            if (currentRound > 15) {
-                UIManager.showFeedback("VICTORY!", "#FFD700");
-                if (!isSimulating) { gameStarted = false; setTimeout(() => UIManager.toggleScreen("lobby"), 2000); }
-            } else this.spawnWave(currentRound);
+
+            // ?�음 ?�운?��? ?�벤???�운?�인�? ?�인
+            const eventRounds = [3, 7, 12, 16];
+            if (eventRounds.includes(currentRound)) {
+                showEventOverlay();
+            } else {
+                showAugmentSelection();
+            }
         }
-    };
 
-    // ==========================================
-    // [?�이??4] ?��??�이???�진
-    // ==========================================
-    const Simulator = {
-        results: [],
-        log(msg) { document.getElementById('sim-log').innerHTML += `<p>${msg}</p>`; },
-        async runMultiple(count, mode = "Expert") {
-            isSimulating = true; gameStarted = true;
-            this.results = [];
-            document.getElementById('sim-overlay').style.display = 'flex';
-            this.log(`Starting ${count} simulations in ${mode} mode...`);
+        function openInventory() {
+            ui.inventory.style.display = "flex";
+            renderCompleteInventory();
+        }
 
-            for (let i = 1; i <= count; i++) {
-                const res = await this.runOne(mode);
-                this.results.push(res);
-                if (i % 10 === 0) this.log(`Completed ${i}/${count}... (Win Rate: ${this.getWinRate()}%)`);
+        function openStageEditor() {
+            ui.stageEditor.style.display = "flex";
+            renderFullStageEditor();
+        }
+
+        function closeOverlay(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+        function renderCompleteInventory() {
+            const list = document.getElementById('complete-inventory-list');
+
+            // 1. Default Monsters from WAVE_DATA
+            const defaults = [
+                { id: "def_1", name: "Enemy 1 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                { id: "def_2", name: "Enemy 2 (Default)", hp: 100, atk: 10, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                { id: "def_A", name: "Enemy A (Default)", hp: 80, atk: 9, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                { id: "def_B", name: "Enemy B (Default)", hp: 120, atk: 8, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true },
+                { id: "def_BOSS", name: "BOSS (Default)", hp: 780, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3, isDefault: true }
+            ];
+
+            const allMonsters = [...defaults, ...monsterLibrary];
+
+            list.innerHTML = allMonsters.map(m => `
+                <div class="monster-card ${m.isDefault ? 'system' : 'custom'}">
+                    <div class="monster-info">
+                        <h4>${m.name}</h4>
+                        <p>HP: ${m.hp} | ATK: ${m.atk} | TG: ${m.telegraph}x</p>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-sm action-str" onclick="addMonsterToStagePrompt('${m.id}')">배치</button>
+                        ${!m.isDefault ? `
+                            <button class="btn-sm action-atk" onclick="openMonsterCreator('${m.id}')">?�정</button>
+                            <button class="btn-sm guide-close-btn" onclick="deleteMonster('${m.id}')">??��</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderFullStageEditor() {
+            const container = document.getElementById('full-stage-list');
+            let html = '';
+            const rounds = [1, 2, 4, 5, 6];
+
+            rounds.forEach(r => {
+                const mIds = customStages[r] || [];
+                html += `
+                    <div class="stage-box" style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-weight:bold; color:#4db8ff; font-size: 18px;">Round ${r}</span>
+                            <span style="font-size: 12px; color: #666;">??��???�집</span>
+                        </div>
+                        <div style="min-height: 40px; border: 1px dashed #333; padding: 10px; border-radius: 8px;">
+                            ${mIds.map((id, idx) => {
+                    // Find in library or defaults
+                    let m = monsterLibrary.find(x => x.id === id);
+                    if (!m) {
+                        const defs = [
+                            { id: "def_1", name: "Enemy 1" }, { id: "def_2", name: "Enemy 2" },
+                            { id: "def_A", name: "Enemy A" }, { id: "def_B", name: "Enemy B" },
+                            { id: "def_BOSS", name: "BOSS" }
+                        ];
+                        m = defs.find(x => x.id === id);
+                    }
+                    return m ? `
+                                    <div class="stage-monster-pill">
+                                        ${m.name} <span style="margin-left:8px; cursor:pointer; color:#ff4a4a; font-weight:bold;" onclick="removeFromStage(${r}, ${idx})">×</span>
+                                    </div>
+                                ` : '';
+                }).join('')}
+                            ${mIds.length === 0 ? '<div style="color:#444; font-size:12px; text-align:center;">배치??몬스?��? ?�습?�다.</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function resetStagesToDefault() {
+            if (!confirm("모든 스테이지 배치를 초기 상태로 되돌리시겠습니까?")) return;
+            const monsterLibrary = [
+                { id: "mon_tuto_1", name: "나무 허수아비", hp: 120, atk: 10, telegraph: 1.5, postdelay: 1.2, hitstop: 3 },
+                { id: "mon_tuto_2", name: "육중한 갑옷병", hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4 },
+                { id: "mon_swarm_1", name: "그림자 슬라임", hp: 80, atk: 8, telegraph: 1.0, postdelay: 0.8, hitstop: 2 },
+                { id: "mon_swarm_2", name: "떠도는 불꽃", hp: 60, atk: 12, telegraph: 0.9, postdelay: 1.2, hitstop: 2 },
+                { id: "mon_elite_1", name: "침묵의 집행자", hp: 600, atk: 22, telegraph: 0.8, postdelay: 1.0, hitstop: 5 },
+                { id: "mon_elite_2", name: "고대인 기사", hp: 850, atk: 28, telegraph: 0.7, postdelay: 1.1, hitstop: 6 },
+                { id: "mon_elite_3", name: "광기에 어린 화살병", hp: 450, atk: 35, telegraph: 0.6, postdelay: 0.8, hitstop: 4 },
+                { id: "mon_boss_1", name: "부활한 사자왕", hp: 2500, atk: 40, telegraph: 0.65, postdelay: 1.3, hitstop: 8 },
+                { id: "mon_boss_final", name: "심연의 지배자", hp: 5000, atk: 55, telegraph: 0.55, postdelay: 1.4, hitstop: 10 },
+                { id: "mon_growth_1", name: "거대 바위 골렘", hp: 1200, atk: 30, telegraph: 1.1, postdelay: 1.5, hitstop: 8 },
+                { id: "mon_growth_2", name: "정예 방패병", hp: 1500, atk: 18, telegraph: 1.0, postdelay: 1.0, hitstop: 6 }
+            ];
+
+            let customStages = {
+                1: ["mon_tuto_1"], 2: ["mon_tuto_2"], 4: ["mon_swarm_1", "mon_swarm_1"],
+                5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"], 6: ["mon_elite_1"],
+                7: ["mon_growth_1"], 8: ["mon_swarm_1", "mon_swarm_2", "mon_elite_1"],
+                9: ["mon_elite_2"], 10: ["mon_boss_1"], 11: ["mon_growth_2"],
+                12: ["mon_elite_1", "mon_elite_1"], 13: ["mon_elite_2", "mon_elite_3"],
+                14: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_1"], 15: ["mon_elite_3"],
+                16: ["mon_growth_1", "mon_growth_2"], 17: ["mon_elite_2", "mon_elite_2", "mon_elite_2"],
+                18: ["mon_boss_1", "mon_elite_1"], 19: ["mon_growth_2"], 20: ["mon_boss_final"]
+            };
+            localStorage.removeItem('custom_stages');
+            renderFullStageEditor();
+            showFeedback("초기화 완료!", "#4db8ff");
+        }
+
+        function startSkill(skill) {
+            const alive = monsters.filter(m => m.hp > 0);
+            if (alive.length === 0) return;
+
+            // If only 1 target remains, auto-attack
+            if (alive.length === 1) {
+                if (skill === "atk") executeAttack(alive[0]);
+                else if (skill === "heavy") executeHeavyStrike(alive[0]);
+                return;
             }
 
-            this.report();
-        },
-        async runOne(mode) {
-            Player.hp = 100; Player.ap = 0; Player.atk = 50; currentRound = 1;
-            let turns = 0;
-            while (currentRound <= 15 && Player.hp > 0 && turns < 500) {
-                if (currentTurn === "PLAYER") {
-                    // AI Player Logic
-                    if (Player.ap >= 5 && !Player.actionsUsed.heavy) BattleEngine.executeSkill("heavy");
-                    else if (Player.ap >= 3 && monsters.length > 1 && !Player.actionsUsed.spin) BattleEngine.executeSkill("spin");
-                    else if (Player.ap >= 2 && !Player.actionsUsed.atk) BattleEngine.executeSkill("atk");
-                    else endPlayerTurn();
-                } else {
-                    // AI Monster Turn Simulation
-                    monsters.forEach(m => {
-                        let dmg = Math.ceil(m.atk * (CONFIG.K / (CONFIG.K + Player.def)));
-                        if (mode === "Expert") {
-                            // 80% chance to 'Parry' in Expert mode (simplified)
-                            if (Math.random() < 0.8) { dmg = 0; Player.ap = Math.min(Player.maxAp, Player.ap + 2); }
-                        }
-                        Player.hp -= dmg;
-                    });
-                    currentTurn = "PLAYER"; turns++;
-                }
-                if (monsters.length === 0) StageManager.winRound();
-            }
-            return { win: currentRound > 15, turns, lastRound: currentRound };
-        },
-        getWinRate() {
-            const wins = this.results.filter(r => r.win).length;
-            return Math.floor((wins / this.results.length) * 100);
-        },
-        report() {
-            const winRate = this.getWinRate();
-            const avgTurns = Math.floor(this.results.reduce((a, b) => a + b.turns, 0) / this.results.length);
-            this.log(`--- FINAL REPORT ---`);
-            this.log(`Total Games: ${this.results.length}`);
-            this.log(`Win Rate: ${winRate}%`);
-            this.log(`Avg Turns to Clear: ${avgTurns}`);
-            this.log(`<button onclick="location.reload()" class="btn-primary" style="margin-top:1rem">CLOSE & RELOAD</button>`);
+            isTargeting = true;
+            selectedSkill = skill;
+            showFeedback("Select Target!", "#fff");
         }
-    };
 
-    // ==========================================
-    // [?�이??5] ?�프?? ?�더�?�?루프
-    // ==========================================
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
 
-    function resizeCanvas() {
-        const playArea = document.getElementById('play-area');
-        if (!playArea) return;
-        const rect = playArea.getBoundingClientRect();
-        canvas.width = rect.width; canvas.height = rect.height;
-        CONFIG.CANVAS_W = canvas.width; CONFIG.CANVAS_H = canvas.height;
-        Player.x = CONFIG.CANVAS_W / 2; Player.y = CONFIG.CANVAS_H * 0.85;
-    }
 
-    function gameLoop(time) {
-        if (!lastTimestamp) lastTimestamp = time;
-        const dt = (time - lastTimestamp) / 16.66; lastTimestamp = time;
-        if (gameStarted && !isSimulating) { update(dt); draw(); }
-        requestAnimationFrame(gameLoop);
-    }
-
-    function update(dt) {
-        damageTexts.forEach((d, i) => { d.y -= 0.5 * dt; d.timer -= dt; if (d.timer <= 0) damageTexts.splice(i, 1); });
-        if (currentTurn === "MONSTER") {
-            const m = monsters[0];
-            if (m) {
-                m.timer += dt;
-                if (m.timer > 60) {
-                    const dmg = Math.ceil(m.atk * (CONFIG.K / (CONFIG.K + Player.def)));
-                    Player.hp -= dmg; damageTexts.push({ x: Player.x, y: Player.y - 30, text: `-${dmg}`, color: "#f44", timer: 60 });
-                    m.timer = 0; if (Player.hp <= 0) { gameStarted = false; ui.over.style.display = 'flex'; }
-                }
-            } else { currentTurn = "PLAYER"; UIManager.update(); }
-        }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        monsters.forEach(m => {
-            ctx.fillStyle = m.color; ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = "#fff"; ctx.font = "bold 12px Inter"; ctx.textAlign = "center";
-            ctx.fillText(m.name, m.x, m.y - m.radius - 20);
-            ctx.fillText(`${Math.ceil(m.hp)} HP`, m.x, m.y - m.radius - 5);
-        });
-        ctx.fillStyle = Player.color; ctx.beginPath(); ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2); ctx.fill();
-        damageTexts.forEach(d => { ctx.fillStyle = d.color; ctx.fillText(d.text, d.x, d.y); });
-    }
-
-    // ==========================================
-    // [?�이??6] ?�역 ?�터?�이??
-    // ==========================================
-    function startGame() { gameStarted = true; StageManager.spawnWave(currentRound); }
-    function startSkill(s) { BattleEngine.executeSkill(s); }
-    function executeSpinSlash() { BattleEngine.executeSkill("spin"); }
-    function endPlayerTurn() { currentTurn = "MONSTER"; UIManager.update(); }
-    function retryGame() { Player.hp = 100; Player.ap = 0; currentRound = 1; ui.over.style.display = 'none'; startGame(); }
-    function openInventory() { Simulator.runMultiple(150, "Expert"); } // ?�시�??�구???�르�??��??�이??
-    function toggleGuide(v) { document.getElementById('guide-overlay').style.display = v ? 'flex' : 'none'; }
-
-    canvas.addEventListener('mousedown', e => {
-        if (isTargeting) {
+        function handleTargeting(e) {
             const rect = canvas.getBoundingClientRect();
-            const mx = e.clientX - rect.left; const my = e.clientY - rect.top;
-            monsters.forEach(m => {
-                if (Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2) < m.radius * 2) {
-                    BattleEngine.executeSkill(selectedSkill, m);
-                    isTargeting = false; selectedSkill = null;
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            monsters.forEach((m) => {
+                const dist = Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2);
+                if (dist < m.radius * 2 && m.hp > 0) {
+                    if (selectedSkill === "atk") executeAttack(m);
+                    else if (selectedSkill === "heavy") executeHeavyStrike(m);
+                    isTargeting = false;
+                    selectedSkill = null;
                 }
             });
         }
-    });
 
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-    requestAnimationFrame(gameLoop);
-</script>
+        function executeAttack(target) {
+            if (Player.ap < 2) return;
+            Player.ap -= 2;
+            dealDamage(Player.atk, target, "normal");
+            Player.actionsUsed.atk = true;
+            Player.state.multiAtkCount++;
+            updateUI();
+        }
+
+        function executeHeavyStrike(target) {
+            if (Player.ap < 5) return;
+            Player.ap -= 5;
+            dealDamage(Player.atk * 2, target, "heavy");
+            Player.actionsUsed.heavy = true;
+            updateUI();
+        }
+
+        function executeSpinSlash() {
+            if (Player.ap < 3) return;
+            const alive = monsters.filter(m => m.hp > 0);
+            if (alive.length === 0) return;
+            Player.ap -= 3;
+            let mult = 1.2;
+            if (alive.length >= 2) mult *= (1 + Player.augBuffs.spinMultiTarget);
+            const totalDmg = Player.atk * mult;
+            const dmgPer = totalDmg / alive.length;
+            alive.forEach(m => dealDamage(dmgPer, m, "spin"));
+            Player.actionsUsed.spin = true;
+            showFeedback("SPIN SLASH!", "#4a4");
+            updateUI();
+        }
+
+        function dealDamage(amount, target, type = "normal") {
+            let mult = Player.augBuffs.atk;
+            if (type === "spin") mult = Player.augBuffs.spin;
+            if (type === "heavy") {
+                mult = Player.augBuffs.heavy;
+                // 증강: 단두의 각
+                if (target.hp / target.maxHp <= 0.3) mult *= (1 + Player.augBuffs.heavyExecute);
+                // 증강: 집행인의 판결
+                if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.heavyExecAll);
+            }
+
+            // 공통 증강 효과
+            if (target.hp / target.maxHp <= Player.augBuffs.executeLow) mult *= 1.15;
+            if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.executeAll);
+
+            // ?점 ?악/??
+            if (Player.state.consecutiveTarget === target) {
+                if (Player.state.consecutiveCount >= 1) mult *= (1 + Player.augBuffs.stackAtk);
+                mult *= (1 + Player.augBuffs.stackAtkEpic * Math.min(Player.state.consecutiveCount, 5));
+            }
+
+            // 조건�? 버프??            if (Player.state.heavyUsedLastTurn && Player.state.firstAttackThisTurn) {
+            mult *= (1 + Player.augBuffs.heavySunder);
+            mult *= (1 + Player.augBuffs.heavyOverheat);
+        }
+        if (Player.state.atkUsedLastTurn && Player.state.firstAttackThisTurn) {
+            mult *= (1 + Player.augBuffs.inertiaSlice); // Epic 9: �???베기
+        }
+        if (Player.state.perfParryThisTurn) mult *= (1 + Player.augBuffs.turnAtkPerf);
+        if (Player.state.perfFocusActive) {
+            mult *= (1 + Player.augBuffs.perfectFocus); // 집중??                Player.state.perfFocusActive = false;
+        }
+        if (Player.state.unlimitKills > 0) mult *= (1 + Player.augBuffs.unlimitKillAtk * Player.state.unlimitKills);
+        if (Player.state.killStacks > 0) mult *= (1 + Player.augBuffs.killStackAtk * Math.min(Player.state.killStacks, 10));
+
+        //  Unique: ?�점???�흡, 결투�?
+        if (Player.state.highApAtkActive) mult *= (1 + Player.augBuffs.highApBuff);
+        if (monsters.length === 1) {
+            mult *= (1 + Player.augBuffs.soloAtk);
+            if (type === "heavy") mult *= (1 + Player.augBuffs.soloHeavy);
+        }
+        if (Player.state.perfStacks > 0) mult *= (1 + Player.augBuffs.perfStackBuff * Player.state.perfStacks);
+        if (Player.state.firstAttackThisTurn) {
+            mult *= (1 + Player.augBuffs.firstAtkMult);
+            if (type === "heavy") mult *= 1.08; // ?�괴??맥박(강�???추�?) -> +0.1 보정
+        }
+        // if (type === "normal" && Player.state.multiAtkCount >= 1) mult *= Player.augBuffs.multiAtkAtk; // This was removed in previous edits
+
+        const finalDmg = Math.ceil(amount * mult);
+        target.hp = Math.max(0, target.hp - finalDmg);
+        addDamageText(target.x, target.y - 30, `-${finalDmg}`, "#ff4a4a");
+
+        Player.state.firstAttackThisTurn = false;
+        Player.state.consecutiveTarget = target;
+        Player.state.consecutiveCount++;
+        if (type === "heavy") Player.state.heavyHitThisTurn = true;
+
+        if (target.hp <= 0) {
+            target.state = "DONE";
+            // 증강: ?�의 ?�수, ?�심 ??��
+            if (Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.killAp;
+            if (type === "spin" && Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.spinKillAp;
+            if (type === "heavy" && Player.state.killsThisTurn < 1) Player.ap += Player.augBuffs.heavyKillAp;
+
+            Player.state.killStacks++;
+            Player.state.unlimitKills++;
+            Player.state.killsThisTurn++;
+
+            setTimeout(() => {
+                monsters = monsters.filter(m => m.hp > 0);
+                if (monsters.length === 0) {
+                    winRound();
+                }
+            }, 100);
+        }
+        }
+
+        function endPlayerTurn() {
+            if (currentTurn !== "PLAYER") return;
+            currentTurn = "MONSTER";
+            currentMonsterIndex = 0;
+            // ??종료 ???�태 갱신
+            Player.state.heavyUsedLastTurn = Player.actionsUsed.heavy;
+            Player.state.atkUsedLastTurn = Player.actionsUsed.atk; // Epic 9 ?�해 ????            Player.state.killsThisTurn = 0;
+            isTargeting = false;
+            selectedSkill = null;
+            Player.actionsUsed = { atk: false, spin: false, heavy: false };
+            isEndingTurnAutomatically = false;
+            roundStartTimer = 25;
+
+            // UI Toggle
+            updateInterfaceVisibility();
+
+            monsters.forEach(m => {
+                if (m.hp > 0) {
+                    m.state = "IDLE";
+                    m.patternStep = 0;
+                    m.timer = 0;
+                }
+            });
+            ui.turn.innerText = "Monster's Turn";
+            updateHitIcons();
+            updateUI();
+        }
+
+        function updateHitIcons() {
+            ui.hitIcons.innerHTML = "";
+            const m = monsters[currentMonsterIndex];
+            if (!m || !m.patterns || !m.currentPattern || currentTurn !== "MONSTER") return;
+
+            const p = m.currentPattern;
+            p.hits.forEach((h, i) => {
+                const icon = document.createElement("div");
+                icon.className = "hit-icon" + (i < m.patternStep ? " used" : "");
+                ui.hitIcons.appendChild(icon);
+            });
+        }
+
+        function showFeedback(text, color) {
+            ui.msg.innerText = text;
+            ui.msg.style.color = color;
+            ui.msg.style.opacity = 1;
+            setTimeout(() => ui.msg.style.opacity = 0, 800);
+        }
+
+        function addDamageText(x, y, text, color) {
+            damageTexts.push({ x, y, text, color, timer: 60 });
+        }
+
+        function triggerVignette() {
+            ui.vignette.classList.add('active');
+            setTimeout(() => ui.vignette.classList.remove('active'), 300);
+        }
+
+        function update(dt) {
+            if (!gameStarted) return;
+
+            // Hit Stop
+            if (hitStopTimer > 0) {
+                hitStopTimer -= 1; // Approx 1 frame
+                return;
+            }
+
+            // ?�워 ?�스???�데?�트
+            for (let i = damageTexts.length - 1; i >= 0; i--) {
+                const dt_item = damageTexts[i];
+                dt_item.y -= 0.5 * dt;
+                dt_item.timer -= dt;
+                if (dt_item.timer <= 0) damageTexts.splice(i, 1);
+            }
+
+            if (currentTurn === "PLAYER") {
+                updateUI();
+                checkAutoTurnEnd();
+                return;
+            }
+
+            if (roundStartTimer > 0) {
+                roundStartTimer -= dt;
+                if (roundStartTimer <= 0) {
+                    roundStartTimer = 0;
+                    ui.turn.innerText = (currentRound === 6) ? "Boss Round" : "Monster's Turn";
+                    updateHitIcons();
+                    // 증강: ?�점???�흡 (???�작 ??체크)
+                    Player.state.highApAtkActive = (Player.ap >= 5);
+                }
+                updateUI();
+                return;
+            }
+
+            // --- 몬스????로직 ---
+            if (Player.parryTimer > 0) Player.parryTimer -= dt;
+            else { Player.parryTimer = 0; Player.isParrying = false; }
+
+            if (Player.dashTimer > 0) {
+                Player.dashTimer -= dt;
+                if (Math.random() < 0.3) Player.ghosts.push({ x: Player.x, y: Player.y, a: 0.5 });
+            }
+            Player.ghosts.forEach(g => g.a -= 0.02 * dt);
+            Player.ghosts = Player.ghosts.filter(g => g.a > 0);
+
+            const m = monsters[currentMonsterIndex];
+            if (!m) { nextMonsterOrTurn(); return; }
+            if (m.hp <= 0) { m.state = "DONE"; nextMonsterOrTurn(); return; }
+
+            if (m.state === "IDLE") {
+                m.timer += dt;
+                const set = m.settings || monsterSettings;
+                if (m.timer > (30 * set.postDelayMult)) {
+                    m.currentPattern = m.patterns[m.currentPatternIdx];
+                    m.state = "TELEGRAPH";
+                    m.timer = 0;
+                    m.startX = m.homeX; m.startY = m.homeY;
+                    updateHitIcons();
+                }
+            } else if (m.state === "TELEGRAPH") {
+                m.timer += dt;
+                const set = m.settings || monsterSettings;
+                const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
+                const prepRatio = Math.min(m.timer / waitFrames, 1);
+                // Vertical Shake
+                m.y = m.homeY + Math.sin(prepRatio * Math.PI) * 15;
+
+                // [NEW] 26?�레??반응 기�???Cue(?�호) 발생 로직
+                const remainingTelegraph = waitFrames - m.timer;
+                if (remainingTelegraph + CONFIG.ATTACK_DURATION <= CONFIG.REACTION_WINDOW) {
+                    m.cueActive = true;
+                } else {
+                    m.cueActive = false;
+                }
+
+                if (m.timer >= waitFrames) {
+                    m.state = "ATTACK";
+                    m.timer = 0;
+                    m.startX = m.x;
+                    m.startY = m.y;
+                    m.cueActive = false; // 공격 ?�작 ???�호 종료
+                }
+            } else if (m.state === "ATTACK") {
+                m.timer += dt;
+                let t = m.timer / CONFIG.ATTACK_DURATION;
+                m.x = m.startX + (Player.x - m.startX) * (t * t);
+                m.y = m.startY + (Player.y - Player.radius - m.startY) * (t * t);
+
+                // ?�정 ???�밍 (0~2?�레???�차 ?�용???�해 범위 체크)
+                if (m.timer >= CONFIG.ATTACK_DURATION - 2 && m.timer < CONFIG.ATTACK_DURATION && !m.hitTriggered) {
+                    m.hitTriggered = true;
+                    if (Player.dashTimer > 0) {
+                        showFeedback("EVADE", "#aaa");
+                    } else if (Player.isParrying) {
+                        const elapsed = CONFIG.PARRY_STANCE_DURATION - Player.parryTimer;
+                        if (elapsed <= CONFIG.PERFECT_WINDOW) {
+                            showFeedback("PERFECT!", "#FFD700");
+                            Player.ap += 2.0;
+                            if (!Player.state.isPrefGainedThisTurn) {
+                                Player.ap += Player.augBuffs.parryAp;
+                                Player.state.isPrefGainedThisTurn = true;
+                            }
+                            if (Player.state.parryApGained < 2) {
+                                Player.ap += Player.augBuffs.perfectApBonus;
+                                Player.state.parryApGained++;
+                            }
+                            Player.state.perfFocusActive = true;
+                            Player.state.perfParryThisTurn = true;
+                            Player.state.perfStacks = Math.min(Player.state.perfStacks + 1, 3);
+                        } else {
+                            showFeedback("GOOD", "#00FF00");
+                            Player.ap += 1.0;
+                            if (!Player.state.isPrefGainedThisTurn) {
+                                Player.ap += Player.augBuffs.parryAp;
+                                Player.state.isPrefGainedThisTurn = true;
+                            }
+                        }
+                    } else {
+                        const finalDmg = Math.round(m.atk * (CONFIG.K / (CONFIG.K + Player.def)) * Player.augBuffs.takeDmgMult);
+                        Player.hp = Math.max(0, Player.hp - finalDmg);
+                        addDamageText(Player.x, Player.y - 40, `-${finalDmg}`, "#ff4a4a");
+                        Player.state.perfStacks = 0;
+                        triggerVignette();
+
+                        const set = m.settings || monsterSettings;
+                        hitStopTimer = set.hitStop;
+
+                        if (Player.hp <= 0) gameOver();
+                    }
+                }
+
+                if (m.timer >= CONFIG.ATTACK_DURATION) {
+                    m.state = "RETURN"; m.returnStartX = m.x; m.returnStartY = m.y; m.timer = 0; m.hitTriggered = false;
+                    m.patternStep++; updateHitIcons();
+                }
+            } else if (m.state === "RETURN") {
+                m.timer += dt;
+                const isLastHit = m.patternStep === m.currentPattern.hits.length;
+                const duration = isLastHit ? CONFIG.RETURN_DURATION : 25;
+                const targetX = isLastHit ? m.homeX : (m.homeX + m.returnStartX) / 2;
+                const targetY = isLastHit ? m.homeY : (m.homeY + m.returnStartY) / 2;
+
+                let t = m.timer / duration;
+                m.x = m.returnStartX + (targetX - m.returnStartX) * (1 - Math.pow(1 - t, 2));
+                m.y = m.returnStartY + (targetY - m.returnStartY) * (1 - Math.pow(1 - t, 2));
+
+                if (m.timer >= duration) {
+                    if (m.patternStep < m.currentPattern.hits.length) {
+                        m.state = "ATTACK"; m.timer = 0; m.startX = m.x; m.startY = m.y;
+                    } else {
+                        if (currentRound === 6) m.nextPattern();
+                        m.state = "DONE";
+                        nextMonsterOrTurn();
+                    }
+                }
+            }
+            updateUI();
+        }
+
+        function checkAutoTurnEnd() {
+            if (isEndingTurnAutomatically) return;
+
+            // ?�수???�차 방�?�??�해 floor 처리??AP ?�용 �??�간??마진(0.1) 추�?
+            const fAp = Math.floor(Player.ap + 0.01);
+            const canAtk = !Player.actionsUsed.atk && fAp >= 2;
+            const canSpin = !Player.actionsUsed.spin && fAp >= 3;
+            const canHeavy = !Player.actionsUsed.heavy && fAp >= 5;
+
+            if (!canAtk && !canSpin && !canHeavy) {
+                isEndingTurnAutomatically = true;
+                setTimeout(endPlayerTurn, 800);
+            }
+        }
+
+        function nextMonsterOrTurn() {
+            if (currentMonsterIndex < monsters.length - 1) {
+                currentMonsterIndex++;
+                // ?�음 몬스?��? 죽어?�을 경우???????�외 처리
+                if (monsters[currentMonsterIndex].hp <= 0) {
+                    monsters[currentMonsterIndex].state = "DONE";
+                    nextMonsterOrTurn();
+                }
+                updateHitIcons();
+            } else {
+                currentTurn = "PLAYER";
+                ui.turn.innerText = "Player's Turn";
+                ui.hitIcons.innerHTML = "";
+
+                // UI Toggle
+                updateInterfaceVisibility();
+            }
+        }
+
+        function updateInterfaceVisibility() {
+            const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver];
+            const isAnyOverlayVisible = overlays.some(o => o && (o.style.display === "flex" || o.style.display === "block" || !o.classList.contains('hidden')));
+
+            const bottomUI = document.getElementById('bottom-ui');
+            const topHUD = document.getElementById('top-status');
+
+            if (isAnyOverlayVisible || !gameStarted || currentTurn === "NONE") {
+                if (bottomUI) { bottomUI.classList.add('opacity-0'); bottomUI.classList.add('pointer-events-none'); }
+                if (topHUD) topHUD.classList.add('opacity-0');
+                return;
+            }
+
+            if (bottomUI) { bottomUI.classList.remove('opacity-0'); bottomUI.classList.remove('pointer-events-none'); }
+            if (topHUD) topHUD.classList.remove('opacity-0');
+
+            const playerActions = document.getElementById('player-actions');
+            const monsterActions = document.getElementById('monster-actions');
+
+            if (currentTurn === "PLAYER") {
+                playerActions.classList.remove('hidden');
+                playerActions.classList.add('flex');
+                monsterActions.classList.add('hidden');
+                monsterActions.classList.remove('flex');
+            } else if (currentTurn === "MONSTER") {
+                playerActions.classList.add('hidden');
+                playerActions.classList.remove('flex');
+                monsterActions.classList.remove('hidden');
+                monsterActions.classList.add('flex');
+            }
+        }
+
+        function updateUI() {
+            updateInterfaceVisibility();
+
+            if (uiCache.hp !== Player.hp) { ui.hp.innerText = Player.hp; uiCache.hp = Player.hp; }
+            if (uiCache.atk !== Player.atk) { ui.atk.innerText = Player.atk; uiCache.atk = Player.atk; }
+            if (uiCache.def !== Player.def) { ui.def.innerText = Player.def; uiCache.def = Player.def; }
+
+            const fAp = Math.floor(Player.ap);
+            if (uiCache.ap !== fAp) { ui.ap.innerText = fAp; uiCache.ap = fAp; }
+
+            const isPlayer = currentTurn === "PLAYER";
+            const atkD = !isPlayer || Player.ap < 2 || Player.actionsUsed.atk;
+            const spinD = !isPlayer || Player.ap < 3 || Player.actionsUsed.spin;
+            const heavyD = !isPlayer || Player.ap < 5 || Player.actionsUsed.heavy;
+            const endD = !isPlayer;
+
+            if (uiCache.atkBtn !== atkD) { ui.btns.atk.disabled = atkD; uiCache.atkBtn = atkD; }
+            if (uiCache.spinBtn !== spinD) { ui.btns.spin.disabled = spinD; uiCache.spinBtn = spinD; }
+            if (uiCache.heavyBtn !== heavyD) { ui.btns.heavy.disabled = heavyD; uiCache.heavyBtn = heavyD; }
+            if (uiCache.endBtn !== endD) { ui.btns.end.disabled = endD; uiCache.endBtn = endD; }
+
+            // AP �?�????�동 ??종료 체크
+            if (isPlayer && !isEndingTurnAutomatically && atkD && spinD && heavyD) {
+                isEndingTurnAutomatically = true;
+                setTimeout(() => {
+                    if (currentTurn === "PLAYER") endPlayerTurn();
+                }, 800);
+            }
+        }
+
+        let canvasShake = 0;
+        function shakeCanvas(amt) { canvasShake = amt; }
+
+        function draw() {
+            ctx.save();
+            if (canvasShake > 0) {
+                ctx.translate(Math.random() * canvasShake - canvasShake / 2, Math.random() * canvasShake - canvasShake / 2);
+                canvasShake *= 0.9;
+                if (canvasShake < 0.5) canvasShake = 0;
+            }
+            ctx.clearRect(-100, -100, canvas.width + 200, canvas.height + 200);
+            if (!gameStarted) { ctx.restore(); return; }
+
+            // 1. Draw Monsters
+            monsters.forEach((m) => {
+                let color = m.color;
+                if (m.state === "TELEGRAPH") {
+                    const set = m.settings || monsterSettings;
+                    const waitFrames = (m.currentPattern.hits[m.patternStep] * set.telegraphMult) + set.variance;
+                    const alpha = Math.min(m.timer / waitFrames, 1);
+                    color = `rgb(${255}, ${74 + 181 * alpha}, ${74 + 181 * alpha})`;
+
+                    // ?�호(Cue) 발생 ???��??�으�?강조
+                    if (m.cueActive) {
+                        color = "#ffffff";
+                        ctx.shadowBlur = 20;
+                        ctx.shadowColor = "#ffffff";
+                    }
+                }
+
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 몬스??HP ?�치�??�시
+                // 몬스??HP ?치??시
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 14px Inter";
+                ctx.textAlign = "center";
+                ctx.fillText(`${Math.ceil(m.hp)}`, m.x, m.y - m.radius - 10);
+
+                // 타겟팅 하이라이트
+                if (isTargeting && m.hp > 0) {
+                    ctx.strokeStyle = "#fff";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(m.x, m.y, m.radius + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            });
+
+            // 2. Draw Damage Texts
+            damageTexts.forEach(dt => {
+                ctx.fillStyle = dt.color;
+                ctx.font = "bold 24px Inter";
+                ctx.fillText(dt.text, dt.x, dt.y);
+            });
+
+            // 3. Draw Player & Ghosts
+            Player.ghosts.forEach(g => {
+                ctx.fillStyle = `rgba(74, 158, 255, ${g.a})`;
+                ctx.beginPath(); ctx.arc(g.x, g.y, Player.radius, 0, Math.PI * 2); ctx.fill();
+            });
+
+            if (Player.isParrying) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "#FFD700";
+                ctx.strokeStyle = "#FFD700";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (Player.dashTimer > 0) {
+                ctx.strokeStyle = "#aaa";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]); // Reset dash
+            }
+
+            ctx.fillStyle = Player.color;
+            ctx.beginPath();
+            ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function gameLoop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            let elapsed = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
+            // ?��? ????계산 (60FPS 기�? 1.0)
+            // 브라?��? ???�환 ?�으�??�한 과도???�프 방�? (최�? 100ms)
+            let dt = (Math.min(elapsed, 100) / 16.66);
+
+            update(dt);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function executeDash() {
+            if (Player.dashTimer > 0) return;
+            Player.dashTimer = 20;
+            showFeedback("DASH!", "#aaa");
+        }
+
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        function resizeCanvas() {
+            const root = document.getElementById('game-container');
+            const playArea = document.getElementById('play-area');
+
+            if (!root || !playArea) return;
+
+            // 1. ?�제 ?�더링된 컨테?�너???�기�??�확???�악
+            const rect = playArea.getBoundingClientRect();
+
+            // 2. 캔버?�의 ?��? ?�상?��? CSS ?�기?? 1:1�??�치?�켜 ?�곡 방�?
+            canvas.width = rect.width || 412;
+            canvas.height = rect.height || 500;
+
+            CANVAS_W = canvas.width;
+            CANVAS_H = canvas.height;
+
+            // 3. 캐릭??좌표 ?�정 (캔버???�기 ??�?백분???��?)
+            Player.x = CANVAS_W / 2;
+            Player.y = CANVAS_H * 0.85;
+
+            monsters.forEach(m => {
+                m.homeX = CANVAS_W / 2;
+                m.homeY = CANVAS_H * 0.22;
+                if (m.state === "IDLE" || m.state === "DONE") {
+                    m.x = m.homeX;
+                    m.y = m.homeY;
+                }
+            });
+
+            // 4. CSS ?��??�링?�로 ?�한 찌그?�짐 방�? (auto ?�정)
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+        }
+
+        function init() {
+            try {
+                lucide.createIcons();
+                loadFromStorage();
+                window.addEventListener('resize', resizeCanvas);
+
+                // ?�역 컨텍?�트 메뉴 차단 (PC ?�클�?조작???�해 ?�수)
+                window.addEventListener('contextmenu', e => e.preventDefault());
+
+                // ?�력 ?�들�?(캔버??본체)
+                canvas.addEventListener('mousedown', handleInput);
+                canvas.addEventListener('touchstart', handleInput, { passive: false });
+
+                // 조작 �??�드 / 버튼 ?�정
+                const pcGuide = document.getElementById('pc-guide');
+                const mobBtns = document.getElementById('mobile-buttons');
+                const btnParry = document.getElementById('btn-parry');
+                const btnDash = document.getElementById('btn-dash');
+
+                if (isMobile) {
+                    if (mobBtns) mobBtns.style.display = 'flex';
+                    if (pcGuide) pcGuide.style.display = 'none';
+                    if (btnParry) {
+                        btnParry.addEventListener('touchstart', (e) => {
+                            e.preventDefault();
+                            Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                            Player.isParrying = true;
+                        }, { passive: false });
+                    }
+                    if (btnDash) btnDash.onclick = executeDash;
+                } else {
+                    if (pcGuide) pcGuide.style.display = 'block';
+                    if (mobBtns) mobBtns.style.display = 'none';
+                }
+
+                resizeCanvas();
+                requestAnimationFrame(gameLoop);
+            } catch (e) {
+                console.error("Critical Init Error:", e);
+            }
+        }
+
+        function handleInput(e) {
+            if (!gameStarted) return;
+            if (currentTurn === "PLAYER") {
+                if (isTargeting) handleTargeting(e);
+                return;
+            }
+            if (currentTurn === "MONSTER") {
+                if (e.target !== canvas) return;
+                e.preventDefault();
+                if (!isMobile) {
+                    if (e.button === 0) { // 좌클�?(Parry)
+                        Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                        Player.isParrying = true;
+                    } else if (e.button === 2) { // ?�클�?(Dash)
+                        executeDash();
+                    }
+                } else {
+                    Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                    Player.isParrying = true;
+                }
+            }
+        }
+
+        init();
+    </script>
 </body>
 
 </html>
