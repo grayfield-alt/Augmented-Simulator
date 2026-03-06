@@ -2,7 +2,7 @@
 import './ui/style.css';
 import { setupGlobalHandlers } from './ui/selectors';
 import { store } from './app/store';
-import { renderUI } from './ui/renderer';
+import { renderUI, drawGame } from './ui/renderer';
 import { initDebugger } from './utils/debugger';
 
 initDebugger(); // V3 Boot 이전에 디버그 레일 우선 활성화 (한글)
@@ -29,9 +29,7 @@ function boot() {
         const ctx = canvas.getContext('2d');
         if (ctx) {
             function loop() {
-                import('./ui/renderer').then(({ drawGame }) => {
-                    drawGame(ctx!, store.getState());
-                });
+                drawGame(ctx!, store.getState());
                 requestAnimationFrame(loop);
             }
             requestAnimationFrame(loop);
