@@ -7,14 +7,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DIST_FILE = path.resolve(__dirname, '..', 'dist', 'proto2.html');
-const REQUIRED_IDS = [
-    'game-container',
-    'play-area',
-    'bottom-ui',
-    'top-status',
-    'gameCanvas'
-];
+// selectors.ts에서 REQUIRED_IDS를 동적으로 추출 (한글)
+const SELECTORS_PATH = path.join(__dirname, '../src/ui/selectors.ts');
+const selectorsContent = fs.readFileSync(SELECTORS_PATH, 'utf-8');
+const idMatches = selectorsContent.match(/REQUIRED_IDS = \[([\s\S]*?)\]/);
+const REQUIRED_IDS = idMatches
+    ? idMatches[1].split(',').map(s => s.trim().replace(/SELECTORS\.|['"\s]/g, '')).filter(Boolean)
+    : ['game-container', 'gameCanvas', 'lobby-overlay', 'battle-screen', 'p-hp'];
 
+console.log(`🔍 [SMOKE CHECK] 필수 ID 목록: ${REQUIRED_IDS.join(', ')}`);
+
+const DIST_DIR = path.join(__dirname, '../dist');
 console.log('\n🔍 [SMOKE CHECK] 배포 산출물 DOM 무결성 검사 시작...');
 
 if (!fs.existsSync(DIST_FILE)) {

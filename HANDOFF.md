@@ -12,6 +12,9 @@
 
 ---
 
+> [!IMPORTANT]
+> HUD/selector(ID) 계약 변경 시 반드시 `npm run smoke-check`를 통과해야 배포가 허용됩니다.
+
 ## 🕒 Last Updated
 - **Time**: 2026-03-07 01:45 (KST)
 - **Commit**: `[All Structure Fixes Included]` (Vite single entry & CI/CD)
