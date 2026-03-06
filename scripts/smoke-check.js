@@ -38,12 +38,36 @@ for (const id of REQUIRED_IDS) {
     }
 }
 
-// 스크립트 로드 확인 (한글)
+// 스크립트 태그 로드 확인 (한글)
 if (!content.includes('type="module"') && !content.includes('<script')) {
-    console.error(`❌ [SMOKE CHECK FAILED] 스크립트 태그가 없습니다!`);
+    console.error(`❌ [SMOKE CHECK FAILED] 스크립트 로드 태그가 없습니다!`);
     failed = true;
 } else {
-    console.log(`  ✅ 스크립트 로드 태그 확인`);
+    console.log(`  ✅ 스크립트 로드 태그 확인 (${DIST_FILE})`);
+}
+
+// 캔버스 렌더 루프 존재 여부 자동 검증 (빌드된 JS 에셋 내부 검사) (한글)
+const ASSETS_DIR = path.join(DIST_DIR, 'assets');
+let renderLogicFound = false;
+
+if (fs.existsSync(ASSETS_DIR)) {
+    const jsFiles = fs.readdirSync(ASSETS_DIR).filter(file => file.endsWith('.js'));
+    for (const file of jsFiles) {
+        const jsContent = fs.readFileSync(path.join(ASSETS_DIR, file), 'utf-8');
+        // V3의 캔버스 렌더링 핵심 로직인 drawGame과 requestAnimationFrame이 번들에 포함되었는지 확인
+        if (jsContent.includes('drawGame') && jsContent.includes('requestAnimationFrame')) {
+            renderLogicFound = true;
+            console.log(`  ✅ 캔버스 렌더 루프(drawGame & requestAnimationFrame) 확인: assets/${file}`);
+            break;
+        }
+    }
+}
+
+if (!renderLogicFound) {
+    console.error(`❌ [SMOKE CHECK FAILED] 번들된 JS 내부에 캔버스 렌더링(drawGame) 로직이 누락되었습니다!`);
+    failed = true;
+} else {
+    console.log(`  ✅ 캔버스 렌더링 로직(drawGame & requestAnimationFrame) 확인`);
 }
 
 if (failed) {
