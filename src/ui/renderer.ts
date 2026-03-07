@@ -78,8 +78,21 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
 
     // 1. 플레이어 렌더링 (하단)
     const p = state.player;
-    ctx.save();
 
+    if (p.isParrying || p.parryTimerFr > 0) {
+        // 패링 황금색 오라 (proto.html 복구)
+        ctx.save();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#FFD700";
+        ctx.strokeStyle = "#FFD700";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(playerX, playerY, 25 + 5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    ctx.save();
     // 대시 잔상 효과
     if (p.dashTimerFr > 0) {
         ctx.globalAlpha = 0.5;
@@ -90,7 +103,6 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
     }
 
     ctx.globalAlpha = 1.0;
-    // 패링 중이거나 잔여 판정 시간이 있으면 파란색, 기본은 녹색
     ctx.fillStyle = (p.isParrying || p.parryTimerFr > 0) ? "#4a9eff" : "#4ade80";
     ctx.beginPath();
     ctx.arc(playerX, playerY, 25, 0, Math.PI * 2);
@@ -100,16 +112,39 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
     // 2. 몬스터 렌더링 (상단)
     if (state.monsters && state.monsters.length > 0) {
         const m = state.monsters[0];
-        ctx.save();
 
+        // 몬스터 상태 애니메이션 계산 (proto.html 복구, 세로형 조정)
+        let drawX = monsterX;
+        let drawY = monsterY;
         let mColor = "#ffffff"; // 대기
-        if (m.state === "CUE" || m.state === "TELEGRAPH") mColor = "#facc15"; // 경고 (노란색)
-        if (m.state === "HIT" || m.state === "ATTACK") mColor = "#ff4a4a";    // 공격 (빨간색)
 
+        if (m.state === "CUE") {
+            // 전조: 떨림 및 색상 변화
+            const ratio = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
+            mColor = `rgb(255, ${Math.floor(255 - 255 * ratio)}, 0)`; // white to orange/red
+            drawX += Math.sin(ratio * Math.PI * 10) * 10;
+        } else if (m.state === "HIT") {
+            // 타격: 플레이어 방향으로 돌진
+            mColor = "#ff4a4a";
+            drawY += (playerY - monsterY) * 0.6; // 플레이어 쪽으로 급격히 이동
+        } else if (m.state === "RECOVER") {
+            // 복귀: 원래 자리로
+            mColor = "#aaaaaa";
+            const ratio = m.attackTimerFr / Math.max(1, m.maxTimerFr);
+            drawY += (playerY - Math.abs(drawY)) * 0.6 * ratio; // 잔존 위치에서 스르륵 복귀
+        }
+
+        ctx.save();
         ctx.fillStyle = mColor;
         ctx.beginPath();
-        ctx.arc(monsterX, monsterY, 30, 0, Math.PI * 2); // 둥근 몬스터 외형 (proto 기준)
+        ctx.arc(drawX, drawY, 30, 0, Math.PI * 2);
         ctx.fill();
+
+        // 몬스터 HP 텍스트 복구 (proto.html)
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 14px Inter";
+        ctx.textAlign = "center";
+        ctx.fillText(`HP ${Math.ceil(m.hp)}`, drawX, drawY + 30 + 20);
         ctx.restore();
     }
 }
