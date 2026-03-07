@@ -14,10 +14,11 @@ function boot() {
     setupGlobalHandlers();
 
     // 2. 스토어 변경 구독 (UI 렌더러 연결) (한글)
+    let dirty = false;
     store.subscribe((state) => {
         // 전역 상태 동기화 (debugger.ts 등에서 활용) (한글)
         (window as any).gameStarted = state.gameStarted;
-        renderUI(state);
+        dirty = true;
     });
 
     // 3. 초기 상태 갱신 (한글)
@@ -97,7 +98,12 @@ function boot() {
                 }
 
                 try {
-                    drawGame(ctx!, store.getState());
+                    const state = store.getState();
+                    if (dirty) {
+                        renderUI(state);
+                        dirty = false;
+                    }
+                    drawGame(ctx!, state);
                 } catch (err) {
                     (window as any).lastDrawGameError = err;
                 }

@@ -180,6 +180,12 @@ export function reduce(state: GameState, action: any): GameState {
                 }
             }
 
+            // 1.5) 플레이어 턴 자동 종료 판단 (최소 요구 AP: 2)
+            if (next.currentTurn === 'PLAYER' && p.ap < 2) {
+                next.currentTurn = 'MONSTER';
+                console.log("[ENGINE] Player out of AP, Auto-switched to MONSTER turn");
+            }
+
             // 2) 플레이어 자세(타이머) 차감
             if (p.parryTimerFr > 0) {
                 p.parryTimerFr -= 1;
