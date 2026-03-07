@@ -8,8 +8,8 @@ export interface PlayerState {
     ap: number;
     maxAp: number;
     isParrying: boolean;
-    parryTimer: number;
-    dashTimer: number;
+    parryTimerFr: number;
+    dashTimerFr: number;
     actionsUsed: {
         atk: boolean;
         spin: boolean;
@@ -43,8 +43,8 @@ export function getInitialPlayerState(): PlayerState {
         ap: 0,
         maxAp: 10,
         isParrying: false,
-        parryTimer: 0,
-        dashTimer: 0,
+        parryTimerFr: 0,
+        dashTimerFr: 0,
         actionsUsed: { atk: false, spin: false, heavy: false },
         augBuffs: {
             atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
@@ -69,7 +69,7 @@ export function getInitialPlayerState(): PlayerState {
     };
 }
 
-export function getInitialGameState(): GameState {
+export function initialState(): GameState {
     return {
         gameStarted: false,
         showAugmentOverlay: false,

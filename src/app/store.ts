@@ -1,6 +1,6 @@
 // src/app/store.ts (한글)
-import { GameState, getInitialGameState } from '../core/state';
-import { processTurn } from '../core/engine';
+import { GameState, initialState } from '../core/state';
+import { reduce } from '../core/engine';
 
 export type Subscriber = (state: GameState) => void;
 
@@ -9,7 +9,7 @@ export class AppStore {
     private subscribers: Subscriber[] = [];
 
     constructor() {
-        this.state = getInitialGameState();
+        this.state = initialState();
     }
 
     getState() {
@@ -21,11 +21,11 @@ export class AppStore {
     }
 
     dispatch(action: any) {
-        if (action.type !== 'TICK') {
+        if (action.type !== 'TICK_FR_STEP') {
             console.log(`[ACTION] ${action.type}`, action);
         }
         // Core 리듀서 연동 (실제 배포 시 processTurn 호출) (한글)
-        this.state = processTurn(this.state, action);
+        this.state = reduce(this.state, action);
         this.notify();
     }
 

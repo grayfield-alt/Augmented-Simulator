@@ -60,60 +60,47 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
 
     if (!state.gameStarted) return;
 
-    // 동적 좌표 할당 (임시: 1:1 전투 기준) (한글)
-    const playerX = w * 0.3;
-    const playerY = h * 0.6;
-    const monsterX = w * 0.7;
-    const monsterY = h * 0.6;
+    // 동적 좌표 할당 (포트레이트 세로형 레이아웃 규칙 적용) (한글)
+    // 몬스터는 화면 상단, 플레이어는 화면 하단
+    const playerX = w * 0.5;
+    const playerY = h * 0.8;
+    const monsterX = w * 0.5;
+    const monsterY = h * 0.25;
 
-    // 1. 플레이어 렌더링 (한글)
+    // 1. 플레이어 렌더링 (하단)
     const p = state.player;
     ctx.save();
 
-    // 대시 잔상 효과 (한글)
-    if (p.dashTimer > 0) {
+    // 대시 잔상 효과
+    if (p.dashTimerFr > 0) {
         ctx.globalAlpha = 0.5;
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(playerX - 20, playerY, 20, 0, Math.PI * 2);
+        ctx.arc(playerX, playerY - 30, 20, 0, Math.PI * 2);
         ctx.fill();
     }
 
     ctx.globalAlpha = 1.0;
-    // 패링 중이거나 잔여 판정 시간이 있으면 파란색, 기본은 녹색 (한글)
-    ctx.fillStyle = (p.isParrying || p.parryTimer > 0) ? "#4a9eff" : "#4ade80";
+    // 패링 중이거나 잔여 판정 시간이 있으면 파란색, 기본은 녹색
+    ctx.fillStyle = (p.isParrying || p.parryTimerFr > 0) ? "#4a9eff" : "#4ade80";
     ctx.beginPath();
     ctx.arc(playerX, playerY, 25, 0, Math.PI * 2);
     ctx.fill();
-
-    // 플레이어 체력 바 (한글)
-    drawBar(ctx, playerX - 30, playerY + 40, 60, 6, p.hp / Math.max(1, p.maxHp), "#4ade80");
     ctx.restore();
 
-    // 2. 몬스터 렌더링 (한글)
+    // 2. 몬스터 렌더링 (상단)
     if (state.monsters && state.monsters.length > 0) {
         const m = state.monsters[0];
         ctx.save();
 
         let mColor = "#ffffff"; // 대기
-        if (m.state === "TELEGRAPH") mColor = "#facc15"; // 경고 (노란색)
-        if (m.state === "ATTACK") mColor = "#ff4a4a";    // 공격 (빨간색)
+        if (m.state === "CUE" || m.state === "TELEGRAPH") mColor = "#facc15"; // 경고 (노란색)
+        if (m.state === "HIT" || m.state === "ATTACK") mColor = "#ff4a4a";    // 공격 (빨간색)
 
         ctx.fillStyle = mColor;
         ctx.beginPath();
-        ctx.roundRect(monsterX - 40, monsterY - 40, 80, 80, 10); // 네모난 몬스터 외형
+        ctx.arc(monsterX, monsterY, 30, 0, Math.PI * 2); // 둥근 몬스터 외형 (proto 기준)
         ctx.fill();
-
-        // 몬스터 체력 바 (한글)
-        drawBar(ctx, monsterX - 40, monsterY - 60, 80, 8, m.hp / Math.max(1, m.maxHp), "#ff4a4a");
         ctx.restore();
     }
-}
-
-// 체력 바 그리기 헬퍼 함수 (한글)
-function drawBar(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, ratio: number, color: string) {
-    ctx.fillStyle = "#333333";
-    ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, Math.max(0, w * ratio), h);
 }

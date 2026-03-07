@@ -35,6 +35,10 @@ function boot() {
 
                 const cssWidth = parent.clientWidth;
                 const cssHeight = parent.clientHeight;
+
+                // 만약 부모가 hidden 상태라 크기가 0이면 무시하거나 임시 최소값 지정
+                if (cssWidth === 0 || cssHeight === 0) return;
+
                 const dpr = window.devicePixelRatio || 1;
 
                 // 실제 픽셀 해상도를 CSS 크기 * DPR로 설정 
@@ -44,20 +48,54 @@ function boot() {
                 // CSS 표시 크기는 그대로 유지
                 canvas.style.width = `${cssWidth}px`;
                 canvas.style.height = `${cssHeight}px`;
+                canvas.style.display = 'block';
 
-                // DPR 스케일링 적용 (중복 방지를 위해 1회만 설정되지만 리사이즈 때마다 초기화되므로 여기서 세팅)
+                // DPR 스케일링 적용
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
                 console.log(`[canvas] w:${canvas.width}/h:${canvas.height} clientW:${cssWidth}/clientH:${cssHeight} dpr:${dpr}`);
             };
 
-            // 초기 1회 실행 및 리사이즈 이벤트 바인딩 (한글)
+            // 초기 1회 실행 및 여러 이벤트에 리사이즈 바인딩 (한글)
             resizeCanvas();
+            requestAnimationFrame(() => requestAnimationFrame(resizeCanvas));
+
             window.addEventListener('resize', () => {
                 requestAnimationFrame(resizeCanvas);
             });
 
-            function loop() {
+            // ResizeObserver를 통해 부모(play-area) 크기 변경 감지 (display:none -> block 될 때 갱신)
+            if (canvas.parentElement) {
+                const ro = new ResizeObserver(() => {
+                    requestAnimationFrame(resizeCanvas);
+                });
+                ro.observe(canvas.parentElement);
+            }
+
+            let lastTime = performance.now();
+            let accumulator = 0;
+            const fixedDt = 1000 / 60;
+            let firstTick = false;
+
+            function loop(time: number) {
+                const dt = time - lastTime;
+                lastTime = time;
+                accumulator += dt;
+
+                // 성능 저하 시 무한 루프 방지 (한글)
+                if (accumulator > 200) accumulator = 200;
+
+                while (accumulator >= fixedDt) {
+                    if (store.getState().gameStarted) {
+                        store.dispatch({ type: 'TICK_FR_STEP' });
+                        if (!firstTick) {
+                            console.log("FIRST_TICK_DISPATCHED");
+                            firstTick = true;
+                        }
+                    }
+                    accumulator -= fixedDt;
+                }
+
                 try {
                     drawGame(ctx!, store.getState());
                 } catch (err) {
@@ -66,6 +104,15 @@ function boot() {
                 requestAnimationFrame(loop);
             }
             requestAnimationFrame(loop);
+
+            // 캔버스 자체 입력 (패링/터치) 액션 연결 (한글)
+            canvas.addEventListener('pointerdown', (e) => {
+                if (store.getState().gameStarted) {
+                    e.preventDefault();
+                    console.log("[INPUT] PARRY_START");
+                    store.dispatch({ type: 'PARRY_START' });
+                }
+            });
         }
     }
 

@@ -30,10 +30,12 @@ export function initDebugger() {
 
         const phase = st.gameStarted ? st.currentTurn : 'WAITING';
         const ap = p ? p.ap : 0;
-        const parry = p ? Math.round(p.parryTimer) : 0;
+        const parry = p ? Math.round(p.parryTimerFr) : 0;
 
         const mState = m ? m.state : 'NONE';
-        const mTimer = m ? Math.round(m.attackTimerMs) : 0;
+        const mTimer = m ? Math.round(m.attackTimerFr) : 0;
+        const atkAttr = m && m.currentAttack ?
+            `${m.currentAttack.isUnparryable ? 'UNPARRY' : 'PARRYABLE'} / ${m.currentAttack.isUndodgeable ? 'UNDODGE' : 'DODGEABLE'}` : 'NONE';
 
         hud.innerHTML = `
             <div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">[DEBUG HUD] v.${buildId}</div>
@@ -43,6 +45,7 @@ export function initDebugger() {
             <div style="margin-top:5px; padding-top:5px; border-top:1px solid #444;"></div>
             <div style="color:#ff4a4a">M_STATE: ${mState}</div>
             <div style="color:#ff4a4a">M_TIMER: ${mTimer}</div>
+            <div style="color:#ffcc00">M_ATTR: ${atkAttr}</div>
         `;
     }
     renderHUD();
