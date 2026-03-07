@@ -7,13 +7,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DIST_FILE = path.resolve(__dirname, '..', 'dist', 'proto2.html');
-// selectors.ts에서 REQUIRED_IDS를 동적으로 추출 (한글)
-const SELECTORS_PATH = path.join(__dirname, '../src/ui/selectors.ts');
-const selectorsContent = fs.readFileSync(SELECTORS_PATH, 'utf-8');
-const idMatches = selectorsContent.match(/REQUIRED_IDS = \[([\s\S]*?)\]/);
-const REQUIRED_IDS = idMatches
-    ? idMatches[1].split(',').map(s => s.trim().replace(/SELECTORS\.|['"\s]/g, '')).filter(Boolean)
-    : ['game-container', 'gameCanvas', 'lobby-overlay', 'battle-screen', 'p-hp'];
+// 1. 하드코딩된 필수 DOM ID 목록 (정규식 파싱 오류 원천 차단)
+const REQUIRED_IDS = [
+    'game-container',
+    'gameCanvas',
+    'lobby-overlay',
+    'battle-screen',
+    'p-hp',
+    'p-atk',
+    'p-def',
+    'p-ap',
+    'btn-start',
+    'turn-indicator-overlay'
+];
 
 console.log(`🔍 [SMOKE CHECK] 필수 ID 목록: ${REQUIRED_IDS.join(', ')}`);
 
@@ -28,22 +34,39 @@ if (!fs.existsSync(DIST_FILE)) {
 const content = fs.readFileSync(DIST_FILE, 'utf-8');
 let failed = false;
 
+// 2. 개발 엔트리(/src/main.ts) 참조 여부 확인 (한글)
+if (content.includes('src="/src/main.ts"') || content.includes('src="./src/main.ts"')) {
+    console.error(`❌ [SMOKE CHECK FAILED] 빌드된 HTML이 여전히 개발 엔트리(/src/main.ts)를 참조하고 있습니다.`);
+    failed = true;
+} else {
+    console.log(`  ✅ 최적화 엔트리 검증 통과 (개발 소스 참조 없음)`);
+}
+
+// 3. 번들된 자바스크립트 로드 태그 및 실제 파일 존재 확인 (한글)
+const scriptMatch = content.match(/src=["']\/?(assets\/index-[^"']+\.js)["']/);
+if (!scriptMatch) {
+    console.error(`❌ [SMOKE CHECK FAILED] 빌드된 HTML 내에 올바른 스크립트 연결(assets/*.js)이 없습니다.`);
+    failed = true;
+} else {
+    console.log(`  ✅ 스크립트 로드 태그 확인: ${scriptMatch[1]}`);
+    const assetFilePath = path.join(DIST_DIR, scriptMatch[1]);
+    if (!fs.existsSync(assetFilePath)) {
+        console.error(`❌ [SMOKE CHECK FAILED] HTML에서 참조하는 물리적 JS 파일이 존재하지 않습니다: ${scriptMatch[1]}`);
+        failed = true;
+    } else {
+        console.log(`  ✅ 컴파일된 JS 파일 물리적 위치 확인`);
+    }
+}
+
+// 4. 필수 DOM 요소 존재 여부 확인 (한글)
 for (const id of REQUIRED_IDS) {
     const pattern = new RegExp(`id=["']${id}["']`);
     if (!pattern.test(content)) {
-        console.error(`❌ [SMOKE CHECK FAILED] 필수 DOM 요소가 없습니다: #${id}`);
+        console.error(`❌ [SMOKE CHECK FAILED] 필수 DOM 요소가 부족합니다: #${id}`);
         failed = true;
     } else {
         console.log(`  ✅ #${id} 존재 확인`);
     }
-}
-
-// 스크립트 태그 로드 확인 (한글)
-if (!content.includes('type="module"') && !content.includes('<script')) {
-    console.error(`❌ [SMOKE CHECK FAILED] 스크립트 로드 태그가 없습니다!`);
-    failed = true;
-} else {
-    console.log(`  ✅ 스크립트 로드 태그 확인 (${DIST_FILE})`);
 }
 
 // 캔버스 렌더 루프 존재 여부 자동 검증 제거 (빌드 시 minify/mangle로 인해 문자열 깨짐 발생 방지)
