@@ -23,11 +23,40 @@ function boot() {
     // 3. 초기 상태 갱신 (한글)
     store.dispatch({ type: 'INIT' });
 
-    // 3.5. 캔버스 렌더링 루프 시작 (한글)
+    // 3.5. 캔버스 렌더링 루프 및 해상도 동기화 (한글)
     const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
     if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
+            // 해상도 조절 함수 (한글)
+            const resizeCanvas = () => {
+                const parent = canvas.parentElement;
+                if (!parent) return;
+
+                const cssWidth = parent.clientWidth;
+                const cssHeight = parent.clientHeight;
+                const dpr = window.devicePixelRatio || 1;
+
+                // 실제 픽셀 해상도를 CSS 크기 * DPR로 설정 
+                canvas.width = Math.floor(cssWidth * dpr);
+                canvas.height = Math.floor(cssHeight * dpr);
+
+                // CSS 표시 크기는 그대로 유지
+                canvas.style.width = `${cssWidth}px`;
+                canvas.style.height = `${cssHeight}px`;
+
+                // DPR 스케일링 적용 (중복 방지를 위해 1회만 설정되지만 리사이즈 때마다 초기화되므로 여기서 세팅)
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                console.log(`[canvas] w:${canvas.width}/h:${canvas.height} clientW:${cssWidth}/clientH:${cssHeight} dpr:${dpr}`);
+            };
+
+            // 초기 1회 실행 및 리사이즈 이벤트 바인딩 (한글)
+            resizeCanvas();
+            window.addEventListener('resize', () => {
+                requestAnimationFrame(resizeCanvas);
+            });
+
             function loop() {
                 try {
                     drawGame(ctx!, store.getState());

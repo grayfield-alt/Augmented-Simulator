@@ -5,4 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ command }) => ({
   base: command === 'serve' ? '/' : '/Augmented-Simulator/',
   plugins: [react()],
+  define: {
+    __BUILD_ID__: JSON.stringify(process.env.GITHUB_SHA?.slice(0, 7) || 'local')
+  }
 }))

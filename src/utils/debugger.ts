@@ -1,4 +1,5 @@
-// src/utils/debugger.ts (한글)
+declare const __BUILD_ID__: string;
+
 export function initDebugger() {
     // 1. 화면 우측 상단 Debug HUD 생성
     const hud = document.createElement('div');
@@ -34,8 +35,10 @@ export function initDebugger() {
             debugState.lastRenderError = err.stack ? err.stack.split('\n')[0] : String(err);
         }
 
+        const buildId = typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : 'local';
+
         hud.innerHTML = `
-            <div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">[DEBUG HUD]</div>
+            <div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">[DEBUG HUD] v.${buildId}</div>
             <div>Start Bind: <span style="color:${debugState.startBind === 'OK' ? '#0f0' : '#f00'}">${debugState.startBind}</span></div>
             <div>Input Locked (gameStarted): ${debugState.inputLocked}</div>
             <div>Last Action: <span style="color:#4a9eff">${debugState.lastAction}</span></div>
