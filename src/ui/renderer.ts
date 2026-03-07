@@ -119,19 +119,24 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
         let mColor = "#ffffff"; // 대기
 
         if (m.state === "CUE") {
-            // 전조: 떨림 및 색상 변화
-            const ratio = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
-            mColor = `rgb(255, ${Math.floor(255 - 255 * ratio)}, 0)`; // white to orange/red
-            drawX += Math.sin(ratio * Math.PI * 10) * 10;
+            // 전조: Math.sin(t * PI) * 20
+            const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
+            mColor = `rgb(255, ${Math.floor(255 - 181 * t)}, ${Math.floor(255 - 181 * t)})`; // proto: 74 + 181*alpha
+            drawX += Math.sin(t * Math.PI) * 20;
         } else if (m.state === "HIT") {
-            // 타격: 플레이어 방향으로 돌진
+            // 공격 돌진: t * t
+            const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
             mColor = "#ff4a4a";
-            drawY += (playerY - monsterY) * 0.6; // 플레이어 쪽으로 급격히 이동
+            drawY += (playerY - monsterY) * (t * t);
         } else if (m.state === "RECOVER") {
-            // 복귀: 원래 자리로
-            mColor = "#aaaaaa";
-            const ratio = m.attackTimerFr / Math.max(1, m.maxTimerFr);
-            drawY += (playerY - Math.abs(drawY)) * 0.6 * ratio; // 잔존 위치에서 스르륵 복귀
+            // 복귀: 1 - (1-t)^2
+            const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
+            mColor = "#ff4a4a"; // proto에서는 맞을 때만 빨간색 돌아갈땐 그대로 유지 (기본 레드)
+            const targetY = monsterY;
+            const startY = playerY;
+            drawY = startY + (targetY - startY) * (1 - Math.pow(1 - t, 2));
+        } else {
+            mColor = "#ff4a4a"; // 기본 레드로 복구
         }
 
         ctx.save();
@@ -144,7 +149,8 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
         ctx.fillStyle = "#fff";
         ctx.font = "bold 14px Inter";
         ctx.textAlign = "center";
-        ctx.fillText(`HP ${Math.ceil(m.hp)}`, drawX, drawY + 30 + 20);
+        ctx.fillText(`HP ${Math.ceil(m.hp)}`, drawX, Math.max(drawY + 50, monsterY + 50));
+        // 하단 UI와 겹치는 걸 방지하기 위해 최소 위치 보정
         ctx.restore();
     }
 }
