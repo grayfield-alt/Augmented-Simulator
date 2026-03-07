@@ -41,3 +41,46 @@ export function validateState(state: GameState): void {
         }
     }
 }
+
+/**
+ * 게임 데이터(monsters, patterns, stage_plans, augments) 참조 스키마 무결성 검증
+ * - 누락된 ID나 스폰 불가능한 참조를 초기 로드 시 체크하여 종료함
+ */
+import { MONSTERS } from '../data/monsters';
+import { PATTERNS } from '../data/patterns';
+import { STAGE_PLANS } from '../data/stage_plans';
+
+export function validateDataSchema(): void {
+    console.log("[VALIDATOR] Verifying data schema references...");
+
+    // 1. Monster -> Pattern references
+    for (const [mId, mDef] of Object.entries(MONSTERS)) {
+        if (!mDef.patterns || mDef.patterns.length === 0) {
+            throw new Error(`[INVALID_SCHEMA] Monster ${mId} has no patterns defined`);
+        }
+        for (const pId of mDef.patterns) {
+            if (!PATTERNS[pId]) {
+                throw new Error(`[INVALID_SCHEMA] Monster ${mId} references missing pattern ID: ${pId}`);
+            }
+        }
+    }
+
+    // 2. StagePlan -> Monster references
+    for (const [sId, plan] of Object.entries(STAGE_PLANS)) {
+        for (let i = 0; i < plan.nodes.length; i++) {
+            const node = plan.nodes[i];
+            if (node.type === 'COMBAT') {
+                if (!node.encounterIds || node.encounterIds.length === 0) {
+                    throw new Error(`[INVALID_SCHEMA] Stage ${sId} Node[${i}] (COMBAT) has no encounterIds`);
+                }
+                for (const mId of node.encounterIds) {
+                    if (!MONSTERS[mId]) {
+                        throw new Error(`[INVALID_SCHEMA] Stage ${sId} Node[${i}] references missing monster ID: ${mId}`);
+                    }
+                }
+            }
+        }
+    }
+
+    console.log("[VALIDATOR] Data schema validation passed. All ID references are intact.");
+}

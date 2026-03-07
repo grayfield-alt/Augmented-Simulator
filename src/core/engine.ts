@@ -1,6 +1,9 @@
 // src/core/engine.ts (한글)
-import { GameState, PlayerState } from './state';
+import { GameState } from './state';
 import { validateState } from './validator';
+import { STAGE_PLANS } from '../data/stage_plans';
+import { MONSTERS } from '../data/monsters';
+import { PATTERNS } from '../data/patterns';
 import { enterStage, advanceStageNode } from './stageRunner';
 
 export const CONFIG_FR = {
@@ -35,25 +38,43 @@ export function reduce(state: GameState, action: any): GameState {
 
     switch (action.type) {
         case 'START_GAME':
+            const tutorialPlan = STAGE_PLANS['tutorial'];
+            if (!tutorialPlan) throw new Error("튜토리얼 스테이지 플랜이 없습니다.");
+
             next.gameStarted = true;
             next.currentTurn = 'MONSTER'; // 첫 턴은 몬스터부터 시작
             next.currentRound = 1;
-            console.log("[ENGINE] START_GAME: 몬스터 1기 CUE 진입 (Vertical Slice)");
-            next.monsters = [{
-                id: 'm1',
-                name: 'M1',
-                hp: 100,
-                maxHp: 100,
-                atk: 10,
-                def: 0,
-                state: 'CUE',
-                attackTimerFr: CONFIG_FR.REACTION_FR,
-                maxTimerFr: CONFIG_FR.REACTION_FR,
-                currentAttack: {
-                    isUnparryable: false,
-                    isUndodgeable: false
-                }
-            }];
+            next.currentStageId = tutorialPlan.id;
+            next.stagePlan = tutorialPlan;
+            next.currentNodeIndex = 0;
+
+            const firstNode = tutorialPlan.nodes[0];
+            if (firstNode.type !== 'COMBAT' || !firstNode.encounterIds) {
+                throw new Error("첫 노드가 컴뱃이 아니거나 몬스터 ID가 없습니다.");
+            }
+
+            next.monsters = firstNode.encounterIds.map((mId: string, idx: number) => {
+                const mDef = MONSTERS[mId];
+                const firstPattern = PATTERNS[mDef.patterns[0]];
+
+                return {
+                    id: `${mId}_${idx}`,
+                    name: mDef.name,
+                    hp: mDef.hp,
+                    maxHp: mDef.hp,
+                    atk: mDef.atk,
+                    def: mDef.def,
+                    state: 'CUE',
+                    attackTimerFr: firstPattern.cueFr,
+                    maxTimerFr: firstPattern.cueFr,
+                    currentAttack: {
+                        isUnparryable: !firstPattern.flags.parryable,
+                        isUndodgeable: !firstPattern.flags.dodgeable,
+                        dmgPct: firstPattern.dmgPct
+                    }
+                };
+            });
+            console.log(`[ENGINE] START_GAME: 스폰 완료 (${next.monsters.length}기)`);
             break;
 
         case 'START_TURN':

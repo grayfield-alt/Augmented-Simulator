@@ -4,11 +4,15 @@ import { setupGlobalHandlers } from './ui/selectors';
 import { store } from './app/store';
 import { renderUI, drawGame } from './ui/renderer';
 import { initDebugger } from './utils/debugger';
+import { validateDataSchema } from './core/validator';
 
 initDebugger(); // V3 Boot 이전에 디버그 레일 우선 활성화 (한글)
 
 function boot() {
     console.log("Augmented Simulator V3 Booting...");
+
+    // 0. 데이터 스키마 무결성 검증 (한글)
+    validateDataSchema();
 
     // 1. 시스템 안정장치 활성화 (한글)
     setupGlobalHandlers();
