@@ -31,6 +31,10 @@ export interface GameState {
     stagePlan: any | null;          // 현재 로드된 StagePlan 개체 (타입 체킹 위해 any 임시 허용) (한글)
     player: PlayerState;
     monsters: any[];
+    currentMonsterIndex: number;    // proto 복구용 (현재 공격/행동 중인 몬스터 인덱스)
+    roundStartTimerFr: number;      // proto 복구용 (턴 시작 대기 프레임)
+    isEndingTurnAutomatically: boolean; // proto 복구용 (턴 강제 종료 플래그)
+    playerEndTimerFr: number;       // proto 복구용 (플레이어 턴 종료 대기 프레임)
     history: any[];
 }
 
@@ -81,6 +85,10 @@ export function initialState(): GameState {
         stagePlan: null,
         player: getInitialPlayerState(),
         monsters: [],
+        currentMonsterIndex: 0,
+        roundStartTimerFr: 0,
+        isEndingTurnAutomatically: false,
+        playerEndTimerFr: 0,
         history: []
     };
 }

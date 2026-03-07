@@ -115,14 +115,22 @@ function boot() {
             }
             requestAnimationFrame(loop);
 
-            // 캔버스 자체 입력 (패링/터치) 액션 연결 (한글)
+            // 캔버스 자체 입력 (패링/터치/회피) 액션 연결 (한글)
             canvas.addEventListener('pointerdown', (e) => {
                 if (store.getState().gameStarted) {
                     e.preventDefault();
-                    console.log("[INPUT] PARRY_START");
-                    store.dispatch({ type: 'PARRY_START' });
+                    if (e.button === 2) { // 우클릭
+                        console.log("[INPUT] DODGE_START");
+                        store.dispatch({ type: 'DODGE_START' });
+                    } else { // 기본(좌클릭/터치)
+                        console.log("[INPUT] PARRY_START");
+                        store.dispatch({ type: 'PARRY_START' });
+                    }
                 }
             });
+
+            // 우클릭 메뉴 방지 (회피 조작 시 필수)
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
         }
     }
 

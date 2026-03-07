@@ -55,7 +55,6 @@ export function reduce(state: GameState, action: any): GameState {
 
             next.monsters = firstNode.encounterIds.map((mId: string, idx: number) => {
                 const mDef = MONSTERS[mId];
-                const firstPattern = PATTERNS[mDef.patterns[0]];
 
                 return {
                     id: `${mId}_${idx}`,
@@ -64,13 +63,16 @@ export function reduce(state: GameState, action: any): GameState {
                     maxHp: mDef.hp,
                     atk: mDef.atk,
                     def: mDef.def,
-                    state: 'CUE',
-                    attackTimerFr: firstPattern.cueFr,
-                    maxTimerFr: firstPattern.cueFr,
+                    patterns: mDef.patterns,
+                    state: 'IDLE',
+                    attackTimerFr: 60,
+                    maxTimerFr: 60,
                     currentAttack: {
-                        isUnparryable: !firstPattern.flags.parryable,
-                        isUndodgeable: !firstPattern.flags.dodgeable,
-                        dmgPct: firstPattern.dmgPct
+                        isUnparryable: false,
+                        isUndodgeable: false,
+                        dmgPct: 1.0,
+                        hitFr: 15,
+                        recoverFr: 20
                     }
                 };
             });
@@ -129,94 +131,194 @@ export function reduce(state: GameState, action: any): GameState {
             break;
 
         case 'PARRY_START':
-            if (p.parryTimerFr === 0 && p.dashTimerFr === 0) {
+            if (p.parryTimerFr === 0 && p.dashTimerFr === 0 && next.currentTurn === 'MONSTER') {
                 p.isParrying = true;
                 p.parryTimerFr = CONFIG_FR.PARRY_MAX_FR;
+            }
+            break;
+
+        case 'DODGE_START':
+            if (p.dashTimerFr === 0 && p.parryTimerFr === 0 && next.currentTurn === 'MONSTER') {
+                p.dashTimerFr = 50; // 50/60fps 회피
+                console.log("[ENGINE] EVASION ACTIVATED");
             }
             break;
 
         case 'TICK_FR_STEP':
             // 1프레임 틱 진행 (한글)
 
-            // 1) 몬스터 공격 사이클 처리 (CUE -> HIT -> RECOVER -> CUE)
-            if (next.monsters && next.monsters.length > 0 && next.currentTurn === 'MONSTER') {
-                const m = next.monsters[0];
+            // 1) 플레이어 턴 종료 대기 로직
+            if (next.currentTurn === 'PLAYER') {
+                if (!next.isEndingTurnAutomatically) {
+                    const fAp = Math.floor(p.ap + 0.01);
+                    const canAtk = !p.actionsUsed.atk && fAp >= 2;
+                    const canSpin = !p.actionsUsed.spin && fAp >= 3;
+                    const canHeavy = !p.actionsUsed.heavy && fAp >= 5;
 
-                if (m.state === 'CUE') {
-                    if (m.attackTimerFr > 0) m.attackTimerFr -= 1;
+                    if (!canAtk && !canSpin && !canHeavy) {
+                        next.isEndingTurnAutomatically = true;
+                        next.playerEndTimerFr = 48; // 800ms 대기 (proto 규격)
+                    }
+                } else {
+                    if (next.playerEndTimerFr > 0) next.playerEndTimerFr--;
+                    if (next.playerEndTimerFr <= 0) {
+                        next.currentTurn = 'MONSTER';
+                        next.currentMonsterIndex = 0;
+                        p.state.heavyUsedLastTurn = p.actionsUsed.heavy;
+                        p.state.atkUsedLastTurn = p.actionsUsed.atk;
+                        p.state.killsThisTurn = 0;
+                        p.actionsUsed = { atk: false, spin: false, heavy: false };
+                        next.isEndingTurnAutomatically = false;
+                        next.roundStartTimerFr = 50; // 턴 전환 대기
 
-                    if (m.attackTimerFr <= 0) {
-                        m.state = 'HIT';
-                        console.log("[ENGINE] Monster HIT triggered");
-
-                        // 타격 순간 패링 판정 (Resolve)
-                        const isUnparryable = m.currentAttack ? m.currentAttack.isUnparryable : false;
-
-                        if (p.isParrying && !isUnparryable) {
-                            // 프레임 기반 소요 시간 계산
-                            const elapsedFr = CONFIG_FR.PARRY_MAX_FR - (p.parryTimerFr - 1); // 이번 틱 차감치 1을 미리 반영
-
-                            if (elapsedFr <= CONFIG_FR.PERFECT_FR) {
-                                p.ap = Math.min(p.maxAp, p.ap + 2 + (p.augBuffs.parryAp || 0));
-                                p.state.perfParryThisTurn = true;
-                                console.log(`[ENGINE] PERFECT PARRY! (소요: ${elapsedFr}Fr) AP+2 -> ${p.ap}`);
-                            } else {
-                                p.ap = Math.min(p.maxAp, p.ap + 1 + (p.augBuffs.parryAp || 0));
-                                console.log(`[ENGINE] GOOD PARRY! (소요: ${elapsedFr}Fr) AP+1 -> ${p.ap}`);
+                        // 몬스터 상태 초기화
+                        next.monsters.forEach((m: any) => {
+                            if (m.hp > 0) {
+                                m.state = 'IDLE';
+                                m.attackTimerFr = 60;
+                                m.maxTimerFr = 60;
                             }
-                        } else {
-                            const rawDmg = m.atk * (p.augBuffs.takeDmgMult || 1.0);
+                        });
+                        console.log("[ENGINE] Turn switched to MONSTER");
+                    }
+                }
+                break;
+            }
+
+            // 2) 턴 전환 대기 (roundStartTimer)
+            if (next.roundStartTimerFr > 0) {
+                next.roundStartTimerFr--;
+                if (next.roundStartTimerFr <= 0) {
+                    if (p.ap >= 5) p.state.highApAtkActive = true;
+                }
+                break;
+            }
+
+            // 3) 몬스터 턴 로직
+            if (p.parryTimerFr > 0) p.parryTimerFr--;
+            else { p.parryTimerFr = 0; p.isParrying = false; }
+
+            if (p.dashTimerFr > 0) p.dashTimerFr--; // 회피 지속 차감
+
+            const m = next.monsters[next.currentMonsterIndex];
+            if (!m) {
+                if (next.currentMonsterIndex < next.monsters.length - 1) {
+                    next.currentMonsterIndex++;
+                } else {
+                    next.currentTurn = 'PLAYER';
+                    console.log("[ENGINE] All monsters finished, Turn switched to PLAYER");
+                }
+                break;
+            }
+            if (m.hp <= 0) {
+                m.state = "DONE";
+                if (next.currentMonsterIndex < next.monsters.length - 1) {
+                    next.currentMonsterIndex++;
+                } else {
+                    next.currentTurn = 'PLAYER';
+                    console.log("[ENGINE] All monsters finished, Turn switched to PLAYER");
+                }
+                break;
+            }
+
+            // Proto 상태머신 (IDLE -> CUE[TELEGRAPH] -> HIT[ATTACK] -> RECOVER[RETURN])
+            if (m.state === "IDLE") {
+                if (m.attackTimerFr > 0) m.attackTimerFr--;
+                if (m.attackTimerFr <= 0) {
+                    m.state = "CUE"; // proto's TELEGRAPH
+                    const pDef = PATTERNS[m.patterns ? m.patterns[0] : 'pat_basic_atk'];
+                    m.attackTimerFr = pDef ? pDef.cueFr : 60;
+                    m.maxTimerFr = m.attackTimerFr;
+                    m.currentAttack = {
+                        isUnparryable: pDef ? !pDef.flags.parryable : false,
+                        isUndodgeable: pDef ? !pDef.flags.dodgeable : false,
+                        dmgPct: pDef ? pDef.dmgPct : 1.0,
+                        hitFr: pDef ? pDef.hitFr : 15,
+                        recoverFr: pDef ? pDef.recoverFr : 20
+                    };
+                }
+            } else if (m.state === "CUE") {
+                if (m.attackTimerFr > 0) m.attackTimerFr--;
+                if (m.attackTimerFr <= 0) {
+                    m.state = "HIT"; // proto's ATTACK
+                    m.attackTimerFr = m.currentAttack.hitFr || 15;
+                    m.maxTimerFr = m.attackTimerFr;
+                    m.hitTriggered = false;
+                }
+            } else if (m.state === "HIT") {
+                if (m.attackTimerFr > 0) m.attackTimerFr--;
+
+                // 타격 판정 (proto: 0~2프레임 오차 허용)
+                if (m.attackTimerFr <= 2 && !m.hitTriggered) {
+                    m.hitTriggered = true;
+
+                    // 1순위: 회피 판정
+                    if (p.dashTimerFr > 0) {
+                        console.log("[ENGINE] EVASION SUCCESS! (Damage Nullified)");
+                        // AP 리턴 없음
+                    }
+                    else {
+                        const isUnparryable = m.currentAttack.isUnparryable;
+
+                        // 2순위: 패링 판정
+                        if (p.isParrying && !isUnparryable) {
+                            const elapsed = CONFIG_FR.PARRY_MAX_FR - p.parryTimerFr; // 소요 프레임
+                            if (elapsed <= CONFIG_FR.PERFECT_FR) {
+                                console.log(`[ENGINE] PERFECT PARRY! (elapsed: ${elapsed})`);
+                                p.ap += 2.0;
+                                if (!p.state.isPrefGainedThisTurn) {
+                                    p.ap += (p.augBuffs.parryAp || 0);
+                                    p.state.isPrefGainedThisTurn = true;
+                                }
+                                if ((p.state.parryApGained || 0) < 2) {
+                                    p.ap += (p.augBuffs.perfectApBonus || 0);
+                                    p.state.parryApGained = (p.state.parryApGained || 0) + 1;
+                                }
+                                p.state.perfFocusActive = true;
+                                p.state.perfParryThisTurn = true;
+                                p.state.perfStacks = Math.min((p.state.perfStacks || 0) + 1, 3);
+                            } else {
+                                console.log(`[ENGINE] GOOD PARRY! (elapsed: ${elapsed})`);
+                                p.ap += 1.0;
+                                if (!p.state.isPrefGainedThisTurn) {
+                                    p.ap += (p.augBuffs.parryAp || 0);
+                                    p.state.isPrefGainedThisTurn = true;
+                                }
+                            }
+                        }
+                        // 3순위: 피격 (패링 불가 or 실패)
+                        else {
+                            const rawDmg = m.atk * (m.currentAttack.dmgPct || 1.0) * (p.augBuffs.takeDmgMult || 1.0);
                             const finalDmg = calculateDamage(rawDmg, p.def);
                             p.hp = Math.max(0, p.hp - finalDmg);
-
+                            p.state.perfStacks = 0;
                             if (p.isParrying && isUnparryable) {
-                                console.log(`[ENGINE] UNPARRYABLE TARGET HIT! Player HP 감소: ${finalDmg} -> ${p.hp}`);
+                                console.log("[ENGINE] UNPARRYABLE HIT PENETRATED GUARD!");
                             } else {
-                                console.log(`[ENGINE] NORMAL HIT (Failed to parry)! Player HP 감소: ${finalDmg} -> ${p.hp}`);
+                                console.log(`[ENGINE] HIT DETECTED! Player HP: ${p.hp}`);
                             }
                         }
                     }
-                } else if (m.state === 'HIT') {
-                    // HIT 프레임을 1프레임 동안만 화면에 유지한 뒤 RECOVER로 전이
-                    m.state = 'RECOVER';
-                    m.attackTimerFr = CONFIG_FR.RECOVER_FR;
+                }
 
-                    // 몬스터 공격 종료 -> 플레이어 턴 시작
-                    next.currentTurn = 'PLAYER';
-                    const gain = 3 + (p.augBuffs.startAp || 0);
-                    p.ap = Math.min(p.maxAp, p.ap + gain);
-                    p.actionsUsed = { atk: false, spin: false, heavy: false };
-                    p.state.killsThisTurn = 0;
-                    console.log("[ENGINE] Turn switched to PLAYER");
-                } else if (m.state === 'RECOVER') {
-                    if (m.attackTimerFr > 0) m.attackTimerFr -= 1;
-
-                    if (m.attackTimerFr <= 0) {
-                        // RECOVER 완료 -> 다음 CUE 진입 (루프)
-                        m.state = 'CUE';
-                        m.attackTimerFr = CONFIG_FR.REACTION_FR;
-                        m.maxTimerFr = CONFIG_FR.REACTION_FR;
-                        console.log("[ENGINE] Monster RECOVER done, starting next CUE");
+                if (m.attackTimerFr <= 0) {
+                    m.state = "RECOVER";
+                    m.attackTimerFr = m.currentAttack.recoverFr || 20;
+                    m.maxTimerFr = m.attackTimerFr;
+                    m.hitTriggered = false;
+                }
+            } else if (m.state === "RECOVER") {
+                if (m.attackTimerFr > 0) m.attackTimerFr--;
+                if (m.attackTimerFr <= 0) {
+                    m.state = "DONE";
+                    // 다음 몬스터 턴으로
+                    if (next.currentMonsterIndex < next.monsters.length - 1) {
+                        next.currentMonsterIndex++;
+                    } else {
+                        next.currentTurn = 'PLAYER';
+                        console.log("[ENGINE] Last monster finished, Turn switched to PLAYER");
                     }
                 }
-            }
-
-            // 1.5) 플레이어 턴 자동 종료 판단 (최소 요구 AP: 2)
-            if (next.currentTurn === 'PLAYER' && p.ap < 2) {
-                next.currentTurn = 'MONSTER';
-                console.log("[ENGINE] Player out of AP, Auto-switched to MONSTER turn");
-            }
-
-            // 2) 플레이어 자세(타이머) 차감
-            if (p.parryTimerFr > 0) {
-                p.parryTimerFr -= 1;
-                if (p.parryTimerFr <= 0) {
-                    p.parryTimerFr = 0;
-                    p.isParrying = false;
-                }
-            }
-            if (p.dashTimerFr > 0) {
-                p.dashTimerFr -= 1;
             }
             break;
 
