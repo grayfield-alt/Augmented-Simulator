@@ -66,9 +66,43 @@ export function reduce(state: GameState, action: any): GameState {
             break;
 
         case 'EXECUTE_SKILL':
-            const cost = action.skill === 'atk' ? 2 : (action.skill === 'spin' ? 3 : 5);
-            if (p.ap >= cost) {
-                p.ap -= cost;
+            // type: 'EXECUTE_SKILL', skill: 'atk' | 'spin' | 'heavy'
+            if (p.hp <= 0) break;
+
+            const skillType = action.skill;
+            let cost = 0;
+            let damageMult = 0;
+            let isMulti = false;
+
+            if (skillType === 'atk') { cost = 2; damageMult = 1.0; }
+            else if (skillType === 'spin') { cost = 3; damageMult = 1.2; isMulti = true; }
+            else if (skillType === 'heavy') { cost = 5; damageMult = 2.0; }
+
+            if (p.ap < cost) {
+                console.warn(`[ENGINE] Not enough AP for ${skillType}. Need ${cost}, have ${p.ap}`);
+                break;
+            }
+
+            p.ap -= cost;
+            p.actionsUsed[skillType as keyof typeof p.actionsUsed] = true;
+
+            const aliveMonsters = next.monsters.filter((m: any) => m.hp > 0);
+            if (aliveMonsters.length > 0) {
+                if (isMulti) {
+                    const baseDamage = p.atk * damageMult;
+                    const damagePerTarget = baseDamage / aliveMonsters.length;
+                    aliveMonsters.forEach((m: any) => {
+                        const finalDmg = calculateDamage(damagePerTarget * (p.augBuffs.takeDmgMult || 1.0), m.def);
+                        m.hp = Math.max(0, m.hp - finalDmg);
+                        console.log(`[ENGINE] Player used ${skillType}! Monster ${m.name} HP reduced to ${m.hp}`);
+                    });
+                } else {
+                    const target = aliveMonsters[0];
+                    const baseDamage = p.atk * damageMult;
+                    const finalDmg = calculateDamage(baseDamage * (p.augBuffs.takeDmgMult || 1.0), target.def);
+                    target.hp = Math.max(0, target.hp - finalDmg);
+                    console.log(`[ENGINE] Player used ${skillType}! Monster ${target.name} HP reduced to ${target.hp}`);
+                }
             }
             break;
 

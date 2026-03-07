@@ -49,6 +49,15 @@ export function renderUI(state: GameState) {
 
     // 5. 스테이지 노드 기반 UI 렌더링 연동 (한글)
     renderStageFlow(state);
+
+    // 6. 스킬 버튼 상태 연동 (AP 부족 시 비활성화) (한글)
+    const btnAtk = document.getElementById('btn-skill-atk') as HTMLButtonElement;
+    const btnSpin = document.getElementById('btn-skill-spin') as HTMLButtonElement;
+    const btnHeavy = document.getElementById('btn-skill-heavy') as HTMLButtonElement;
+
+    if (btnAtk) btnAtk.disabled = state.player.ap < 2;
+    if (btnSpin) btnSpin.disabled = state.player.ap < 3;
+    if (btnHeavy) btnHeavy.disabled = state.player.ap < 5;
 }
 
 export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {

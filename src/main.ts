@@ -133,6 +133,12 @@ function boot() {
             if (typeof (window as any).toggleGuide === 'function') {
                 (window as any).toggleGuide(true);
             }
+        } else if (target.closest('#btn-skill-atk')) {
+            store.dispatch({ type: 'EXECUTE_SKILL', skill: 'atk' });
+        } else if (target.closest('#btn-skill-spin')) {
+            store.dispatch({ type: 'EXECUTE_SKILL', skill: 'spin' });
+        } else if (target.closest('#btn-skill-heavy')) {
+            store.dispatch({ type: 'EXECUTE_SKILL', skill: 'heavy' });
         }
     });
 
