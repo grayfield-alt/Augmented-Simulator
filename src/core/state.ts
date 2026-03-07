@@ -35,6 +35,7 @@ export interface GameState {
     roundStartTimerFr: number;      // proto 복구용 (턴 시작 대기 프레임)
     isEndingTurnAutomatically: boolean; // proto 복구용 (턴 강제 종료 플래그)
     playerEndTimerFr: number;       // proto 복구용 (플레이어 턴 종료 대기 프레임)
+    combatFeedback: { text: string, color: string, timerFr: number } | null;
     history: any[];
 }
 
@@ -89,6 +90,7 @@ export function initialState(): GameState {
         roundStartTimerFr: 0,
         isEndingTurnAutomatically: false,
         playerEndTimerFr: 0,
+        combatFeedback: null,
         history: []
     };
 }

@@ -147,6 +147,11 @@ export function reduce(state: GameState, action: any): GameState {
         case 'TICK_FR_STEP':
             // 1프레임 틱 진행 (한글)
 
+            if (next.combatFeedback) {
+                next.combatFeedback.timerFr--;
+                if (next.combatFeedback.timerFr <= 0) next.combatFeedback = null;
+            }
+
             // 1) 플레이어 턴 종료 대기 로직
             if (next.currentTurn === 'PLAYER') {
                 if (!next.isEndingTurnAutomatically) {
@@ -254,6 +259,7 @@ export function reduce(state: GameState, action: any): GameState {
 
                     // 1순위: 회피 판정
                     if (p.dashTimerFr > 0) {
+                        next.combatFeedback = { text: "EVADED!", color: "#88ccff", timerFr: 45 };
                         console.log("[ENGINE] EVASION SUCCESS! (Damage Nullified)");
                         // AP 리턴 없음
                     }
@@ -264,6 +270,7 @@ export function reduce(state: GameState, action: any): GameState {
                         if (p.isParrying && !isUnparryable) {
                             const elapsed = CONFIG_FR.PARRY_MAX_FR - p.parryTimerFr; // 소요 프레임
                             if (elapsed <= CONFIG_FR.PERFECT_FR) {
+                                next.combatFeedback = { text: "PERFECT!", color: "#FFD700", timerFr: 45 };
                                 console.log(`[ENGINE] PERFECT PARRY! (elapsed: ${elapsed})`);
                                 p.ap += 2.0;
                                 if (!p.state.isPrefGainedThisTurn) {
@@ -278,6 +285,7 @@ export function reduce(state: GameState, action: any): GameState {
                                 p.state.perfParryThisTurn = true;
                                 p.state.perfStacks = Math.min((p.state.perfStacks || 0) + 1, 3);
                             } else {
+                                next.combatFeedback = { text: "GOOD", color: "#00FF00", timerFr: 45 };
                                 console.log(`[ENGINE] GOOD PARRY! (elapsed: ${elapsed})`);
                                 p.ap += 1.0;
                                 if (!p.state.isPrefGainedThisTurn) {
@@ -293,6 +301,7 @@ export function reduce(state: GameState, action: any): GameState {
                             p.hp = Math.max(0, p.hp - finalDmg);
                             p.state.perfStacks = 0;
                             if (p.isParrying && isUnparryable) {
+                                next.combatFeedback = { text: "UNPARRIABLE!", color: "#ff4a4a", timerFr: 45 };
                                 console.log("[ENGINE] UNPARRYABLE HIT PENETRATED GUARD!");
                             } else {
                                 console.log(`[ENGINE] HIT DETECTED! Player HP: ${p.hp}`);

@@ -153,4 +153,24 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
         // 하단 UI와 겹치는 걸 방지하기 위해 최소 위치 보정
         ctx.restore();
     }
+
+    // 3. 전투 피드백 메시지 (퍼펙트, 굿, 회피) 출력 (한글)
+    if (state.combatFeedback) {
+        ctx.save();
+        ctx.fillStyle = state.combatFeedback.color;
+        ctx.font = "900 36px Inter";
+        ctx.textAlign = "center";
+        ctx.shadowColor = "rgba(0,0,0,0.8)";
+        ctx.shadowBlur = 10;
+
+        // 프레임에 따른 페이드 아웃 연출
+        const alpha = Math.min(1.0, state.combatFeedback.timerFr / 15);
+        ctx.globalAlpha = alpha;
+
+        // 살짝 위로 올라가는 효과
+        const yOffset = (45 - state.combatFeedback.timerFr) * 0.5;
+        ctx.fillText(state.combatFeedback.text, w * 0.5, h * 0.45 - yOffset);
+
+        ctx.restore();
+    }
 }
