@@ -29,6 +29,54 @@ export function tickFr(state: GameState, steps: number): GameState {
     return current;
 }
 
+function initCurrentNode(state: GameState): GameState {
+    const plan = state.stagePlan;
+    if (!plan) return state;
+    const node = plan.nodes[state.currentNodeIndex];
+    if (!node) return state;
+
+    if (node.type === 'COMBAT' || node.type === 'BOSS') {
+        state.currentTurn = 'MONSTER';
+        state.roundStartTimerFr = 100; // proto: 100fr 대기 (약 1.6초)
+        const roundNum = state.currentNodeIndex + 1;
+        console.log(`[ENGINE] Round ${roundNum} Start!`);
+
+        state.monsters = (node.encounterIds || []).map((mId: string, idx: number) => {
+            const mDef = MONSTERS[mId];
+            if (!mDef) throw new Error(`Monster ${mId} not found`);
+            return {
+                id: `${mId}_${idx}`,
+                name: mDef.name,
+                hp: mDef.hp,
+                maxHp: mDef.hp,
+                atk: mDef.atk,
+                def: mDef.def,
+                patterns: mDef.patterns,
+                state: 'IDLE',
+                attackTimerFr: 60,
+                maxTimerFr: 60,
+                currentPatternIdx: 0,
+                currentAttack: {
+                    isUnparryable: false,
+                    isUndodgeable: false,
+                    dmgPct: 1.0,
+                    hitFr: 15,
+                    recoverFr: 20
+                }
+            };
+        });
+        state.currentMonsterIndex = 0;
+        state.player.state.killsThisTurn = 0;
+        state.player.state.firstAttackThisTurn = true;
+    } else if (node.type === 'REWARD_AUGMENT') {
+        state.showAugmentOverlay = true;
+    } else if (node.type === 'REST_CHOICE') {
+        state.showEventOverlay = true;
+    }
+
+    return state;
+}
+
 export function reduce(state: GameState, action: any): GameState {
     // 1. 입력 상태 검증 (한글)
     validateState(state);
@@ -42,41 +90,13 @@ export function reduce(state: GameState, action: any): GameState {
             if (!tutorialPlan) throw new Error("튜토리얼 스테이지 플랜이 없습니다.");
 
             next.gameStarted = true;
-            next.currentTurn = 'MONSTER'; // 첫 턴은 몬스터부터 시작
             next.currentRound = 1;
             next.currentStageId = tutorialPlan.id;
             next.stagePlan = tutorialPlan;
             next.currentNodeIndex = 0;
 
-            const firstNode = tutorialPlan.nodes[0];
-            if (firstNode.type !== 'COMBAT' || !firstNode.encounterIds) {
-                throw new Error("첫 노드가 컴뱃이 아니거나 몬스터 ID가 없습니다.");
-            }
-
-            next.monsters = firstNode.encounterIds.map((mId: string, idx: number) => {
-                const mDef = MONSTERS[mId];
-
-                return {
-                    id: `${mId}_${idx}`,
-                    name: mDef.name,
-                    hp: mDef.hp,
-                    maxHp: mDef.hp,
-                    atk: mDef.atk,
-                    def: mDef.def,
-                    patterns: mDef.patterns,
-                    state: 'IDLE',
-                    attackTimerFr: 60,
-                    maxTimerFr: 60,
-                    currentAttack: {
-                        isUnparryable: false,
-                        isUndodgeable: false,
-                        dmgPct: 1.0,
-                        hitFr: 15,
-                        recoverFr: 20
-                    }
-                };
-            });
-            console.log(`[ENGINE] START_GAME: 스폰 완료 (${next.monsters.length}기)`);
+            next = initCurrentNode(next);
+            console.log(`[ENGINE] START_GAME: 스폰 완료 (${next.monsters ? next.monsters.length : 0}기)`);
             break;
 
         case 'START_TURN':
@@ -248,7 +268,16 @@ export function reduce(state: GameState, action: any): GameState {
                 if (m.attackTimerFr > 0) m.attackTimerFr--;
                 if (m.attackTimerFr <= 0) {
                     m.state = "CUE"; // proto's TELEGRAPH
-                    const pDef = PATTERNS[m.patterns ? m.patterns[0] : 'pat_basic_atk'];
+
+                    // 패턴 순환 로직
+                    const hasPatterns = m.patterns && m.patterns.length > 0;
+                    const patId = hasPatterns ? m.patterns[m.currentPatternIdx] : 'pat_normal';
+                    const pDef = PATTERNS[patId] || PATTERNS['pat_normal'];
+
+                    if (hasPatterns) {
+                        m.currentPatternIdx = (m.currentPatternIdx + 1) % m.patterns.length;
+                    }
+
                     m.attackTimerFr = pDef ? pDef.cueFr : 60;
                     m.maxTimerFr = m.attackTimerFr;
                     m.currentAttack = {
@@ -354,13 +383,16 @@ export function reduce(state: GameState, action: any): GameState {
 
         case 'ADVANCE_NODE':
             next = advanceStageNode(next);
+            next = initCurrentNode(next);
             break;
 
         case 'REST_CHOICE_MADE':
             if (action.choice === 'heal') {
                 p.hp = Math.min(p.maxHp, Math.round(p.hp + p.maxHp * 0.35));
             }
+            // 휴식 후 다음 노드로 진행
             next = advanceStageNode(next);
+            next = initCurrentNode(next);
             break;
     }
 

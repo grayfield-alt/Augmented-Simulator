@@ -51,13 +51,35 @@ export function renderUI(state: GameState) {
     renderStageFlow(state);
 
     // 6. 스킬 버튼 상태 연동 (AP 부족 시 비활성화) (한글)
-    const btnAtk = document.getElementById('btn-skill-atk') as HTMLButtonElement;
-    const btnSpin = document.getElementById('btn-skill-spin') as HTMLButtonElement;
-    const btnHeavy = document.getElementById('btn-skill-heavy') as HTMLButtonElement;
+    const btnAtk = document.getElementById('btn-skill-atk') as HTMLButtonElement | null;
+    const btnSpin = document.getElementById('btn-skill-spin') as HTMLButtonElement | null;
+    const btnHeavy = document.getElementById('btn-skill-heavy') as HTMLButtonElement | null;
 
     if (btnAtk) btnAtk.disabled = state.player.ap < 2;
     if (btnSpin) btnSpin.disabled = state.player.ap < 3;
     if (btnHeavy) btnHeavy.disabled = state.player.ap < 5;
+
+    // 7. 하단 컨트롤러 스왑 로직 (PLAYER vs MONSTER)
+    const playerControls = document.getElementById('player-controls');
+    const monsterControls = document.getElementById('monster-controls');
+
+    if (playerControls && monsterControls) {
+        if (state.currentTurn === 'PLAYER') {
+            playerControls.classList.remove('hidden');
+            playerControls.classList.add('grid');
+            monsterControls.classList.remove('grid');
+            monsterControls.classList.add('hidden');
+        } else if (state.currentTurn === 'MONSTER') {
+            playerControls.classList.remove('grid');
+            playerControls.classList.add('hidden');
+            monsterControls.classList.remove('hidden');
+            monsterControls.classList.add('grid');
+        } else {
+            // NONE 등 예외 상태일 때는 전부 숨김
+            playerControls.classList.add('hidden');
+            monsterControls.classList.add('hidden');
+        }
+    }
 }
 
 export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
@@ -72,9 +94,9 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
     // 동적 좌표 할당 (포트레이트 세로형 레이아웃 규칙 적용) (한글)
     // 몬스터는 화면 상단, 플레이어는 화면 하단
     const playerX = w * 0.5;
-    const playerY = h * 0.8;
+    const playerY = h * 0.70; // 0.8 -> 0.70 으로 올려서 UI 침범 방지 및 거리 압축
     const monsterX = w * 0.5;
-    const monsterY = h * 0.25;
+    const monsterY = h * 0.30; // 0.25 -> 0.30 으로 내려서 거리 약 40% 확보
 
     // 1. 플레이어 렌더링 (하단)
     const p = state.player;
@@ -87,7 +109,7 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
         ctx.strokeStyle = "#FFD700";
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(playerX, playerY, 25 + 5, 0, Math.PI * 2);
+        ctx.arc(playerX, playerY, 35 + 8, 0, Math.PI * 2); // 25 -> 35 변경, 오라도 비례 증가
         ctx.stroke();
         ctx.restore();
     }
@@ -98,21 +120,21 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
         ctx.globalAlpha = 0.5;
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(playerX, playerY - 30, 20, 0, Math.PI * 2);
+        ctx.arc(playerX, playerY - 40, 30, 0, Math.PI * 2); // 잔상도 약간 확대
         ctx.fill();
     }
 
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = (p.isParrying || p.parryTimerFr > 0) ? "#4a9eff" : "#4ade80";
     ctx.beginPath();
-    ctx.arc(playerX, playerY, 25, 0, Math.PI * 2);
+    ctx.arc(playerX, playerY, 35, 0, Math.PI * 2); // 반경 25 -> 35
     ctx.fill();
     ctx.restore();
 
     // 2. 몬스터 렌더링 (상단)
     if (state.monsters && state.monsters.length > 0) {
         const totalMonsters = state.monsters.length;
-        const spacing = 90; // 다중 몬스터 간격
+        const spacing = 120; // 몬스터가 커졌으므로 간격도 증가 (90 -> 120)
         const startX = monsterX - ((totalMonsters - 1) * spacing) / 2;
 
         state.monsters.forEach((m: any, idx: number) => {
@@ -125,7 +147,7 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
                 // 전조: 공격 전 후방(위쪽)으로 살짝 밀림
                 const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
                 mColor = `rgb(255, ${Math.floor(255 - 181 * t)}, ${Math.floor(255 - 181 * t)})`;
-                drawY -= Math.sin(t * Math.PI) * 20; // 위쪽 방향으로 진동/후퇴
+                drawY -= Math.sin(t * Math.PI) * 30; // 20 -> 30 (스케일 업 반영)
             } else if (m.state === "HIT") {
                 // 공격 돌진: t * t (아래 플레이어 방향)
                 const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
@@ -145,14 +167,14 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
             ctx.save();
             ctx.fillStyle = mColor;
             ctx.beginPath();
-            ctx.arc(drawX, drawY, 30, 0, Math.PI * 2);
+            ctx.arc(drawX, drawY, 45, 0, Math.PI * 2); // 반경 30 -> 45
             ctx.fill();
 
             // 몬스터 HP 텍스트 복구 (proto.html)
             ctx.fillStyle = "#fff";
-            ctx.font = "bold 14px Inter";
+            ctx.font = "bold 16px Inter"; // 14px -> 16px
             ctx.textAlign = "center";
-            ctx.fillText(`HP ${Math.ceil(m.hp)}`, drawX, Math.max(drawY + 50, monsterY + 50));
+            ctx.fillText(`HP ${Math.ceil(m.hp)}`, drawX, Math.max(drawY + 65, monsterY + 65)); // 50 -> 65
             // 하단 UI와 겹치는 걸 방지하기 위해 최소 위치 보정
             ctx.restore();
         });

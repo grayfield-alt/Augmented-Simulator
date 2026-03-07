@@ -157,6 +157,12 @@ function boot() {
             store.dispatch({ type: 'EXECUTE_SKILL', skill: 'spin' });
         } else if (target.closest('#btn-skill-heavy')) {
             store.dispatch({ type: 'EXECUTE_SKILL', skill: 'heavy' });
+        } else if (target.closest('#btn-parry')) {
+            console.log("[INPUT] PARRY_START (from Button)");
+            store.dispatch({ type: 'PARRY_START' });
+        } else if (target.closest('#btn-dodge')) {
+            console.log("[INPUT] DODGE_START (from Button)");
+            store.dispatch({ type: 'DODGE_START' });
         }
     });
 

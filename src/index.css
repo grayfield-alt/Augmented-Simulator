@@ -14,14 +14,22 @@
   .premium-card {
     @apply bg-surface/80 backdrop-blur-md border border-white/5 rounded-2xl shadow-premium p-6;
   }
-  
+
   .glass-button {
-    @apply relative overflow-hidden px-6 py-2 rounded-xl font-semibold transition-all duration-300
-           bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10;
+    @apply relative overflow-hidden px-6 py-2 rounded-xl font-semibold transition-all duration-300 bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10;
   }
 
   .primary-button {
     @apply bg-primary hover:bg-primary/80 text-white shadow-glow;
+  }
+
+  /* 세로형 모바일 HUD 전용 (한글) */
+  .glass-panel {
+    @apply bg-[#050507]/60 backdrop-blur-2xl border border-white/10 shadow-[0_0_30px_rgba(0, 0, 0, 0.8)] relative overflow-hidden;
+  }
+
+  .glass-btn {
+    @apply bg-white/5 hover:bg-white/10 active:scale-95 border border-white/10 rounded-2xl transition-all duration-200 disabled:opacity-30 disabled:pointer-events-none;
   }
 
   .stat-bar-bg {
@@ -35,9 +43,19 @@
 
 /* Animations */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 .animate-shake {

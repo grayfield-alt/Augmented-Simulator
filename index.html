@@ -38,22 +38,58 @@
                     </div>
                 </div>
             </main>
-            <footer id="bottom-ui" class="absolute bottom-0 w-full z-30 pb-[env(safe-area-inset-bottom,20px)] p-4">
-                <div class="grid grid-cols-3 gap-2 max-w-[412px] mx-auto">
+            <footer id="bottom-ui"
+                class="absolute bottom-0 w-full z-30 pb-[env(safe-area-inset-bottom,20px)] p-4 flex flex-col gap-3">
+                <!-- HP / AP Status HUD -->
+                <div class="glass-panel w-full p-4 rounded-2xl flex justify-between items-center">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-white/60 font-bold uppercase tracking-widest">Health</span>
+                        <div class="flex items-baseline gap-1">
+                            <span id="p-hp" class="text-3xl font-black italic text-[#4ade80]">100</span>
+                            <span class="text-sm font-bold text-white/40">/ 100</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] text-white/60 font-bold uppercase tracking-widest">Action Points</span>
+                        <div class="flex items-baseline gap-1">
+                            <span id="p-ap" class="text-3xl font-black italic text-[#4a9eff]">0</span>
+                            <span class="text-sm font-bold text-white/40">/ 10</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PLAYER TURN CONTROLS -->
+                <div id="player-controls"
+                    class="grid grid-cols-3 gap-3 max-w-[412px] mx-auto w-full transition-all duration-300">
                     <button id="btn-skill-atk"
-                        class="bg-black/50 hover:bg-white/10 active:scale-95 border border-white/20 rounded-xl p-3 flex flex-col items-center justify-center min-h-[50px] transition-all disabled:opacity-30 disabled:pointer-events-none">
-                        <span class="text-sm font-bold text-white">ATK</span>
-                        <span class="text-[10px] text-[#4a9eff] font-bold mt-1">2 AP</span>
+                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[64px]">
+                        <span class="text-lg font-black italic text-white">ATK</span>
+                        <span class="text-[11px] text-[#4a9eff] font-bold mt-1">2 AP</span>
                     </button>
                     <button id="btn-skill-spin"
-                        class="bg-black/50 hover:bg-white/10 active:scale-95 border border-white/20 rounded-xl p-3 flex flex-col items-center justify-center min-h-[50px] transition-all disabled:opacity-30 disabled:pointer-events-none">
-                        <span class="text-sm font-bold text-white">SPIN</span>
-                        <span class="text-[10px] text-[#4a9eff] font-bold mt-1">3 AP</span>
+                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[64px]">
+                        <span class="text-lg font-black italic text-white">SPIN</span>
+                        <span class="text-[11px] text-[#4a9eff] font-bold mt-1">3 AP</span>
                     </button>
                     <button id="btn-skill-heavy"
-                        class="bg-black/50 hover:bg-white/10 active:scale-95 border border-white/20 rounded-xl p-3 flex flex-col items-center justify-center min-h-[50px] transition-all disabled:opacity-30 disabled:pointer-events-none">
-                        <span class="text-sm font-bold text-[#ff4a4a]">HEAVY</span>
-                        <span class="text-[10px] text-[#4a9eff] font-bold mt-1">5 AP</span>
+                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[64px]">
+                        <span class="text-lg font-black italic text-[#ff4a4a]">HEAVY</span>
+                        <span class="text-[11px] text-[#4a9eff] font-bold mt-1">5 AP</span>
+                    </button>
+                </div>
+
+                <!-- MONSTER TURN CONTROLS -->
+                <div id="monster-controls"
+                    class="hidden grid-cols-2 gap-3 max-w-[412px] mx-auto w-full transition-all duration-300">
+                    <button id="btn-dodge"
+                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[80px] bg-[#050507]/60 border-[#88ccff]/30">
+                        <span class="text-xl font-black italic text-[#88ccff]">DODGE</span>
+                        <span class="text-[11px] text-white/50 font-bold mt-1">EVADE HIT</span>
+                    </button>
+                    <button id="btn-parry"
+                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[80px] bg-[#050507]/60 border-[#FFD700]/30">
+                        <span class="text-xl font-black italic text-[#FFD700]">PARRY</span>
+                        <span class="text-[11px] text-white/50 font-bold mt-1">BLOCK & AP</span>
                     </button>
                 </div>
             </footer>
