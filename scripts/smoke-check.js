@@ -43,7 +43,7 @@ if (content.includes('src="/src/main.ts"') || content.includes('src="./src/main.
 }
 
 // 3. 번들된 자바스크립트 로드 태그 및 실제 파일 존재 확인 (한글)
-const scriptMatch = content.match(/src=["']\/?(assets\/index-[^"']+\.js)["']/);
+const scriptMatch = content.match(/src=["'].*?(assets\/index-[^"']+\.js)["']/);
 if (!scriptMatch) {
     console.error(`❌ [SMOKE CHECK FAILED] 빌드된 HTML 내에 올바른 스크립트 연결(assets/*.js)이 없습니다.`);
     failed = true;
