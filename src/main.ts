@@ -29,7 +29,11 @@ function boot() {
         const ctx = canvas.getContext('2d');
         if (ctx) {
             function loop() {
-                drawGame(ctx!, store.getState());
+                try {
+                    drawGame(ctx!, store.getState());
+                } catch (err) {
+                    (window as any).lastDrawGameError = err;
+                }
                 requestAnimationFrame(loop);
             }
             requestAnimationFrame(loop);
@@ -57,9 +61,19 @@ function boot() {
     });
 
     // 5. 전역 액션 브릿지 등록 (Legacy 호환성 및 버튼 바인딩용) (한글)
+    let _inputLock = false; // 중복 실행 방지 락 (한글)
+
     (window as any).startGame = () => {
-        console.log("Game Start Signal Received.");
-        store.dispatch({ type: 'START_GAME' });
+        if (_inputLock) return;
+        _inputLock = true;
+        try {
+            console.log("Game Start Signal Received.");
+            store.dispatch({ type: 'START_GAME' });
+        } catch (err) {
+            console.error(err);
+        } finally {
+            _inputLock = false; // 에러가 나도 반드시 락 해제 (한글)
+        }
     };
 
     (window as any).openInventory = () => {
