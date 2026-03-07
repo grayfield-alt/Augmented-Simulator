@@ -147,6 +147,23 @@ export function reduce(state: GameState, action: any): GameState {
         case 'TICK_FR_STEP':
             // 1프레임 틱 진행 (한글)
 
+            // 진행 중인 전투가 있다면 모든 몬스터의 생존 잔존 확인
+            if (next.monsters && next.monsters.length > 0) {
+                const aliveMonsters = next.monsters.filter((m: any) => m.hp > 0);
+                next.monsters = aliveMonsters; // 죽은 몬스터는 배열에서 영구 제거 (렌더/턴 대상 기반)
+
+                // 방금 적들이 모두 죽었다면 전투 페이즈 강제 종료
+                if (aliveMonsters.length === 0) {
+                    console.log("[ENGINE] Encounter Ended - All monsters defeated.");
+                    next.currentTurn = 'PLAYER';
+                    next.isEndingTurnAutomatically = false;
+                    next.playerEndTimerFr = 0;
+                    next.combatFeedback = null;
+                    next = advanceStageNode(next); // REWARD_AUGMENT 단계로 전환됨
+                    break; // 이번 틱 전체 루프 정지
+                }
+            }
+
             if (next.combatFeedback) {
                 next.combatFeedback.timerFr--;
                 if (next.combatFeedback.timerFr <= 0) next.combatFeedback = null;

@@ -111,47 +111,51 @@ export function drawGame(ctx: CanvasRenderingContext2D, state: GameState) {
 
     // 2. 몬스터 렌더링 (상단)
     if (state.monsters && state.monsters.length > 0) {
-        const m = state.monsters[0];
+        const totalMonsters = state.monsters.length;
+        const spacing = 90; // 다중 몬스터 간격
+        const startX = monsterX - ((totalMonsters - 1) * spacing) / 2;
 
-        // 몬스터 상태 애니메이션 계산 (proto.html 복구, 세로형 조정)
-        let drawX = monsterX;
-        let drawY = monsterY;
-        let mColor = "#ffffff"; // 대기
+        state.monsters.forEach((m: any, idx: number) => {
+            // 몬스터 상태 애니메이션 계산 (세로형 기반)
+            let drawX = startX + idx * spacing;
+            let drawY = monsterY;
+            let mColor = "#ffffff"; // 대기
 
-        if (m.state === "CUE") {
-            // 전조: Math.sin(t * PI) * 20
-            const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
-            mColor = `rgb(255, ${Math.floor(255 - 181 * t)}, ${Math.floor(255 - 181 * t)})`; // proto: 74 + 181*alpha
-            drawX += Math.sin(t * Math.PI) * 20;
-        } else if (m.state === "HIT") {
-            // 공격 돌진: t * t
-            const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
-            mColor = "#ff4a4a";
-            drawY += (playerY - monsterY) * (t * t);
-        } else if (m.state === "RECOVER") {
-            // 복귀: 1 - (1-t)^2
-            const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
-            mColor = "#ff4a4a"; // proto에서는 맞을 때만 빨간색 돌아갈땐 그대로 유지 (기본 레드)
-            const targetY = monsterY;
-            const startY = playerY;
-            drawY = startY + (targetY - startY) * (1 - Math.pow(1 - t, 2));
-        } else {
-            mColor = "#ff4a4a"; // 기본 레드로 복구
-        }
+            if (m.state === "CUE") {
+                // 전조: 공격 전 후방(위쪽)으로 살짝 밀림
+                const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
+                mColor = `rgb(255, ${Math.floor(255 - 181 * t)}, ${Math.floor(255 - 181 * t)})`;
+                drawY -= Math.sin(t * Math.PI) * 20; // 위쪽 방향으로 진동/후퇴
+            } else if (m.state === "HIT") {
+                // 공격 돌진: t * t (아래 플레이어 방향)
+                const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
+                mColor = "#ff4a4a";
+                drawY += (playerY - monsterY) * (t * t);
+            } else if (m.state === "RECOVER") {
+                // 복귀: 1 - (1-t)^2
+                const t = 1 - (m.attackTimerFr / Math.max(1, m.maxTimerFr));
+                mColor = "#ff4a4a"; // proto에서는 맞을 때만 빨간색 돌아갈땐 그대로 유지 (기본 레드)
+                const targetY = monsterY;
+                const startY = playerY;
+                drawY = startY + (targetY - startY) * (1 - Math.pow(1 - t, 2));
+            } else {
+                mColor = "#ff4a4a"; // 기본 레드로 복구
+            }
 
-        ctx.save();
-        ctx.fillStyle = mColor;
-        ctx.beginPath();
-        ctx.arc(drawX, drawY, 30, 0, Math.PI * 2);
-        ctx.fill();
+            ctx.save();
+            ctx.fillStyle = mColor;
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, 30, 0, Math.PI * 2);
+            ctx.fill();
 
-        // 몬스터 HP 텍스트 복구 (proto.html)
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 14px Inter";
-        ctx.textAlign = "center";
-        ctx.fillText(`HP ${Math.ceil(m.hp)}`, drawX, Math.max(drawY + 50, monsterY + 50));
-        // 하단 UI와 겹치는 걸 방지하기 위해 최소 위치 보정
-        ctx.restore();
+            // 몬스터 HP 텍스트 복구 (proto.html)
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 14px Inter";
+            ctx.textAlign = "center";
+            ctx.fillText(`HP ${Math.ceil(m.hp)}`, drawX, Math.max(drawY + 50, monsterY + 50));
+            // 하단 UI와 겹치는 걸 방지하기 위해 최소 위치 보정
+            ctx.restore();
+        });
     }
 
     // 3. 전투 피드백 메시지 (퍼펙트, 굿, 회피) 출력 (한글)
