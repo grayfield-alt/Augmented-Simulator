@@ -72,4 +72,54 @@ describe('Augmented Simulator V3 Core Logic', () => {
         const next = processTurn(state, { type: 'START_TURN', turn: 'PLAYER' });
         expect(next.player.actionsUsed.atk).toBe(false);
     });
+
+    describe('패링 Vertical Slice 판정 검증 (TDD)', () => {
+        // 임시 프레임 변환 헬퍼 (다음 커밋에서 엔진 완전 Fr 개조 후 제거됨)
+        const tickFr = (state: any, frames: number) => processTurn(state, { type: 'TICK', dtMs: frames * (1000 / 60) });
+
+        it('11. Perfect Parry -> AP+2, 데미지 0 적용 (hit 시점 parry 경과 프레임 <= 8Fr)', () => {
+            let state = getInitialGameState();
+            // 몬스터 공격 CUE 설정 (26프레임 뒤 타격)
+            state.monsters = [{ id: 'm1', name: 'M1', hp: 100, maxHp: 100, atk: 10, def: 0, state: 'CUE', attackTimerMs: 26 * (1000 / 60), maxTimerMs: 26 * (1000 / 60) }];
+            state.player.ap = 0;
+
+            // 20프레임 진행 (남은 시간 6프레임) -> 패링 입력!
+            state = tickFr(state, 20);
+            state = processTurn(state, { type: 'PARRY_START' });
+
+            // 6프레임 진행 -> HIT 시점 (6Fr 경과 = Perfect Window 이내)
+            state = tickFr(state, 6);
+
+            expect(state.player.hp).toBe(100); // 데미지 무효화
+            expect(state.player.ap).toBe(2);   // 퍼펙트 패링 보상
+        });
+
+        it('12. Good Parry -> AP+1, 데미지 0 적용 (8Fr < hit 시점 parry 경과 프레임 <= 21Fr)', () => {
+            let state = getInitialGameState();
+            state.monsters = [{ id: 'm1', name: 'M1', hp: 100, maxHp: 100, atk: 10, def: 0, state: 'CUE', attackTimerMs: 26 * (1000 / 60), maxTimerMs: 26 * (1000 / 60) }];
+            state.player.ap = 0;
+
+            // 6프레임 진행 (남은 시간 20프레임) -> 패링 입력!
+            state = tickFr(state, 6);
+            state = processTurn(state, { type: 'PARRY_START' });
+
+            // 20프레임 진행 -> HIT 시점 (20Fr 경과 = Good Window 이내)
+            state = tickFr(state, 20);
+
+            expect(state.player.hp).toBe(100); // 데미지 무효화
+            expect(state.player.ap).toBe(1);   // 일반 패링 보상
+        });
+
+        it('13. Unparry Hit -> 데미지 적용, AP 증가 없음 (패링 안함 또는 21Fr 수명 초과)', () => {
+            let state = getInitialGameState();
+            state.monsters = [{ id: 'm1', name: 'M1', hp: 100, maxHp: 100, atk: 10, def: 0, state: 'CUE', attackTimerMs: 26 * (1000 / 60), maxTimerMs: 26 * (1000 / 60) }];
+            state.player.ap = 0;
+
+            // 패링 없이 26프레임 진행 -> HIT 시점
+            state = tickFr(state, 26);
+
+            expect(state.player.hp).toBe(90);  // 100 - 10 데미지
+            expect(state.player.ap).toBe(0);   // 보상 없음
+        });
+    });
 });
