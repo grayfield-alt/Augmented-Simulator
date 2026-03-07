@@ -70,6 +70,7 @@ describe('Augmented Simulator V3 Core Logic', () => {
         // CUE 상태의 몬스터가 공격하기 직전 타이밍 모의
         it(`10. Perfect Parry -> AP+2, 데미지 0 적용 (hit 시점 parry 경과 프레임 <= ${CONFIG_FR.PERFECT_FR}Fr)`, () => {
             let state = initialState();
+            state.currentTurn = 'MONSTER';
             state.monsters = [{ id: 'm1', name: 'M1', hp: 100, maxHp: 100, atk: 10, def: 0, state: 'CUE', attackTimerFr: 26, maxTimerFr: 26 }];
             state.player.ap = 0;
 
@@ -89,6 +90,7 @@ describe('Augmented Simulator V3 Core Logic', () => {
 
         it(`11. Good Parry -> AP+1, 데미지 0 적용 (${CONFIG_FR.PERFECT_FR}Fr < hit 시점 parry 경과 <= ${CONFIG_FR.PARRY_MAX_FR}Fr)`, () => {
             let state = initialState();
+            state.currentTurn = 'MONSTER';
             state.monsters = [{ id: 'm1', name: 'M1', hp: 100, maxHp: 100, atk: 10, def: 0, state: 'CUE', attackTimerFr: 26, maxTimerFr: 26 }];
             state.player.ap = 0;
 
@@ -108,15 +110,20 @@ describe('Augmented Simulator V3 Core Logic', () => {
 
         it('12. Unparry Hit -> 데미지 적용, AP 증가 없음', () => {
             let state = initialState();
+            state.currentTurn = 'MONSTER';
             state.monsters = [{ id: 'm1', name: 'M1', hp: 100, maxHp: 100, atk: 10, def: 0, state: 'CUE', attackTimerFr: 26, maxTimerFr: 26 }];
             state.player.ap = 0;
 
-            // 패링 전혀 안 하고 26프레임 흘러서 바로 쳐맞음
+            // 패링 전혀 안 하고 26프레임 흘러서 바로 쳐맞음 (HIT 프레임 진입)
             state = tickFr(state, 26);
 
             expect(state.player.hp).toBe(90);  // 100 - base 10 = 90
             expect(state.player.ap).toBe(0);   // 보상 기각
-            expect(state.monsters[0].state).toBe('RECOVER'); // 맞고 나면 RECOVER 상태로 전이
+            expect(state.monsters[0].state).toBe('HIT'); // HIT 상태 1프레임 대기
+
+            // 1프레임 추가 진행 시 RECOVER 진입
+            state = tickFr(state, 1);
+            expect(state.monsters[0].state).toBe('RECOVER');
         });
     });
 });

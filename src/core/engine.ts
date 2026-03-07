@@ -36,11 +36,12 @@ export function reduce(state: GameState, action: any): GameState {
     switch (action.type) {
         case 'START_GAME':
             next.gameStarted = true;
-            next.currentTurn = 'PLAYER';
+            next.currentTurn = 'MONSTER'; // 첫 턴은 몬스터부터 시작
+            next.currentRound = 1;
             console.log("[ENGINE] START_GAME: 몬스터 1기 CUE 진입 (Vertical Slice)");
             next.monsters = [{
                 id: 'm1',
-                name: 'Training Dummy',
+                name: 'M1',
                 hp: 100,
                 maxHp: 100,
                 atk: 10,
@@ -117,11 +118,12 @@ export function reduce(state: GameState, action: any): GameState {
             // 1프레임 틱 진행 (한글)
 
             // 1) 몬스터 공격 사이클 처리 (CUE -> HIT -> RECOVER -> CUE)
-            if (next.monsters && next.monsters.length > 0) {
+            if (next.monsters && next.monsters.length > 0 && next.currentTurn === 'MONSTER') {
                 const m = next.monsters[0];
 
-                if (m.state === 'CUE' && m.attackTimerFr > 0) {
-                    m.attackTimerFr -= 1;
+                if (m.state === 'CUE') {
+                    if (m.attackTimerFr > 0) m.attackTimerFr -= 1;
+
                     if (m.attackTimerFr <= 0) {
                         m.state = 'HIT';
                         console.log("[ENGINE] Monster HIT triggered");
@@ -152,13 +154,22 @@ export function reduce(state: GameState, action: any): GameState {
                                 console.log(`[ENGINE] NORMAL HIT (Failed to parry)! Player HP 감소: ${finalDmg} -> ${p.hp}`);
                             }
                         }
-
-                        // HIT 완료 즉시 RECOVER 진입 (프레임 1 소모 안 함, 다음 틱부터 감소 추적)
-                        m.state = 'RECOVER';
-                        m.attackTimerFr = CONFIG_FR.RECOVER_FR;
                     }
-                } else if (m.state === 'RECOVER' && m.attackTimerFr > 0) {
-                    m.attackTimerFr -= 1;
+                } else if (m.state === 'HIT') {
+                    // HIT 프레임을 1프레임 동안만 화면에 유지한 뒤 RECOVER로 전이
+                    m.state = 'RECOVER';
+                    m.attackTimerFr = CONFIG_FR.RECOVER_FR;
+
+                    // 몬스터 공격 종료 -> 플레이어 턴 시작
+                    next.currentTurn = 'PLAYER';
+                    const gain = 3 + (p.augBuffs.startAp || 0);
+                    p.ap = Math.min(p.maxAp, p.ap + gain);
+                    p.actionsUsed = { atk: false, spin: false, heavy: false };
+                    p.state.killsThisTurn = 0;
+                    console.log("[ENGINE] Turn switched to PLAYER");
+                } else if (m.state === 'RECOVER') {
+                    if (m.attackTimerFr > 0) m.attackTimerFr -= 1;
+
                     if (m.attackTimerFr <= 0) {
                         // RECOVER 완료 -> 다음 CUE 진입 (루프)
                         m.state = 'CUE';
