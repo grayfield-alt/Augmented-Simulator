@@ -1,8 +1,14 @@
 // src/data/types.ts
+export enum AttackSpeed {
+    FAST = 'FAST',
+    NORMAL = 'NORMAL',
+    SLOW = 'SLOW'
+}
 
 export interface PatternDef {
     id: string;
-    cueFr: number;
+    speed: AttackSpeed; // NEW: Enum 기반 속도
+    cueFr?: number;     // Optional: 명시적 재정의용
     hitFr: number;
     recoverFr: number;
     flags: {

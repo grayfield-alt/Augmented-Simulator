@@ -37,27 +37,71 @@
   }
 
   .stat-bar-fill {
-    @apply h-full rounded-full transition-all duration-300;
+    @apply h-full transition-all duration-300;
+  }
+
+  .skill-btn {
+    @apply shadow-[0_2px_0_0_rgba(255, 255, 255, 0.1)] active:shadow-none active:translate-y-[1px] font-bold;
+  }
+
+  .defense-btn {
+    @apply shadow-[0_4px_0_0_rgba(255, 255, 255, 0.05)] active:shadow-none active:translate-y-[2px];
   }
 }
 
 /* Animations */
 @keyframes shake {
 
-  0%,
-  100% {
-    transform: translateX(0);
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
   }
 
-  25% {
-    transform: translateX(-5px);
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
   }
 
-  75% {
-    transform: translateX(5px);
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+@keyframes shake-heavy {
+
+  10%,
+  90% {
+    transform: translate3d(-2px, -1px, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(4px, 2px, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-8px, -4px, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(8px, 4px, 0);
   }
 }
 
 .animate-shake {
-  animation: shake 0.2s ease-in-out;
+  animation: shake 0.2s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.animate-shake-heavy {
+  animation: shake-heavy 0.35s cubic-bezier(.36, .07, .19, .97) both;
 }

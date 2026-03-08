@@ -19,118 +19,181 @@
     <div id="game-container"
         class="w-full max-w-[412px] h-full max-h-[850px] aspect-[9/18] m-auto flex flex-col bg-black relative shadow-2xl overflow-hidden">
         <!-- Battle Screen -->
-        <div id="battle-screen" class="hidden flex-col h-full bg-[#050507]">
-            <header id="top-status" class="p-4 flex justify-between items-center bg-black/40 backdrop-blur-md z-30">
-                <div class="flex gap-4 font-mono text-xs italic tracking-tighter uppercase opacity-80">
-                    <div>HP <span id="p-hp" class="text-white font-bold">0</span></div>
-                    <div>ATK <span id="p-atk" class="text-white font-bold">0</span></div>
-                    <div>DEF <span id="p-def" class="text-white font-bold">0</span></div>
-                    <div>AP <span id="p-ap" class="text-white font-bold">0</span></div>
-                </div>
-                <div id="turn-indicator-overlay" class="text-[10px] font-black italic uppercase tracking-[0.2em]"></div>
-            </header>
-            <main id="play-area" class="flex-1 relative overflow-hidden bg-black/20">
-                <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
-                <div id="visual-overlays" class="absolute inset-0 pointer-events-none z-20">
-                    <div id="msg-container"
-                        class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
-                        <div id="message"></div>
+        <div id="battle-screen" class="hidden flex flex-col h-full bg-[#050507]">
+            <!-- TOP HUD ZONE (12%) -->
+            <header id="top-hud-zone"
+                class="h-[12%] w-full z-50 p-2 pt-[env(safe-area-inset-top,10px)] flex flex-col justify-between items-center pointer-events-none border-b border-white/5 bg-black/40 backdrop-blur-sm">
+                <!-- TOP HUD ZONE (Fixed Anchors) -->
+                <div
+                    class="glass-panel grid grid-cols-3 items-center px-4 safe-top select-none pointer-events-none w-full">
+
+                    <!-- Left Anchor: Turn Indicator -->
+                    <div class="flex items-center justify-start h-full">
+                        <div id="turn-indicator"
+                            class="text-sm font-black italic tracking-tighter opacity-80 uppercase">PHASE: INIT</div>
                     </div>
+
+                    <!-- Center Anchor: Toast Messages -->
+                    <div class="flex items-center justify-center">
+                        <div id="toast-container" class="hidden">
+                            <div class="glass-panel px-3 py-1 rounded-full">
+                                <span id="message" class="text-xs font-bold text-[#fae133]"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Anchor: Status & Toggle -->
+                    <div class="flex items-center justify-end gap-3 h-full">
+                        <div id="mini-status" class="flex flex-col gap-1 items-end w-24">
+                            <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div id="hp-bar-mini" class="h-full bg-red-500 transition-all duration-300"
+                                    style="width: 100%"></div>
+                            </div>
+                            <div class="w-2/3 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div id="ap-bar-mini" class="h-full bg-blue-500 transition-all duration-300"
+                                    style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <button id="btn-hud-toggle"
+                            class="glass-panel p-2 rounded-lg pointer-events-auto active:scale-90 transition-transform">
+                            <i data-lucide="info" class="w-4 h-4 text-white/60"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- BATTLE ZONE (60%) -->
+            <main id="battle-zone" class="h-[60%] w-full relative overflow-hidden bg-black/20">
+                <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
+                <!-- Visual Feedback Layer (Only for floating text like DAMAGE/PERFECT) -->
+                <div id="visual-overlays" class="absolute inset-0 pointer-events-none z-20">
+                    <div id="msg-container" class="hidden"></div> <!-- Deprecated, moved to toast/canvas -->
                 </div>
             </main>
-            <footer id="bottom-ui"
-                class="absolute bottom-0 w-full z-30 pb-[env(safe-area-inset-bottom,20px)] p-4 flex flex-col gap-3">
-                <!-- HP / AP Status HUD -->
-                <div class="glass-panel w-full p-4 rounded-2xl flex justify-between items-center">
-                    <div class="flex flex-col">
-                        <span class="text-[10px] text-white/60 font-bold uppercase tracking-widest">Health</span>
-                        <div class="flex items-baseline gap-1">
-                            <span id="p-hp" class="text-3xl font-black italic text-[#4ade80]">100</span>
-                            <span class="text-sm font-bold text-white/40">/ 100</span>
+
+            <!-- BOTTOM ACTION ZONE (28%) -->
+            <footer id="bottom-action-zone"
+                class="h-[28%] w-full z-30 pb-[env(safe-area-inset-bottom,20px)] px-5 pt-4 flex flex-col bg-[#050507]/90 backdrop-blur-2xl border-t border-white/5 relative">
+
+                <!-- Permanent Status Area (Always Visible) -->
+                <div id="permanent-status" class="flex flex-col gap-3 mb-4 z-40">
+                    <!-- HP Group -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Vitality
+                                Trace</span>
+                            <span id="p-hp-label" class="text-xs font-bold text-red-500/80 font-mono">100 / 100</span>
+                        </div>
+                        <div class="h-[6px] w-full gauge-container rounded-full overflow-hidden">
+                            <div id="hp-bar-fill" class="h-full hp-bar-gradient transition-all duration-500 ease-out"
+                                style="width: 100%"></div>
                         </div>
                     </div>
-                    <div class="flex flex-col items-end">
-                        <span class="text-[10px] text-white/60 font-bold uppercase tracking-widest">Action Points</span>
-                        <div class="flex items-baseline gap-1">
-                            <span id="p-ap" class="text-3xl font-black italic text-[#4a9eff]">0</span>
-                            <span class="text-sm font-bold text-white/40">/ 10</span>
+
+                    <!-- AP Group -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Energy
+                                Flow</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] text-white/20 font-bold uppercase">AP</span>
+                                <span id="p-ap-label"
+                                    class="text-sm font-black text-[#3b82f6] tracking-tighter">0</span>
+                            </div>
+                        </div>
+                        <div class="h-[4px] w-full gauge-container rounded-full overflow-hidden">
+                            <div id="ap-bar-fill" class="h-full ap-bar-gradient transition-all duration-500 ease-out"
+                                style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- PLAYER TURN CONTROLS -->
-                <div id="player-controls"
-                    class="grid grid-cols-3 gap-3 max-w-[412px] mx-auto w-full transition-all duration-300">
-                    <button id="btn-skill-atk"
-                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[64px]">
-                        <span class="text-lg font-black italic text-white">ATK</span>
-                        <span class="text-[11px] text-[#4a9eff] font-bold mt-1">2 AP</span>
-                    </button>
-                    <button id="btn-skill-spin"
-                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[64px]">
-                        <span class="text-lg font-black italic text-white">SPIN</span>
-                        <span class="text-[11px] text-[#4a9eff] font-bold mt-1">3 AP</span>
-                    </button>
-                    <button id="btn-skill-heavy"
-                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[64px]">
-                        <span class="text-lg font-black italic text-[#ff4a4a]">HEAVY</span>
-                        <span class="text-[11px] text-[#4a9eff] font-bold mt-1">5 AP</span>
-                    </button>
-                </div>
+                <!-- Sliding Control Area -->
+                <div id="control-container" class="slide-area flex-1 flex flex-col justify-end pb-2">
+                    <!-- PLAYER TURN CONTROLS -->
+                    <div id="player-controls" class="flex flex-col gap-4">
+                        <div class="grid grid-cols-3 gap-3">
+                            <button id="btn-skill-atk"
+                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
+                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">STRIKE</span>
+                                <span class="text-[9px] text-white/30 font-bold">2 AP</span>
+                            </button>
+                            <button id="btn-skill-spin"
+                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
+                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">SPIN</span>
+                                <span class="text-[9px] text-white/30 font-bold">3 AP</span>
+                            </button>
+                            <button id="btn-skill-heavy"
+                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
+                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">HEAVY</span>
+                                <span class="text-[9px] text-white/30 font-bold">5 AP</span>
+                            </button>
+                        </div>
+                        <div class="flex justify-center mt-1">
+                            <button id="btn-turn-end"
+                                class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-black font-black italic py-3 rounded-lg text-[11px] uppercase tracking-widest active:scale-[0.98] transition-all shadow-lg shadow-orange-950/20">
+                                END OPERATION
+                            </button>
+                        </div>
+                    </div>
 
-                <!-- MONSTER TURN CONTROLS -->
-                <div id="monster-controls"
-                    class="hidden grid-cols-2 gap-3 max-w-[412px] mx-auto w-full transition-all duration-300">
-                    <button id="btn-dodge"
-                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[80px] bg-[#050507]/60 border-[#88ccff]/30">
-                        <span class="text-xl font-black italic text-[#88ccff]">DODGE</span>
-                        <span class="text-[11px] text-white/50 font-bold mt-1">EVADE HIT</span>
-                    </button>
-                    <button id="btn-parry"
-                        class="glass-btn p-4 flex flex-col items-center justify-center min-h-[80px] bg-[#050507]/60 border-[#FFD700]/30">
-                        <span class="text-xl font-black italic text-[#FFD700]">PARRY</span>
-                        <span class="text-[11px] text-white/50 font-bold mt-1">BLOCK & AP</span>
-                    </button>
+                    <!-- MONSTER TURN CONTROLS -->
+                    <div id="monster-controls"
+                        class="hidden grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2">
+                        <button id="btn-dodge"
+                            class="defense-btn h-24 bg-white/[0.03] border border-[#88ccff]/20 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all">
+                            <span
+                                class="text-[10px] font-black text-[#88ccff]/40 uppercase tracking-widest mb-1">Evasive</span>
+                            <span class="text-xl font-black italic text-[#88ccff] tracking-tight">DODGE</span>
+                        </button>
+                        <button id="btn-parry"
+                            class="defense-btn h-24 bg-white/[0.03] border border-[#fbbf24]/20 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all">
+                            <span
+                                class="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-widest mb-1">Defensive</span>
+                            <span class="text-xl font-black italic text-[#fbbf24] tracking-tight">PARRY</span>
+                        </button>
+                    </div>
                 </div>
             </footer>
         </div>
+    </div>
 
-        <!-- Overlays -->
-        <div id="lobby-overlay"
-            class="fixed inset-0 bg-[#050507]/95 backdrop-blur-2xl z-[200] flex flex-col items-center justify-center p-8 text-center transition-all duration-500">
-            <h1 class="text-6xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
-                AUGMENTED<br /><span class="text-[#fae133]">SIMULATOR</span>
-            </h1>
-            <button id="btn-start"
-                class="w-full max-w-[280px] bg-[#fae133] hover:bg-[#fae133]/80 p-6 rounded-[2rem] font-black text-black text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-2xl mt-12">
-                Start Operation
-            </button>
-            <div class="grid grid-cols-2 gap-4 mt-6 w-full max-w-[280px]">
-                <button id="btn-archive"
-                    class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Archive</button>
-                <button id="btn-briefing"
-                    class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Briefing</button>
-            </div>
+    <!-- Overlays -->
+    <div id="lobby-overlay"
+        class="fixed inset-0 bg-[#050507]/95 backdrop-blur-2xl z-[200] flex flex-col items-center justify-center p-8 text-center transition-all duration-500">
+        <h1 class="text-6xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
+            AUGMENTED<br /><span class="text-[#fae133]">SIMULATOR</span>
+        </h1>
+        <button id="btn-start"
+            class="w-full max-w-[280px] bg-[#fae133] hover:bg-[#fae133]/80 p-6 rounded-[2rem] font-black text-black text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-2xl mt-12">
+            Start Operation
+        </button>
+        <div class="grid grid-cols-2 gap-4 mt-6 w-full max-w-[280px]">
+            <button id="btn-archive"
+                class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Archive</button>
+            <button id="btn-briefing"
+                class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Briefing</button>
         </div>
+    </div>
 
-        <div id="augment-overlay"
-            class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
-        </div>
-        <div id="event-overlay"
-            class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
-        </div>
-        <div id="inventory-overlay"
-            class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6">
-        </div>
-        <div id="guide-overlay"
-            class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8">
-        </div>
-        <div id="game-over-overlay"
-            class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 text-center">
-        </div>
-        <div id="error-overlay"
-            class="hidden fixed inset-0 bg-red-900/90 backdrop-blur-3xl z-[9999] flex flex-col items-center justify-center p-12 text-white font-mono text-xs overflow-auto">
-        </div>
+    <div id="augment-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
+    </div>
+    <div id="event-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
+    </div>
+    <div id="inventory-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6">
+    </div>
+    <div id="guide-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8">
+    </div>
+    <div id="game-over-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 text-center">
+    </div>
+    <div id="error-overlay"
+        class="hidden fixed inset-0 bg-red-900/90 backdrop-blur-3xl z-[9999] flex flex-col items-center justify-center p-12 text-white font-mono text-xs overflow-auto">
+    </div>
     </div>
     <script type="module" src="./src/main.ts"></script>
 </body>

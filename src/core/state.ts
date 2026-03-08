@@ -24,6 +24,7 @@ export interface GameState {
     gameStarted: boolean;
     showAugmentOverlay: boolean;
     showEventOverlay: boolean;
+    showGameOverOverlay: boolean; // 게임 오버 오버레이 플래그
     currentTurn: "PLAYER" | "MONSTER" | "NONE";
     currentRound: number;
     currentStageId: string | null;  // 현재 진행 중인 스테이지 (한글)
@@ -36,6 +37,8 @@ export interface GameState {
     isEndingTurnAutomatically: boolean; // proto 복구용 (턴 강제 종료 플래그)
     playerEndTimerFr: number;       // proto 복구용 (플레이어 턴 종료 대기 프레임)
     combatFeedback: { text: string, color: string, timerFr: number } | null;
+    lastEvent: string | null;       // UI FX 트리거용 최신 이벤트
+    targetingSkill: string | null;  // 현재 타겟팅 중인 스킬 (한글)
     history: any[];
 }
 
@@ -79,6 +82,7 @@ export function initialState(): GameState {
         gameStarted: false,
         showAugmentOverlay: false,
         showEventOverlay: false,
+        showGameOverOverlay: false,
         currentTurn: "NONE",
         currentRound: 1,
         currentStageId: null,
@@ -91,6 +95,8 @@ export function initialState(): GameState {
         isEndingTurnAutomatically: false,
         playerEndTimerFr: 0,
         combatFeedback: null,
+        lastEvent: null,
+        targetingSkill: null,
         history: []
     };
 }

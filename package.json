@@ -4,11 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/check-env.js && vite",
     "build": "vite build",
-    "build:deploy": "vite build && node scripts/sync-dist.js",
     "deploy": "npm run build && node scripts/smoke-check.js && npx gh-pages -d dist",
-    "postbuild": "node scripts/postbuild.js",
     "smoke-check": "node scripts/smoke-check.js",
     "test": "vitest run",
     "check": "npm run test && npm run lint && npm run build",

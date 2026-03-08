@@ -6,19 +6,17 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DIST_FILE = path.resolve(__dirname, '..', 'dist', 'proto2.html');
+const DIST_FILE = path.resolve(__dirname, '..', 'dist', 'index.html');
 // 1. 하드코딩된 필수 DOM ID 목록 (정규식 파싱 오류 원천 차단)
 const REQUIRED_IDS = [
     'game-container',
     'gameCanvas',
     'lobby-overlay',
     'battle-screen',
-    'p-hp',
-    'p-atk',
-    'p-def',
-    'p-ap',
+    'p-hp-label',
+    'p-ap-label',
     'btn-start',
-    'turn-indicator-overlay'
+    'turn-indicator'
 ];
 
 console.log(`🔍 [SMOKE CHECK] 필수 ID 목록: ${REQUIRED_IDS.join(', ')}`);

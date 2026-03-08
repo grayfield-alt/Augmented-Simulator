@@ -4,6 +4,8 @@ import { validateState } from './validator';
 import { STAGE_PLANS } from '../data/stage_plans';
 import { MONSTERS } from '../data/monsters';
 import { PATTERNS } from '../data/patterns';
+import { ATTACK_SPEED_FRAMES } from '../data/constants';
+import { AttackSpeed } from '../data/types';
 import { enterStage, advanceStageNode } from './stageRunner';
 
 export const CONFIG_FR = {
@@ -109,6 +111,14 @@ export function reduce(state: GameState, action: any): GameState {
             }
             break;
 
+        case 'END_TURN_MANUAL':
+            if (next.currentTurn === 'PLAYER' && !next.isEndingTurnAutomatically) {
+                next.isEndingTurnAutomatically = true;
+                next.playerEndTimerFr = 10; // 빠른 전환을 위해 10프레임 대기
+                console.log("[ENGINE] Manual Turn End Requested");
+            }
+            break;
+
         case 'EXECUTE_SKILL':
             // type: 'EXECUTE_SKILL', skill: 'atk' | 'spin' | 'heavy'
             if (p.hp <= 0) break;
@@ -127,10 +137,20 @@ export function reduce(state: GameState, action: any): GameState {
                 break;
             }
 
+            const aliveMonsters = next.monsters.filter((m: any) => m.hp > 0);
+
+            // 타겟팅 단계 체크 (단일 공격인데 몹이 2마리 이상일 경우) (한글)
+            if (!isMulti && aliveMonsters.length > 1) {
+                next.targetingSkill = skillType;
+                console.log(`[ENGINE] Targeting mode started for ${skillType}`);
+                break;
+            }
+
+            // 즉시 실행 (타겟팅 불필요) (한글)
             p.ap -= cost;
             p.actionsUsed[skillType as keyof typeof p.actionsUsed] = true;
+            next.lastEvent = `SKILL_${skillType.toUpperCase()}`;
 
-            const aliveMonsters = next.monsters.filter((m: any) => m.hp > 0);
             if (aliveMonsters.length > 0) {
                 if (isMulti) {
                     const baseDamage = p.atk * damageMult;
@@ -138,6 +158,7 @@ export function reduce(state: GameState, action: any): GameState {
                     aliveMonsters.forEach((m: any) => {
                         const finalDmg = calculateDamage(damagePerTarget * (p.augBuffs.takeDmgMult || 1.0), m.def);
                         m.hp = Math.max(0, m.hp - finalDmg);
+                        next.lastEvent = 'PLAYER_HIT'; // 타격 이펙트 트리거
                         console.log(`[ENGINE] Player used ${skillType}! Monster ${m.name} HP reduced to ${m.hp}`);
                     });
                 } else {
@@ -145,9 +166,36 @@ export function reduce(state: GameState, action: any): GameState {
                     const baseDamage = p.atk * damageMult;
                     const finalDmg = calculateDamage(baseDamage * (p.augBuffs.takeDmgMult || 1.0), target.def);
                     target.hp = Math.max(0, target.hp - finalDmg);
+                    next.lastEvent = 'PLAYER_HIT'; // 타격 이펙트 트리거
                     console.log(`[ENGINE] Player used ${skillType}! Monster ${target.name} HP reduced to ${target.hp}`);
                 }
             }
+            break;
+
+        case 'SELECT_TARGET':
+            // type: 'SELECT_TARGET', index: number
+            if (!next.targetingSkill) break;
+            const targetIdx = action.index;
+            const sType = next.targetingSkill;
+            const target = next.monsters[targetIdx];
+
+            if (!target || target.hp <= 0) break;
+
+            let sCost = 0;
+            let sDamageMult = 0;
+            if (sType === 'atk') { sCost = 2; sDamageMult = 1.0; }
+            else if (sType === 'heavy') { sCost = 5; sDamageMult = 2.0; }
+
+            p.ap -= sCost;
+            p.actionsUsed[sType as keyof typeof p.actionsUsed] = true;
+            next.lastEvent = `SKILL_${sType.toUpperCase()}`;
+
+            const fDmg = calculateDamage(p.atk * sDamageMult * (p.augBuffs.takeDmgMult || 1.0), target.def);
+            target.hp = Math.max(0, target.hp - fDmg);
+            next.lastEvent = 'PLAYER_HIT'; // 타격 이펙트 트리거
+            console.log(`[ENGINE] Target ${targetIdx} selected! Player used ${sType}, Monster HP: ${target.hp}`);
+
+            next.targetingSkill = null; // 타겟팅 해제
             break;
 
         case 'PARRY_START':
@@ -165,6 +213,18 @@ export function reduce(state: GameState, action: any): GameState {
             break;
 
         case 'TICK_FR_STEP':
+            // 0. 플레이어 사망 체크 (한글)
+            if (p.hp <= 0 && next.gameStarted) {
+                next.showGameOverOverlay = true;
+                next.gameStarted = false;
+                next.currentTurn = 'NONE';
+                console.log("[ENGINE] PLAYER DIED. Game Over.");
+                break;
+            }
+
+            // 0-1. 시각 효과 이벤트 리셋 (한글)
+            next.lastEvent = null;
+
             // 1프레임 틱 진행 (한글)
 
             // 진행 중인 전투가 있다면 모든 몬스터의 생존 잔존 확인
@@ -175,11 +235,13 @@ export function reduce(state: GameState, action: any): GameState {
                 // 방금 적들이 모두 죽었다면 전투 페이즈 강제 종료
                 if (aliveMonsters.length === 0) {
                     console.log("[ENGINE] Encounter Ended - All monsters defeated.");
-                    next.currentTurn = 'PLAYER';
+                    next.currentTurn = 'NONE'; // 턴 머신 정지
                     next.isEndingTurnAutomatically = false;
                     next.playerEndTimerFr = 0;
                     next.combatFeedback = null;
+
                     next = advanceStageNode(next); // REWARD_AUGMENT 단계로 전환됨
+                    next = initCurrentNode(next); // 새 노드 상태 초기화
                     break; // 이번 틱 전체 루프 정지
                 }
             }
@@ -189,8 +251,16 @@ export function reduce(state: GameState, action: any): GameState {
                 if (next.combatFeedback.timerFr <= 0) next.combatFeedback = null;
             }
 
-            // 1) 플레이어 턴 종료 대기 로직
+            // 1) 플레이어 턴 종료 대기 로직 (전투 중일 때만 동작)
+            const node = next.stagePlan?.nodes[next.currentNodeIndex];
+            const isCombat = node?.type === 'COMBAT' || node?.type === 'BOSS';
+
             if (next.currentTurn === 'PLAYER') {
+                if (!isCombat) {
+                    next.currentTurn = 'NONE';
+                    break;
+                }
+
                 if (!next.isEndingTurnAutomatically) {
                     const fAp = Math.floor(p.ap + 0.01);
                     const canAtk = !p.actionsUsed.atk && fAp >= 2;
@@ -217,8 +287,8 @@ export function reduce(state: GameState, action: any): GameState {
                         next.monsters.forEach((m: any) => {
                             if (m.hp > 0) {
                                 m.state = 'IDLE';
-                                m.attackTimerFr = 60;
-                                m.maxTimerFr = 60;
+                                m.attackTimerFr = ATTACK_SPEED_FRAMES[AttackSpeed.NORMAL];
+                                m.maxTimerFr = m.attackTimerFr;
                             }
                         });
                         console.log("[ENGINE] Turn switched to MONSTER");
@@ -236,7 +306,9 @@ export function reduce(state: GameState, action: any): GameState {
                 break;
             }
 
-            // 3) 몬스터 턴 로직
+            // 3) 몬스터 턴 로직 (전투 중일 때만 동작)
+            if (!isCombat) break;
+
             if (p.parryTimerFr > 0) p.parryTimerFr--;
             else { p.parryTimerFr = 0; p.isParrying = false; }
 
@@ -278,7 +350,10 @@ export function reduce(state: GameState, action: any): GameState {
                         m.currentPatternIdx = (m.currentPatternIdx + 1) % m.patterns.length;
                     }
 
-                    m.attackTimerFr = pDef ? pDef.cueFr : 60;
+                    // 속도 테이블 참조 (사용자 요청: 이넘 기반 파싱) (한글)
+                    const speedFr = pDef.cueFr !== undefined ? pDef.cueFr : ATTACK_SPEED_FRAMES[pDef.speed];
+
+                    m.attackTimerFr = speedFr || 60;
                     m.maxTimerFr = m.attackTimerFr;
                     m.currentAttack = {
                         isUnparryable: pDef ? !pDef.flags.parryable : false,
@@ -306,6 +381,7 @@ export function reduce(state: GameState, action: any): GameState {
                     // 1순위: 회피 판정
                     if (p.dashTimerFr > 0) {
                         next.combatFeedback = { text: "EVADED!", color: "#88ccff", timerFr: 45 };
+                        next.lastEvent = 'EVADE';
                         console.log("[ENGINE] EVASION SUCCESS! (Damage Nullified)");
                         // AP 리턴 없음
                     }
@@ -317,6 +393,7 @@ export function reduce(state: GameState, action: any): GameState {
                             const elapsed = CONFIG_FR.PARRY_MAX_FR - p.parryTimerFr; // 소요 프레임
                             if (elapsed <= CONFIG_FR.PERFECT_FR) {
                                 next.combatFeedback = { text: "PERFECT!", color: "#FFD700", timerFr: 45 };
+                                next.lastEvent = 'PERFECT_PARRY';
                                 console.log(`[ENGINE] PERFECT PARRY! (elapsed: ${elapsed})`);
                                 p.ap += 2.0;
                                 if (!p.state.isPrefGainedThisTurn) {
@@ -332,6 +409,7 @@ export function reduce(state: GameState, action: any): GameState {
                                 p.state.perfStacks = Math.min((p.state.perfStacks || 0) + 1, 3);
                             } else {
                                 next.combatFeedback = { text: "GOOD", color: "#00FF00", timerFr: 45 };
+                                next.lastEvent = 'PARRY';
                                 console.log(`[ENGINE] GOOD PARRY! (elapsed: ${elapsed})`);
                                 p.ap += 1.0;
                                 if (!p.state.isPrefGainedThisTurn) {
@@ -345,6 +423,7 @@ export function reduce(state: GameState, action: any): GameState {
                             const rawDmg = m.atk * (m.currentAttack.dmgPct || 1.0) * (p.augBuffs.takeDmgMult || 1.0);
                             const finalDmg = calculateDamage(rawDmg, p.def);
                             p.hp = Math.max(0, p.hp - finalDmg);
+                            next.lastEvent = 'HIT';
                             p.state.perfStacks = 0;
                             if (p.isParrying && isUnparryable) {
                                 next.combatFeedback = { text: "UNPARRIABLE!", color: "#ff4a4a", timerFr: 45 };
