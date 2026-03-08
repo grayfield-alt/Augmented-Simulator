@@ -104,7 +104,8 @@ export function reduce(state: GameState, action: any): GameState {
         case 'START_TURN':
             next.currentTurn = action.turn;
             if (action.turn === 'PLAYER') {
-                const gain = 3 + (p.augBuffs.startAp || 0);
+                // [FIX] 원본 정합성: 턴당 자동 AP 회복(+3) 제거. 증강 보너스만 유지.
+                const gain = (p.augBuffs.startAp || 0);
                 p.ap = Math.min(p.maxAp, p.ap + gain);
                 p.actionsUsed = { atk: false, spin: false, heavy: false };
                 p.state.killsThisTurn = 0;
@@ -156,7 +157,8 @@ export function reduce(state: GameState, action: any): GameState {
                     const baseDamage = p.atk * damageMult;
                     const damagePerTarget = baseDamage / aliveMonsters.length;
                     aliveMonsters.forEach((m: any) => {
-                        const finalDmg = calculateDamage(damagePerTarget * (p.augBuffs.takeDmgMult || 1.0), m.def);
+                        // [FIX] 원본 정합성: 플레이어 공격 시 몬스터 방어력 무시 (def=0)
+                        const finalDmg = calculateDamage(damagePerTarget * (p.augBuffs.takeDmgMult || 1.0), 0);
                         m.hp = Math.max(0, m.hp - finalDmg);
                         next.lastEvent = 'PLAYER_HIT'; // 타격 이펙트 트리거
                         console.log(`[ENGINE] Player used ${skillType}! Monster ${m.name} HP reduced to ${m.hp}`);
@@ -164,7 +166,8 @@ export function reduce(state: GameState, action: any): GameState {
                 } else {
                     const target = aliveMonsters[0];
                     const baseDamage = p.atk * damageMult;
-                    const finalDmg = calculateDamage(baseDamage * (p.augBuffs.takeDmgMult || 1.0), target.def);
+                    // [FIX] 원본 정합성: 플레이어 공격 시 몬스터 방어력 무시 (def=0)
+                    const finalDmg = calculateDamage(baseDamage * (p.augBuffs.takeDmgMult || 1.0), 0);
                     target.hp = Math.max(0, target.hp - finalDmg);
                     next.lastEvent = 'PLAYER_HIT'; // 타격 이펙트 트리거
                     console.log(`[ENGINE] Player used ${skillType}! Monster ${target.name} HP reduced to ${target.hp}`);
@@ -190,7 +193,8 @@ export function reduce(state: GameState, action: any): GameState {
             p.actionsUsed[sType as keyof typeof p.actionsUsed] = true;
             next.lastEvent = `SKILL_${sType.toUpperCase()}`;
 
-            const fDmg = calculateDamage(p.atk * sDamageMult * (p.augBuffs.takeDmgMult || 1.0), target.def);
+            // [FIX] 원본 정합성: 플레이어 공격 시 몬스터 방어력 무시 (def=0)
+            const fDmg = calculateDamage(p.atk * sDamageMult * (p.augBuffs.takeDmgMult || 1.0), 0);
             target.hp = Math.max(0, target.hp - fDmg);
             next.lastEvent = 'PLAYER_HIT'; // 타격 이펙트 트리거
             console.log(`[ENGINE] Target ${targetIdx} selected! Player used ${sType}, Monster HP: ${target.hp}`);
@@ -269,7 +273,13 @@ export function reduce(state: GameState, action: any): GameState {
 
                     if (!canAtk && !canSpin && !canHeavy) {
                         next.isEndingTurnAutomatically = true;
-                        next.playerEndTimerFr = 48; // 800ms 대기 (proto 규격)
+                        // [FIX] 상황별 턴 스킵 속도 차별화
+                        // AP가 아예 없으면 즉시(1프레임), 스킬을 쓰고 남은 AP가 없으면 0.8초 대기
+                        if (fAp < 2) {
+                            next.playerEndTimerFr = 1;
+                        } else {
+                            next.playerEndTimerFr = 48; // 800ms 대기 (proto 가독성용)
+                        }
                     }
                 } else {
                     if (next.playerEndTimerFr > 0) next.playerEndTimerFr--;
@@ -308,11 +318,6 @@ export function reduce(state: GameState, action: any): GameState {
 
             // 3) 몬스터 턴 로직 (전투 중일 때만 동작)
             if (!isCombat) break;
-
-            if (p.parryTimerFr > 0) p.parryTimerFr--;
-            else { p.parryTimerFr = 0; p.isParrying = false; }
-
-            if (p.dashTimerFr > 0) p.dashTimerFr--; // 회피 지속 차감
 
             const m = next.monsters[next.currentMonsterIndex];
             if (!m) {
@@ -395,13 +400,13 @@ export function reduce(state: GameState, action: any): GameState {
                                 next.combatFeedback = { text: "PERFECT!", color: "#FFD700", timerFr: 45 };
                                 next.lastEvent = 'PERFECT_PARRY';
                                 console.log(`[ENGINE] PERFECT PARRY! (elapsed: ${elapsed})`);
-                                p.ap += 2.0;
+                                p.ap = Math.min(p.maxAp, p.ap + 2.0);
                                 if (!p.state.isPrefGainedThisTurn) {
-                                    p.ap += (p.augBuffs.parryAp || 0);
+                                    p.ap = Math.min(p.maxAp, p.ap + (p.augBuffs.parryAp || 0));
                                     p.state.isPrefGainedThisTurn = true;
                                 }
                                 if ((p.state.parryApGained || 0) < 2) {
-                                    p.ap += (p.augBuffs.perfectApBonus || 0);
+                                    p.ap = Math.min(p.maxAp, p.ap + (p.augBuffs.perfectApBonus || 0));
                                     p.state.parryApGained = (p.state.parryApGained || 0) + 1;
                                 }
                                 p.state.perfFocusActive = true;
@@ -411,9 +416,9 @@ export function reduce(state: GameState, action: any): GameState {
                                 next.combatFeedback = { text: "GOOD", color: "#00FF00", timerFr: 45 };
                                 next.lastEvent = 'PARRY';
                                 console.log(`[ENGINE] GOOD PARRY! (elapsed: ${elapsed})`);
-                                p.ap += 1.0;
+                                p.ap = Math.min(p.maxAp, p.ap + 1.0);
                                 if (!p.state.isPrefGainedThisTurn) {
-                                    p.ap += (p.augBuffs.parryAp || 0);
+                                    p.ap = Math.min(p.maxAp, p.ap + (p.augBuffs.parryAp || 0));
                                     p.state.isPrefGainedThisTurn = true;
                                 }
                             }
@@ -454,6 +459,11 @@ export function reduce(state: GameState, action: any): GameState {
                     }
                 }
             }
+            // [FIX] 차감 로직을 공격 판정 이후로 이동하여 판정 유실 방지
+            if (p.parryTimerFr > 0) p.parryTimerFr--;
+            else { p.parryTimerFr = 0; p.isParrying = false; }
+
+            if (p.dashTimerFr > 0) p.dashTimerFr--; // 회피 지속 차감
             break;
 
         case 'ENTER_STAGE':

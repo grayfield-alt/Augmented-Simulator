@@ -1,17 +1,262 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=index.html">
-    <title>Redirecting...</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Augmented Simulator - Portrait</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@500;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module" crossorigin>(function(){const n=document.createElement("link").relList;if(n&&n.supports&&n.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))r(a);new MutationObserver(a=>{for(const i of a)if(i.type==="childList")for(const l of i.addedNodes)l.tagName==="LINK"&&l.rel==="modulepreload"&&r(l)}).observe(document,{childList:!0,subtree:!0});function e(a){const i={};return a.integrity&&(i.integrity=a.integrity),a.referrerPolicy&&(i.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?i.credentials="include":a.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function r(a){if(a.ep)return;a.ep=!0;const i=e(a);fetch(a.href,i)}})();const T={hpLabel:"p-hp-label",apLabel:"p-ap-label",hpBar:"hp-bar-fill",apBar:"ap-bar-fill",turn:"turn-indicator",message:"message",errorOverlay:"error-overlay",btnSkillAtk:"btn-skill-atk",btnSkillSpin:"btn-skill-spin",btnSkillHeavy:"btn-skill-heavy",lobby:"lobby-overlay",battleScreen:"battle-screen",overlayAug:"augment-overlay",overlayEvent:"event-overlay",overlayGameOver:"game-over-overlay",debugHub:"debug-hub",hpBarMini:"hp-bar-mini",apBarMini:"ap-bar-mini",toastContainer:"toast-container"},B={},$=3;function R(t){const n=document.getElementById(t);if(!n){const e=`CRITICAL UI ELEMENT MISSING: ${t}`;throw x(e),new Error(e)}return n}function x(t){const n=document.getElementById(T.errorOverlay);if(n){const e=B[t]||0;e<$&&(n.style.display="block",n.innerText=`[SYSTEM ERROR] ${t}
+
+${new Error().stack}`,B[t]=e+1),e===$&&console.warn(`Error throttled: ${t}`)}console.error(t)}function K(){window.onerror=(t,n,e,r,a)=>(x(`Uncaught Error: ${t} at ${e}:${r}`),!1),window.onunhandledrejection=t=>{x(`Unhandled Promise Rejection: ${t.reason}`)}}function W(){return{hp:100,maxHp:100,atk:50,def:0,ap:0,maxAp:10,isParrying:!1,parryTimerFr:0,dashTimerFr:0,actionsUsed:{atk:!1,spin:!1,heavy:!1},augBuffs:{atk:1,spin:1,heavy:1,parryAp:0,startAp:0,executeLow:0,stackAtk:0,heavySunder:0,killAp:0,perfectFocus:0,stackAtkEpic:0,heavyOverheat:0,spinKillAp:0,turnAtkPerf:0,startTurnAtk:0,killStackAtk:0,heavyExecute:0,lowApAtk:1,inertiaSlice:0,firstAtkMult:0,heavyKillAp:0,spinMultiTarget:0,perfectApBonus:0,unlimitKillAtk:0,takeDmgMult:1,soloAtk:0,soloHeavy:0,executeAll:0,heavyExecAll:0,heavyChain:0,highApBuff:0,perfStackBuff:0},state:{killsThisTurn:0,parryApGained:0,isPrefGainedThisTurn:!1,consecutiveTarget:null,consecutiveCount:0,heavyUsedLastTurn:!1,heavyHitThisTurn:!1,perfFocusActive:!1,perfParryThisTurn:!1,killStacks:0,unlimitKills:0,firstAttackThisTurn:!0,perfStacks:0,multiAtkCount:0,heavyLastTurn:!1,atkUsedLastTurn:!1},activeAugments:[]}}function X(){return{gameStarted:!1,showAugmentOverlay:!1,showEventOverlay:!1,showGameOverOverlay:!1,currentTurn:"NONE",currentRound:1,currentStageId:null,currentNodeIndex:0,stagePlan:null,player:W(),monsters:[],currentMonsterIndex:0,roundStartTimerFr:0,isEndingTurnAutomatically:!1,playerEndTimerFr:0,combatFeedback:null,lastEvent:null,targetingSkill:null,history:[]}}function C(t){if(!t)throw new Error("[CRITICAL] StagePlan is null or undefined.");if(!Array.isArray(t.nodes)||t.nodes.length===0)throw new Error(`[CRITICAL] StagePlan "${t.id}" has no nodes.`);if(!t.nodes.some(e=>e.type==="BOSS"))throw new Error(`[CRITICAL] StagePlan "${t.id}" must contain at least one BOSS node.`);t.nodes.forEach((e,r)=>{if(!["COMBAT","REWARD_AUGMENT","REST_CHOICE","BOSS"].includes(e.type))throw new Error(`[CRITICAL] Unknown node type "${e.type}" at index ${r} in StagePlan "${t.id}".`)})}function z(t,n){C(n);const e={...t};return e.currentStageId=n.id,e.stagePlan=n,e.currentNodeIndex=0,e}function P(t){if(!t.stagePlan)throw new Error("[CRITICAL] Cannot advance node: stagePlan is missing in current state.");C(t.stagePlan);const n={...t};if(n.currentNodeIndex+=1,n.currentNodeIndex>=t.stagePlan.nodes.length)throw new Error(`[CRITICAL] Cannot advance beyond the last node of StagePlan "${n.currentStageId}".`);return n}const L={m_w1_1:{id:"m_w1_1",name:"Scout Drone",hp:100,atk:10,def:0,patterns:["pat_normal"]},m_w1_2:{id:"m_w1_2",name:"Fast Strider",hp:80,atk:12,def:0,patterns:["pat_fast"]},m_w2_1:{id:"m_w2_1",name:"Shield Core",hp:150,atk:8,def:5,patterns:["pat_normal","pat_slow"]},m_w2_2:{id:"m_w2_2",name:"Assault Unit",hp:120,atk:15,def:0,patterns:["pat_fast","pat_normal"]},m_boss:{id:"m_boss",name:"VOID OVERSEER",hp:850,atk:18,def:2,patterns:["pat_normal","pat_fast","pat_slow","pat_heavy"]}};var S=(t=>(t.FAST="FAST",t.NORMAL="NORMAL",t.SLOW="SLOW",t))(S||{});const O={pat_fast:{id:"pat_fast",speed:S.FAST,hitFr:15,recoverFr:20,flags:{parryable:!0,dodgeable:!0},dmgPct:1},pat_normal:{id:"pat_normal",speed:S.NORMAL,hitFr:15,recoverFr:20,flags:{parryable:!0,dodgeable:!0},dmgPct:1},pat_slow:{id:"pat_slow",speed:S.SLOW,hitFr:15,recoverFr:20,flags:{parryable:!0,dodgeable:!0},dmgPct:1},pat_heavy:{id:"pat_heavy",speed:S.SLOW,hitFr:15,recoverFr:30,flags:{parryable:!0,dodgeable:!0},dmgPct:1.5}},H={tutorial:{id:"tutorial",nodes:[{type:"COMBAT",encounterIds:["m_w1_1","m_w1_2"]},{type:"REWARD_AUGMENT"},{type:"COMBAT",encounterIds:["m_w2_1","m_w2_2"]},{type:"REST_CHOICE"},{type:"COMBAT",encounterIds:["m_w1_2","m_w2_2"]},{type:"REWARD_AUGMENT"},{type:"COMBAT",encounterIds:["m_w2_1","m_w2_2"]},{type:"REWARD_AUGMENT"},{type:"BOSS",encounterIds:["m_boss"]}]}};function G(t){const n=t.player,e=["hp","maxHp","atk","def","ap","maxAp"];for(const r of e){const a=n[r];if(typeof a!="number"||!Number.isFinite(a))throw new Error(`[INVALID_STATE] Player field "${r}" is not a finite number: ${a}`)}if(n.maxHp<=0)throw new Error(`[INVALID_STATE] maxHp must be greater than 0: ${n.maxHp}`);if(n.maxAp<=0)throw new Error(`[INVALID_STATE] maxAp must be greater than 0: ${n.maxAp}`);if(n.actionsUsed===void 0)throw new Error("[INVALID_STATE] actionsUsed is missing");if(n.augBuffs===void 0)throw new Error("[INVALID_STATE] augBuffs is missing");if(!["PLAYER","MONSTER","NONE"].includes(t.currentTurn))throw new Error(`[INVALID_STATE] Invalid currentTurn: ${t.currentTurn}`);if(t.stagePlan!==null&&(C(t.stagePlan),typeof t.currentNodeIndex!="number"||t.currentNodeIndex<0))throw new Error(`[INVALID_STATE] currentNodeIndex is invalid: ${t.currentNodeIndex}`)}function q(){console.log("[VALIDATOR] Verifying data schema references...");for(const[t,n]of Object.entries(L)){if(!n.patterns||n.patterns.length===0)throw new Error(`[INVALID_SCHEMA] Monster ${t} has no patterns defined`);for(const e of n.patterns)if(!O[e])throw new Error(`[INVALID_SCHEMA] Monster ${t} references missing pattern ID: ${e}`)}for(const[t,n]of Object.entries(H))for(let e=0;e<n.nodes.length;e++){const r=n.nodes[e];if(r.type==="COMBAT"){if(!r.encounterIds||r.encounterIds.length===0)throw new Error(`[INVALID_SCHEMA] Stage ${t} Node[${e}] (COMBAT) has no encounterIds`);for(const a of r.encounterIds)if(!L[a])throw new Error(`[INVALID_SCHEMA] Stage ${t} Node[${e}] references missing monster ID: ${a}`)}}console.log("[VALIDATOR] Data schema validation passed. All ID references are intact.")}const U={[S.FAST]:11,[S.NORMAL]:15,[S.SLOW]:20},F={PARRY_MAX_FR:21,PERFECT_FR:8,K:50};function N(t,n){const e=Math.max(1,Math.round(t*(F.K/(F.K+n))));if(!Number.isFinite(e))throw new Error(`[CRITICAL] Damage calculation resulted in non-finite value: ${e}`);return e}function M(t){const n=t.stagePlan;if(!n)return t;const e=n.nodes[t.currentNodeIndex];if(!e)return t;if(e.type==="COMBAT"||e.type==="BOSS"){t.currentTurn="MONSTER",t.roundStartTimerFr=100;const r=t.currentNodeIndex+1;console.log(`[ENGINE] Round ${r} Start!`),t.monsters=(e.encounterIds||[]).map((a,i)=>{const l=L[a];if(!l)throw new Error(`Monster ${a} not found`);return{id:`${a}_${i}`,name:l.name,hp:l.hp,maxHp:l.hp,atk:l.atk,def:l.def,patterns:l.patterns,state:"IDLE",attackTimerFr:60,maxTimerFr:60,currentPatternIdx:0,currentAttack:{isUnparryable:!1,isUndodgeable:!1,dmgPct:1,hitFr:15,recoverFr:20}}}),t.currentMonsterIndex=0,t.player.state.killsThisTurn=0,t.player.state.firstAttackThisTurn=!0}else e.type==="REWARD_AUGMENT"?t.showAugmentOverlay=!0:e.type==="REST_CHOICE"&&(t.showEventOverlay=!0);return t}function j(t,n){G(t);let e=JSON.parse(JSON.stringify(t));const r=e.player;switch(n.type){case"START_GAME":const a=H.tutorial;if(!a)throw new Error("튜토리얼 스테이지 플랜이 없습니다.");e.gameStarted=!0,e.currentRound=1,e.currentStageId=a.id,e.stagePlan=a,e.currentNodeIndex=0,e=M(e),console.log(`[ENGINE] START_GAME: 스폰 완료 (${e.monsters?e.monsters.length:0}기)`);break;case"START_TURN":if(e.currentTurn=n.turn,n.turn==="PLAYER"){const o=r.augBuffs.startAp||0;r.ap=Math.min(r.maxAp,r.ap+o),r.actionsUsed={atk:!1,spin:!1,heavy:!1},r.state.killsThisTurn=0}break;case"END_TURN_MANUAL":e.currentTurn==="PLAYER"&&!e.isEndingTurnAutomatically&&(e.isEndingTurnAutomatically=!0,e.playerEndTimerFr=10,console.log("[ENGINE] Manual Turn End Requested"));break;case"EXECUTE_SKILL":if(r.hp<=0)break;const i=n.skill;let l=0,h=0,E=!1;if(i==="atk"?(l=2,h=1):i==="spin"?(l=3,h=1.2,E=!0):i==="heavy"&&(l=5,h=2),r.ap<l){console.warn(`[ENGINE] Not enough AP for ${i}. Need ${l}, have ${r.ap}`);break}const c=e.monsters.filter(o=>o.hp>0);if(!E&&c.length>1){e.targetingSkill=i,console.log(`[ENGINE] Targeting mode started for ${i}`);break}if(r.ap-=l,r.actionsUsed[i]=!0,e.lastEvent=`SKILL_${i.toUpperCase()}`,c.length>0)if(E){const m=r.atk*h/c.length;c.forEach(u=>{const k=N(m*(r.augBuffs.takeDmgMult||1),0);u.hp=Math.max(0,u.hp-k),e.lastEvent="PLAYER_HIT",console.log(`[ENGINE] Player used ${i}! Monster ${u.name} HP reduced to ${u.hp}`)})}else{const o=c[0],m=r.atk*h,u=N(m*(r.augBuffs.takeDmgMult||1),0);o.hp=Math.max(0,o.hp-u),e.lastEvent="PLAYER_HIT",console.log(`[ENGINE] Player used ${i}! Monster ${o.name} HP reduced to ${o.hp}`)}break;case"SELECT_TARGET":if(!e.targetingSkill)break;const f=n.index,p=e.targetingSkill,d=e.monsters[f];if(!d||d.hp<=0)break;let y=0,A=0;p==="atk"?(y=2,A=1):p==="heavy"&&(y=5,A=2),r.ap-=y,r.actionsUsed[p]=!0,e.lastEvent=`SKILL_${p.toUpperCase()}`;const g=N(r.atk*A*(r.augBuffs.takeDmgMult||1),0);d.hp=Math.max(0,d.hp-g),e.lastEvent="PLAYER_HIT",console.log(`[ENGINE] Target ${f} selected! Player used ${p}, Monster HP: ${d.hp}`),e.targetingSkill=null;break;case"PARRY_START":r.parryTimerFr===0&&r.dashTimerFr===0&&e.currentTurn==="MONSTER"&&(r.isParrying=!0,r.parryTimerFr=F.PARRY_MAX_FR);break;case"DODGE_START":r.dashTimerFr===0&&r.parryTimerFr===0&&e.currentTurn==="MONSTER"&&(r.dashTimerFr=50,console.log("[ENGINE] EVASION ACTIVATED"));break;case"TICK_FR_STEP":if(r.hp<=0&&e.gameStarted){e.showGameOverOverlay=!0,e.gameStarted=!1,e.currentTurn="NONE",console.log("[ENGINE] PLAYER DIED. Game Over.");break}if(e.lastEvent=null,e.monsters&&e.monsters.length>0){const o=e.monsters.filter(m=>m.hp>0);if(e.monsters=o,o.length===0){console.log("[ENGINE] Encounter Ended - All monsters defeated."),e.currentTurn="NONE",e.isEndingTurnAutomatically=!1,e.playerEndTimerFr=0,e.combatFeedback=null,e=P(e),e=M(e);break}}e.combatFeedback&&(e.combatFeedback.timerFr--,e.combatFeedback.timerFr<=0&&(e.combatFeedback=null));const I=e.stagePlan?.nodes[e.currentNodeIndex],v=I?.type==="COMBAT"||I?.type==="BOSS";if(e.currentTurn==="PLAYER"){if(!v){e.currentTurn="NONE";break}if(e.isEndingTurnAutomatically)e.playerEndTimerFr>0&&e.playerEndTimerFr--,e.playerEndTimerFr<=0&&(e.currentTurn="MONSTER",e.currentMonsterIndex=0,r.state.heavyUsedLastTurn=r.actionsUsed.heavy,r.state.atkUsedLastTurn=r.actionsUsed.atk,r.state.killsThisTurn=0,r.actionsUsed={atk:!1,spin:!1,heavy:!1},e.isEndingTurnAutomatically=!1,e.roundStartTimerFr=50,e.monsters.forEach(o=>{o.hp>0&&(o.state="IDLE",o.attackTimerFr=U[S.NORMAL],o.maxTimerFr=o.attackTimerFr)}),console.log("[ENGINE] Turn switched to MONSTER"));else{const o=Math.floor(r.ap+.01),m=!r.actionsUsed.atk&&o>=2,u=!r.actionsUsed.spin&&o>=3,k=!r.actionsUsed.heavy&&o>=5;!m&&!u&&!k&&(e.isEndingTurnAutomatically=!0,o<2?e.playerEndTimerFr=1:e.playerEndTimerFr=48)}break}if(e.roundStartTimerFr>0){e.roundStartTimerFr--,e.roundStartTimerFr<=0&&r.ap>=5&&(r.state.highApAtkActive=!0);break}if(!v)break;const s=e.monsters[e.currentMonsterIndex];if(!s){e.currentMonsterIndex<e.monsters.length-1?e.currentMonsterIndex++:(e.currentTurn="PLAYER",console.log("[ENGINE] All monsters finished, Turn switched to PLAYER"));break}if(s.hp<=0){s.state="DONE",e.currentMonsterIndex<e.monsters.length-1?e.currentMonsterIndex++:(e.currentTurn="PLAYER",console.log("[ENGINE] All monsters finished, Turn switched to PLAYER"));break}if(s.state==="IDLE"){if(s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=0){s.state="CUE";const o=s.patterns&&s.patterns.length>0,m=o?s.patterns[s.currentPatternIdx]:"pat_normal",u=O[m]||O.pat_normal;o&&(s.currentPatternIdx=(s.currentPatternIdx+1)%s.patterns.length);const k=u.cueFr!==void 0?u.cueFr:U[u.speed];s.attackTimerFr=k||60,s.maxTimerFr=s.attackTimerFr,s.currentAttack={isUnparryable:u?!u.flags.parryable:!1,isUndodgeable:u?!u.flags.dodgeable:!1,dmgPct:u?u.dmgPct:1,hitFr:u?u.hitFr:15,recoverFr:u?u.recoverFr:20}}}else if(s.state==="CUE")s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=0&&(s.state="HIT",s.attackTimerFr=s.currentAttack.hitFr||15,s.maxTimerFr=s.attackTimerFr,s.hitTriggered=!1);else if(s.state==="HIT"){if(s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=2&&!s.hitTriggered)if(s.hitTriggered=!0,r.dashTimerFr>0)e.combatFeedback={text:"EVADED!",color:"#88ccff",timerFr:45},e.lastEvent="EVADE",console.log("[ENGINE] EVASION SUCCESS! (Damage Nullified)");else{const o=s.currentAttack.isUnparryable;if(r.isParrying&&!o){const m=F.PARRY_MAX_FR-r.parryTimerFr;m<=F.PERFECT_FR?(e.combatFeedback={text:"PERFECT!",color:"#FFD700",timerFr:45},e.lastEvent="PERFECT_PARRY",console.log(`[ENGINE] PERFECT PARRY! (elapsed: ${m})`),r.ap=Math.min(r.maxAp,r.ap+2),r.state.isPrefGainedThisTurn||(r.ap=Math.min(r.maxAp,r.ap+(r.augBuffs.parryAp||0)),r.state.isPrefGainedThisTurn=!0),(r.state.parryApGained||0)<2&&(r.ap=Math.min(r.maxAp,r.ap+(r.augBuffs.perfectApBonus||0)),r.state.parryApGained=(r.state.parryApGained||0)+1),r.state.perfFocusActive=!0,r.state.perfParryThisTurn=!0,r.state.perfStacks=Math.min((r.state.perfStacks||0)+1,3)):(e.combatFeedback={text:"GOOD",color:"#00FF00",timerFr:45},e.lastEvent="PARRY",console.log(`[ENGINE] GOOD PARRY! (elapsed: ${m})`),r.ap=Math.min(r.maxAp,r.ap+1),r.state.isPrefGainedThisTurn||(r.ap=Math.min(r.maxAp,r.ap+(r.augBuffs.parryAp||0)),r.state.isPrefGainedThisTurn=!0))}else{const m=s.atk*(s.currentAttack.dmgPct||1)*(r.augBuffs.takeDmgMult||1),u=N(m,r.def);r.hp=Math.max(0,r.hp-u),e.lastEvent="HIT",r.state.perfStacks=0,r.isParrying&&o?(e.combatFeedback={text:"UNPARRIABLE!",color:"#ff4a4a",timerFr:45},console.log("[ENGINE] UNPARRYABLE HIT PENETRATED GUARD!")):console.log(`[ENGINE] HIT DETECTED! Player HP: ${r.hp}`)}}s.attackTimerFr<=0&&(s.state="RECOVER",s.attackTimerFr=s.currentAttack.recoverFr||20,s.maxTimerFr=s.attackTimerFr,s.hitTriggered=!1)}else s.state==="RECOVER"&&(s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=0&&(s.state="DONE",e.currentMonsterIndex<e.monsters.length-1?e.currentMonsterIndex++:(e.currentTurn="PLAYER",console.log("[ENGINE] Last monster finished, Turn switched to PLAYER"))));r.parryTimerFr>0?r.parryTimerFr--:(r.parryTimerFr=0,r.isParrying=!1),r.dashTimerFr>0&&r.dashTimerFr--;break;case"ENTER_STAGE":e=z(e,n.stagePlan);break;case"ADVANCE_NODE":e=P(e),e=M(e);break;case"REST_CHOICE_MADE":n.choice==="heal"&&(r.hp=Math.min(r.maxHp,Math.round(r.hp+r.maxHp*.35))),e=P(e),e=M(e);break}return G(e),e}class J{constructor(){this.subscribers=[],this.state=X()}getState(){return this.state}subscribe(n){this.subscribers.push(n)}dispatch(n){n.type!=="TICK_FR_STEP"&&console.log(`[ACTION] ${n.type}`,n),this.state=j(this.state,n),this.notify()}notify(){this.subscribers.forEach(n=>{try{n(this.state)}catch(e){console.error("UI Update blocked but core remains stable:",e)}})}}const b=new J;function Q(t){if(!t.gameStarted||!t.stagePlan)return;const n=t.stagePlan.nodes[t.currentNodeIndex];if(!n)return;const e=document.getElementById(T.overlayAug),r=document.getElementById(T.overlayEvent),a=document.getElementById("player-controls");switch(e&&(e.style.display="none"),r&&(r.style.display="none"),a&&a.classList.remove("hidden"),n.type){case"REWARD_AUGMENT":e&&(e.style.display="flex",e.innerHTML=`
+                    <div class="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-500">
+                        <div class="text-center mb-4">
+                            <h2 class="text-3xl font-black italic text-[#fae133] tracking-tighter">AUGMENT ACQUIRED</h2>
+                            <p class="text-[10px] text-white/40 uppercase tracking-widest">Select one enhancement to proceed</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 w-full max-w-sm px-4">
+                            <button class="glass-panel p-5 rounded-2xl border border-white/10 hover:border-[#fae133]/50 hover:bg-white/5 transition-all text-left group active:scale-95" onclick="location.reload()">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-[#fae133] font-black italic tracking-tight group-hover:translate-x-1 transition-transform">RECOVERY CORE</span>
+                                    <span class="text-[8px] bg-white/10 px-2 py-0.5 rounded-full text-white/60">COMMON</span>
+                                </div>
+                                <div class="text-[11px] text-white/60 leading-tight">Restores <span class="text-white font-bold">20 HP</span> immediately after selection.</div>
+                            </button>
+                            
+                            <button class="glass-panel p-5 rounded-2xl border border-white/10 hover:border-[#fae133]/50 hover:bg-white/5 transition-all text-left group active:scale-95" onclick="location.reload()">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-[#fae133] font-black italic tracking-tight group-hover:translate-x-1 transition-transform">OVERCHARGE</span>
+                                    <span class="text-[8px] bg-[#fae133]/20 px-2 py-0.5 rounded-full text-[#fae133]">RARE</span>
+                                </div>
+                                <div class="text-[11px] text-white/60 leading-tight">Increases <span class="text-white font-bold">ATK by 10%</span> for the rest of the operation.</div>
+                            </button>
+                        </div>
+                        <div class="mt-8">
+                             <div class="text-[9px] text-white/20 italic animate-pulse">SYSTEM: TEST MODE - CLICKING REBOOTS TO LOBBY</div>
+                        </div>
+                    </div>
+                `),a&&a.classList.add("hidden");break;case"REST_CHOICE":r&&(r.style.display="flex"),a&&a.classList.add("hidden");break;case"COMBAT":case"BOSS":break;default:console.warn(`[UI] Unknown node type: ${n.type}`);break}}function Z(t){const n=document.getElementById(T.hpLabel),e=document.getElementById(T.apLabel),r=R(T.hpBar),a=R(T.apBar);n&&(n.innerText=`${Math.ceil(t.player.hp)} / ${t.player.maxHp}`),e&&(e.innerText=Math.floor(t.player.ap).toString());const i=t.player.hp/t.player.maxHp*100;r.style.width=`${Math.max(0,i)}%`;const l=document.getElementById(T.hpBarMini);l&&(l.style.width=`${Math.max(0,i)}%`);const h=t.player.ap/t.player.maxAp*100;a.style.width=`${Math.max(0,h)}%`;const E=document.getElementById(T.apBarMini);E&&(E.style.width=`${Math.max(0,h)}%`);const c=R(T.turn);t.currentTurn==="PLAYER"?(c.innerText="PLAYER PHASE",c.className="text-sm font-black text-[#fae133] italic tracking-tighter uppercase opacity-90"):t.currentTurn==="MONSTER"&&(c.innerText="ENEMY PHASE",c.className="text-sm font-black text-red-500 italic tracking-tighter uppercase opacity-90");const f=R(T.message),p=document.getElementById(T.toastContainer);t.targetingSkill?(f.innerText="공격할 적을 선택하세요",p?.classList.remove("hidden")):(f.innerText="",p?.classList.add("hidden")),[{id:T.btnSkillAtk,cost:2},{id:T.btnSkillSpin,cost:3},{id:T.btnSkillHeavy,cost:5}].forEach(m=>{const u=document.getElementById(m.id);if(u){const k=t.player.ap<m.cost;u.disabled=k}});const y=document.getElementById("player-controls"),A=document.getElementById("monster-controls"),g=document.getElementById("control-container");t.targetingSkill?g&&(g.classList.remove("slide-up"),g.classList.add("slide-down")):t.currentTurn==="PLAYER"?(g&&(g.classList.remove("slide-down"),g.classList.add("slide-up")),y&&(y.style.display="flex"),A&&(A.style.display="none")):t.currentTurn==="MONSTER"?(g&&(g.classList.remove("slide-down"),g.classList.add("slide-up")),y&&(y.style.display="none"),A&&(A.style.display="grid")):g&&(g.classList.remove("slide-up"),g.classList.add("slide-down"));const I=document.getElementById(T.debugHub);I&&(I.innerHTML=`
+            PHASE: ${t.currentTurn}<br/>
+            PLAYER AP: ${t.player.ap.toFixed(1)}<br/>
+            MONSTERS: ${t.monsters.filter(m=>m.hp>0).length} ALIVE
+        `);const v=R(T.lobby),s=R(T.battleScreen);t.gameStarted?(v.style.display="none",s.style.display="flex"):(v.style.display="flex",s.style.display="none");const o=document.getElementById(T.overlayGameOver);o&&(o.classList.toggle("hidden",!t.showGameOverOverlay),t.showGameOverOverlay&&(o.innerHTML=`
+                <div class="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
+                    <h2 class="text-6xl font-black italic text-red-600 mb-4 tracking-tighter">TERMINATED</h2>
+                    <button onclick="location.reload()" class="bg-red-600 text-white px-10 py-3 rounded-full font-bold italic active:scale-95 transition-transform shadow-lg shadow-red-900/40">REBOOT</button>
+                </div>
+            `)),Q(t)}function ee(t,n){if(!t||!t.canvas)return;const e=t.canvas.clientWidth,r=t.canvas.clientHeight;if(t.clearRect(0,0,e,r),!n.gameStarted)return;const a=e*.5,i=r*.82,l=e*.5,h=r*.25,E=n.player;if((E.isParrying||E.parryTimerFr>0)&&(t.save(),t.shadowBlur=15,t.shadowColor="#FFD700",t.strokeStyle="#FFD700",t.lineWidth=3,t.beginPath(),t.arc(a,i,40,0,Math.PI*2),t.stroke(),t.restore()),E.dashTimerFr>0){t.save(),t.setLineDash([5,5]),t.strokeStyle="#88ccff",t.lineWidth=2;const c=1-E.dashTimerFr/50,f=35+10*Math.sin(c*Math.PI);t.beginPath(),t.arc(a,i,f,0,Math.PI*2),t.stroke(),t.restore()}if(t.save(),t.fillStyle=E.isParrying||E.parryTimerFr>0?"#3b82f6":"#10b981",t.beginPath(),t.arc(a,i,32,0,Math.PI*2),t.fill(),t.restore(),n.monsters&&n.monsters.length>0){const c=n.monsters.length,f=110,p=l-(c-1)*f/2;n.monsters.forEach((d,y)=>{const A=p+y*f,g=h;let I=A,v=g,s="#ef4444";if(d.state==="CUE"){const o=1-d.attackTimerFr/Math.max(1,d.maxTimerFr);v-=Math.sin(o*Math.PI)*20,s=`rgb(255, ${Math.floor(68+180*o)}, ${Math.floor(68+180*o)})`}else if(d.state==="HIT"){const o=1-d.attackTimerFr/Math.max(1,d.maxTimerFr);I=A+(a-A)*(o*o),v=g+(i-g)*(o*o)}else if(d.state==="RECOVER"){const o=1-d.attackTimerFr/Math.max(1,d.maxTimerFr);I=a+(A-a)*o,v=i+(g-i)*o}t.save(),n.targetingSkill&&d.hp>0&&(t.shadowBlur=20,t.shadowColor="#fae133",t.strokeStyle="#fae133",t.lineWidth=3,t.beginPath(),t.arc(I,v,48,0,Math.PI*2),t.stroke()),t.fillStyle=s,t.beginPath(),t.arc(I,v,40,0,Math.PI*2),t.fill(),d.hp>0&&(t.fillStyle="white",t.font="bold 12px Outfit",t.textAlign="center",t.fillText(`${Math.ceil(d.hp)}`,I,v+5)),t.restore()})}if(n.combatFeedback&&n.combatFeedback.timerFr>0){t.save(),t.fillStyle=n.combatFeedback.color,t.font="900 32px Outfit",t.textAlign="center",t.shadowColor="black",t.shadowBlur=5;const c=Math.min(1,n.combatFeedback.timerFr/10);t.globalAlpha=c;const f=r*.45-(45-n.combatFeedback.timerFr);t.fillText(n.combatFeedback.text,e*.5,f),t.restore()}}function w(t="light"){const n=document.getElementById("game-container");n&&(n.style.animation="none",n.offsetHeight,t==="heavy"?n.style.animation="shake-heavy 0.3s cubic-bezier(.36,.07,.19,.97) both":n.style.animation="shake 0.15s cubic-bezier(.36,.07,.19,.97) both",setTimeout(()=>{n.style.animation=""},t==="heavy"?300:150))}function _(t="white"){const n=document.createElement("div");n.style.position="absolute",n.style.inset="0",n.style.pointerEvents="none",n.style.zIndex="500",t==="red"?(n.style.background="radial-gradient(circle, transparent 50%, rgba(255,0,0,0.4) 150%)",n.style.boxShadow="inset 0 0 50px rgba(255,0,0,0.5)",n.style.transition="opacity 0.2s ease-out"):(n.style.backgroundColor="rgba(255, 255, 255, 0.4)",n.style.transition="opacity 0.1s ease-out"),(document.getElementById("play-area")||document.body).appendChild(n),requestAnimationFrame(()=>{requestAnimationFrame(()=>{n.style.opacity="0",setTimeout(()=>{n.remove()},200)})})}function te(t,n,e="#FFD700"){const r=document.getElementById("play-area");if(!r)return;const a=document.createElement("div");a.style.position="absolute",a.style.left=`${t}px`,a.style.top=`${n}px`,a.style.width="10px",a.style.height="10px",a.style.transform="translate(-50%, -50%) scale(1)",a.style.borderRadius="50%",a.style.border=`4px solid ${e}`,a.style.opacity="1",a.style.pointerEvents="none",a.style.zIndex="25",a.style.transition="all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)",r.appendChild(a),requestAnimationFrame(()=>{requestAnimationFrame(()=>{a.style.transform="translate(-50%, -50%) scale(8)",a.style.opacity="0",setTimeout(()=>a.remove(),300)})})}function re(){const t=document.createElement("div");t.id="debug-hud",t.style.cssText=`
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.8);
+        border: 1px solid #4a9eff;
+        color: #fff;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 11px;
+        z-index: 99999;
+        pointer-events: none;
+        min-width: 200px;
+    `,document.body.appendChild(t);function n(){const r=typeof __BUILD_ID__<"u"?__BUILD_ID__:"local",a=b.getState(),i=a.player,l=a.monsters&&a.monsters.length>0?a.monsters[0]:null,h=a.gameStarted?a.currentTurn:"WAITING",E=i?i.ap:0,c=i?Math.round(i.parryTimerFr):0,f=l?l.state:"NONE",p=l?Math.round(l.attackTimerFr):0,d=l&&l.currentAttack?`${l.currentAttack.isUnparryable?"UNPARRY":"PARRYABLE"} / ${l.currentAttack.isUndodgeable?"UNDODGE":"DODGEABLE"}`:"NONE";t.innerHTML=`
+            <div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">[DEBUG HUD] v.${r}</div>
+            <div style="color:#4ade80">PHASE: ${h}</div>
+            <div>PLAYER AP: <span style="color:#4a9eff">${E}</span></div>
+            <div>PARRY timer: ${c>0?c:"-"}</div>
+            <div style="margin-top:5px; padding-top:5px; border-top:1px solid #444;"></div>
+            <div style="color:#ff4a4a">M_STATE: ${f}</div>
+            <div style="color:#ff4a4a">M_TIMER: ${p}</div>
+            <div style="color:#ffcc00">M_ATTR: ${d}</div>
+        `}n(),setInterval(()=>{n()},500);const e=(r,a="")=>{console.error(`[GLOBAL ERROR CAUGHT] ${r}`,a)};window.onerror=(r,a,i,l,h)=>(e(`${r} (Line: ${i})`,h?.stack||""),!1),window.addEventListener("unhandledrejection",r=>{e(`Unhandled Promise: ${r.reason}`)}),document.addEventListener("click",r=>{const i=r.target.closest("#btn-start");if(i){const l=i.getBoundingClientRect(),h=l.left+l.width/2,E=l.top+l.height/2,c=document.elementFromPoint(h,E);c&&c!==i&&!i.contains(c)&&console.warn("[DEBUG] Click intercepted! Button covered by:",c)}},!0)}re();function ne(){console.log("Augmented Simulator V3 Booting..."),q(),K(),window.lucide&&window.lucide.createIcons();let t=!1;b.subscribe(r=>{window.gameStarted=r.gameStarted,t=!0}),b.dispatch({type:"INIT"});const n=document.getElementById("gameCanvas");if(n){const r=n.getContext("2d");if(r){let a=function(c){const f=c-l;for(l=c,h+=f,h>200&&(h=200);h>=E;){const d=b.getState();if(d.gameStarted){d.monsters.forEach(A=>{A.hp>0&&!A.id&&console.error("[VALIDATOR] Invalid Monster detected in pool!")}),b.dispatch({type:"TICK_FR_STEP"});const y=b.getState().lastEvent;y&&(y==="HIT"?(w("heavy"),_("red")):y==="PARRY"?(w("light"),_("white")):y==="PERFECT_PARRY"?(w("heavy"),_("white"),te(n.clientWidth/2,n.clientHeight*.82)):y==="EVADE"?w("light"):y==="PLAYER_HIT"&&(w("light"),_("white")))}h-=E}const p=b.getState();t&&(Z(p),t=!1),ee(r,p),requestAnimationFrame(a)};const i=()=>{const c=n.parentElement;if(!c)return;const f=c.clientWidth,p=c.clientHeight;if(f===0||p===0)return;const d=window.devicePixelRatio||1;n.width=Math.floor(f*d),n.height=Math.floor(p*d),n.style.width=`${f}px`,n.style.height=`${p}px`,r.setTransform(d,0,0,d,0,0)};i(),n.parentElement&&new ResizeObserver(()=>requestAnimationFrame(i)).observe(n.parentElement);let l=performance.now(),h=0;const E=1e3/60;requestAnimationFrame(a),n.addEventListener("pointerdown",c=>{const f=b.getState();if(f.gameStarted){if(c.preventDefault(),f.targetingSkill){const p=n.getBoundingClientRect(),d=c.clientX-p.left,y=c.clientY-p.top,A=f.monsters.length,g=110,I=p.width*.5,v=p.height*.25,s=I-(A-1)*g/2;let o=-1,m=60;f.monsters.forEach((u,k)=>{if(u.hp<=0)return;const Y=s+k*g,V=v,D=Math.sqrt((d-Y)**2+(y-V)**2);D<m&&(m=D,o=k)}),o!==-1&&b.dispatch({type:"SELECT_TARGET",index:o});return}c.button===2?b.dispatch({type:"DODGE_START"}):b.dispatch({type:"PARRY_START"})}}),n.addEventListener("contextmenu",c=>c.preventDefault())}}document.body.addEventListener("click",r=>{const a=r.target;if(a.closest("#btn-hud-toggle")){const l=document.getElementById("hud-expanded");l&&(l.classList.toggle("hidden"),l.classList.add("animate-expanded"));return}a.closest("#btn-start")&&window.startGame(),a.closest("#btn-skill-atk")&&b.dispatch({type:"EXECUTE_SKILL",skill:"atk"}),a.closest("#btn-skill-spin")&&b.dispatch({type:"EXECUTE_SKILL",skill:"spin"}),a.closest("#btn-skill-heavy")&&b.dispatch({type:"EXECUTE_SKILL",skill:"heavy"}),a.closest("#btn-turn-end")&&b.dispatch({type:"END_TURN_MANUAL"}),a.closest("#btn-parry")&&b.dispatch({type:"PARRY_START"}),a.closest("#btn-dodge")&&b.dispatch({type:"DODGE_START"})});let e=!1;window.startGame=()=>{if(!e){e=!0;try{console.log("Game Start Signal Received."),b.dispatch({type:"START_GAME"})}catch(r){console.error(r)}finally{e=!1}}},window.openInventory=()=>{console.log("Inventory Open Signal Received.")},window.toggleGuide=r=>{console.log("Guide Toggle Signal Received:",r)},console.log("V3 Core Operational. Game Loop initialized via Event Delegation.")}document.addEventListener("DOMContentLoaded",ne);</script>
+  <style rel="stylesheet" crossorigin>:root{--glass-bg: rgba(255, 255, 255, .05);--glass-border: rgba(255, 255, 255, .1);--accent-red: #ff4a4a;--accent-blue: #3b82f6;--accent-gold: #fae133}body{margin:0;padding:0;background-color:#050507;color:#fff;font-family:Outfit,Inter,sans-serif;overflow:hidden;-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}#game-container{height:100vh;display:flex;flex-direction:column}#top-hud-zone{height:12%;min-height:80px}#battle-zone{height:60%;position:relative}#bottom-action-zone{height:28%;min-height:200px;overflow:hidden}.gauge-container{background:#0006;border:1px solid rgba(255,255,255,.05);box-shadow:inset 0 1px 3px #0006}.hp-bar-gradient{background:linear-gradient(90deg,#dc2626,#ef4444);box-shadow:0 0 10px #ef44444d}.ap-bar-gradient{background:linear-gradient(90deg,#2563eb,#3b82f6);box-shadow:0 0 10px #3b82f64d}.slide-area{transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .3s ease}.slide-up{transform:translateY(0);opacity:1}.slide-down{transform:translateY(100%);opacity:0}.glass-panel{background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border)}.skill-btn{background:#312e814d;backdrop-filter:blur(10px);border:1px solid rgba(67,56,202,.2);transition:all .2s cubic-bezier(.4,0,.2,1)}.skill-btn:active:not(:disabled){background:#312e8199;border-color:#4338ca80;transform:scale(.95)}.skill-btn:disabled{opacity:.2;filter:grayscale(1);pointer-events:none}@keyframes toast-in{0%{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#message:not(:empty){animation:toast-in .3s ease-out forwards}#hud-expanded.animate-expanded{animation:slide-up .3s ease-out}@keyframes slide-up{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}#gameCanvas{display:block;width:100%;height:100%}#visual-overlays{z-index:20}</style>
 </head>
 
-<body>
-    <p>Redirecting to <a href="index.html">index.html</a>...</p>
-    <script>
-        window.location.href = "index.html" + window.location.search + window.location.hash;
-    </script>
+<body class="bg-[#050507] text-white overflow-hidden flex justify-center">
+    <div id="game-container"
+        class="w-full max-w-[412px] h-full max-h-[850px] aspect-[9/18] m-auto flex flex-col bg-black relative shadow-2xl overflow-hidden">
+        <!-- Battle Screen -->
+        <div id="battle-screen" class="hidden flex flex-col h-full bg-[#050507]">
+            <!-- TOP HUD ZONE (12%) -->
+            <header id="top-hud-zone"
+                class="h-[12%] w-full z-50 p-2 pt-[env(safe-area-inset-top,10px)] flex flex-col justify-between items-center pointer-events-none border-b border-white/5 bg-black/40 backdrop-blur-sm">
+                <!-- TOP HUD ZONE (Fixed Anchors) -->
+                <div
+                    class="glass-panel grid grid-cols-3 items-center px-4 safe-top select-none pointer-events-none w-full">
+
+                    <!-- Left Anchor: Turn Indicator -->
+                    <div class="flex items-center justify-start h-full">
+                        <div id="turn-indicator"
+                            class="text-sm font-black italic tracking-tighter opacity-80 uppercase">PHASE: INIT</div>
+                    </div>
+
+                    <!-- Center Anchor: Toast Messages -->
+                    <div class="flex items-center justify-center">
+                        <div id="toast-container" class="hidden">
+                            <div class="glass-panel px-3 py-1 rounded-full">
+                                <span id="message" class="text-xs font-bold text-[#fae133]"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Anchor: Status & Toggle -->
+                    <div class="flex items-center justify-end gap-3 h-full">
+                        <div id="mini-status" class="flex flex-col gap-1 items-end w-24">
+                            <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div id="hp-bar-mini" class="h-full bg-red-500 transition-all duration-300"
+                                    style="width: 100%"></div>
+                            </div>
+                            <div class="w-2/3 h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div id="ap-bar-mini" class="h-full bg-blue-500 transition-all duration-300"
+                                    style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <button id="btn-hud-toggle"
+                            class="glass-panel p-2 rounded-lg pointer-events-auto active:scale-90 transition-transform">
+                            <i data-lucide="info" class="w-4 h-4 text-white/60"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- BATTLE ZONE (60%) -->
+            <main id="battle-zone" class="h-[60%] w-full relative overflow-hidden bg-black/20">
+                <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
+                <!-- Visual Feedback Layer (Only for floating text like DAMAGE/PERFECT) -->
+                <div id="visual-overlays" class="absolute inset-0 pointer-events-none z-20">
+                    <div id="msg-container" class="hidden"></div> <!-- Deprecated, moved to toast/canvas -->
+                </div>
+            </main>
+
+            <!-- BOTTOM ACTION ZONE (28%) -->
+            <footer id="bottom-action-zone"
+                class="h-[28%] w-full z-30 pb-[env(safe-area-inset-bottom,20px)] px-5 pt-4 flex flex-col bg-[#050507]/90 backdrop-blur-2xl border-t border-white/5 relative">
+
+                <!-- Permanent Status Area (Always Visible) -->
+                <div id="permanent-status" class="flex flex-col gap-3 mb-4 z-40">
+                    <!-- HP Group -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Vitality
+                                Trace</span>
+                            <span id="p-hp-label" class="text-xs font-bold text-red-500/80 font-mono">100 / 100</span>
+                        </div>
+                        <div class="h-[6px] w-full gauge-container rounded-full overflow-hidden">
+                            <div id="hp-bar-fill" class="h-full hp-bar-gradient transition-all duration-500 ease-out"
+                                style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- AP Group -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Energy
+                                Flow</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] text-white/20 font-bold uppercase">AP</span>
+                                <span id="p-ap-label"
+                                    class="text-sm font-black text-[#3b82f6] tracking-tighter">0</span>
+                            </div>
+                        </div>
+                        <div class="h-[4px] w-full gauge-container rounded-full overflow-hidden">
+                            <div id="ap-bar-fill" class="h-full ap-bar-gradient transition-all duration-500 ease-out"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sliding Control Area -->
+                <div id="control-container" class="slide-area flex-1 flex flex-col justify-end pb-2">
+                    <!-- PLAYER TURN CONTROLS -->
+                    <div id="player-controls" class="flex flex-col gap-4">
+                        <div class="grid grid-cols-3 gap-3">
+                            <button id="btn-skill-atk"
+                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
+                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">STRIKE</span>
+                                <span class="text-[9px] text-white/30 font-bold">2 AP</span>
+                            </button>
+                            <button id="btn-skill-spin"
+                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
+                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">SPIN</span>
+                                <span class="text-[9px] text-white/30 font-bold">3 AP</span>
+                            </button>
+                            <button id="btn-skill-heavy"
+                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
+                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">HEAVY</span>
+                                <span class="text-[9px] text-white/30 font-bold">5 AP</span>
+                            </button>
+                        </div>
+                        <div class="flex justify-center mt-1">
+                            <button id="btn-turn-end"
+                                class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-black font-black italic py-3 rounded-lg text-[11px] uppercase tracking-widest active:scale-[0.98] transition-all shadow-lg shadow-orange-950/20">
+                                END OPERATION
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- MONSTER TURN CONTROLS -->
+                    <div id="monster-controls"
+                        class="hidden grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2">
+                        <button id="btn-dodge"
+                            class="defense-btn h-24 bg-white/[0.03] border border-[#88ccff]/20 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all">
+                            <span
+                                class="text-[10px] font-black text-[#88ccff]/40 uppercase tracking-widest mb-1">Evasive</span>
+                            <span class="text-xl font-black italic text-[#88ccff] tracking-tight">DODGE</span>
+                        </button>
+                        <button id="btn-parry"
+                            class="defense-btn h-24 bg-white/[0.03] border border-[#fbbf24]/20 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all">
+                            <span
+                                class="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-widest mb-1">Defensive</span>
+                            <span class="text-xl font-black italic text-[#fbbf24] tracking-tight">PARRY</span>
+                        </button>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Overlays -->
+    <div id="lobby-overlay"
+        class="fixed inset-0 bg-[#050507]/95 backdrop-blur-2xl z-[200] flex flex-col items-center justify-center p-8 text-center transition-all duration-500">
+        <h1 class="text-6xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
+            AUGMENTED<br /><span class="text-[#fae133]">SIMULATOR</span>
+        </h1>
+        <button id="btn-start"
+            class="w-full max-w-[280px] bg-[#fae133] hover:bg-[#fae133]/80 p-6 rounded-[2rem] font-black text-black text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-2xl mt-12">
+            Start Operation
+        </button>
+        <div class="grid grid-cols-2 gap-4 mt-6 w-full max-w-[280px]">
+            <button id="btn-archive"
+                class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Archive</button>
+            <button id="btn-briefing"
+                class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Briefing</button>
+        </div>
+    </div>
+
+    <div id="augment-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
+    </div>
+    <div id="event-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
+    </div>
+    <div id="inventory-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6">
+    </div>
+    <div id="guide-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8">
+    </div>
+    <div id="game-over-overlay"
+        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 text-center">
+    </div>
+    <div id="error-overlay"
+        class="hidden fixed inset-0 bg-red-900/90 backdrop-blur-3xl z-[9999] flex flex-col items-center justify-center p-12 text-white font-mono text-xs overflow-auto">
+    </div>
+    </div>
 </body>
 
 </html>
