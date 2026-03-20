@@ -3,260 +3,1307 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Augmented Simulator - Portrait</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@500;800;900&display=swap"
-        rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="module" crossorigin>(function(){const n=document.createElement("link").relList;if(n&&n.supports&&n.supports("modulepreload"))return;for(const a of document.querySelectorAll('link[rel="modulepreload"]'))r(a);new MutationObserver(a=>{for(const i of a)if(i.type==="childList")for(const l of i.addedNodes)l.tagName==="LINK"&&l.rel==="modulepreload"&&r(l)}).observe(document,{childList:!0,subtree:!0});function e(a){const i={};return a.integrity&&(i.integrity=a.integrity),a.referrerPolicy&&(i.referrerPolicy=a.referrerPolicy),a.crossOrigin==="use-credentials"?i.credentials="include":a.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function r(a){if(a.ep)return;a.ep=!0;const i=e(a);fetch(a.href,i)}})();const T={hpLabel:"p-hp-label",apLabel:"p-ap-label",hpBar:"hp-bar-fill",apBar:"ap-bar-fill",turn:"turn-indicator",message:"message",errorOverlay:"error-overlay",btnSkillAtk:"btn-skill-atk",btnSkillSpin:"btn-skill-spin",btnSkillHeavy:"btn-skill-heavy",lobby:"lobby-overlay",battleScreen:"battle-screen",overlayAug:"augment-overlay",overlayEvent:"event-overlay",overlayGameOver:"game-over-overlay",debugHub:"debug-hub",hpBarMini:"hp-bar-mini",apBarMini:"ap-bar-mini",toastContainer:"toast-container"},B={},$=3;function R(t){const n=document.getElementById(t);if(!n){const e=`CRITICAL UI ELEMENT MISSING: ${t}`;throw x(e),new Error(e)}return n}function x(t){const n=document.getElementById(T.errorOverlay);if(n){const e=B[t]||0;e<$&&(n.style.display="block",n.innerText=`[SYSTEM ERROR] ${t}
+    <title>Parry Roguelike Prototype V2</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #eee;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
 
-${new Error().stack}`,B[t]=e+1),e===$&&console.warn(`Error throttled: ${t}`)}console.error(t)}function K(){window.onerror=(t,n,e,r,a)=>(x(`Uncaught Error: ${t} at ${e}:${r}`),!1),window.onunhandledrejection=t=>{x(`Unhandled Promise Rejection: ${t.reason}`)}}function W(){return{hp:100,maxHp:100,atk:50,def:0,ap:0,maxAp:10,isParrying:!1,parryTimerFr:0,dashTimerFr:0,actionsUsed:{atk:!1,spin:!1,heavy:!1},augBuffs:{atk:1,spin:1,heavy:1,parryAp:0,startAp:0,executeLow:0,stackAtk:0,heavySunder:0,killAp:0,perfectFocus:0,stackAtkEpic:0,heavyOverheat:0,spinKillAp:0,turnAtkPerf:0,startTurnAtk:0,killStackAtk:0,heavyExecute:0,lowApAtk:1,inertiaSlice:0,firstAtkMult:0,heavyKillAp:0,spinMultiTarget:0,perfectApBonus:0,unlimitKillAtk:0,takeDmgMult:1,soloAtk:0,soloHeavy:0,executeAll:0,heavyExecAll:0,heavyChain:0,highApBuff:0,perfStackBuff:0},state:{killsThisTurn:0,parryApGained:0,isPrefGainedThisTurn:!1,consecutiveTarget:null,consecutiveCount:0,heavyUsedLastTurn:!1,heavyHitThisTurn:!1,perfFocusActive:!1,perfParryThisTurn:!1,killStacks:0,unlimitKills:0,firstAttackThisTurn:!0,perfStacks:0,multiAtkCount:0,heavyLastTurn:!1,atkUsedLastTurn:!1},activeAugments:[]}}function X(){return{gameStarted:!1,showAugmentOverlay:!1,showEventOverlay:!1,showGameOverOverlay:!1,currentTurn:"NONE",currentRound:1,currentStageId:null,currentNodeIndex:0,stagePlan:null,player:W(),monsters:[],currentMonsterIndex:0,roundStartTimerFr:0,isEndingTurnAutomatically:!1,playerEndTimerFr:0,combatFeedback:null,lastEvent:null,targetingSkill:null,history:[]}}function C(t){if(!t)throw new Error("[CRITICAL] StagePlan is null or undefined.");if(!Array.isArray(t.nodes)||t.nodes.length===0)throw new Error(`[CRITICAL] StagePlan "${t.id}" has no nodes.`);if(!t.nodes.some(e=>e.type==="BOSS"))throw new Error(`[CRITICAL] StagePlan "${t.id}" must contain at least one BOSS node.`);t.nodes.forEach((e,r)=>{if(!["COMBAT","REWARD_AUGMENT","REST_CHOICE","BOSS"].includes(e.type))throw new Error(`[CRITICAL] Unknown node type "${e.type}" at index ${r} in StagePlan "${t.id}".`)})}function z(t,n){C(n);const e={...t};return e.currentStageId=n.id,e.stagePlan=n,e.currentNodeIndex=0,e}function P(t){if(!t.stagePlan)throw new Error("[CRITICAL] Cannot advance node: stagePlan is missing in current state.");C(t.stagePlan);const n={...t};if(n.currentNodeIndex+=1,n.currentNodeIndex>=t.stagePlan.nodes.length)throw new Error(`[CRITICAL] Cannot advance beyond the last node of StagePlan "${n.currentStageId}".`);return n}const L={m_w1_1:{id:"m_w1_1",name:"Scout Drone",hp:100,atk:10,def:0,patterns:["pat_normal"]},m_w1_2:{id:"m_w1_2",name:"Fast Strider",hp:80,atk:12,def:0,patterns:["pat_fast"]},m_w2_1:{id:"m_w2_1",name:"Shield Core",hp:150,atk:8,def:5,patterns:["pat_normal","pat_slow"]},m_w2_2:{id:"m_w2_2",name:"Assault Unit",hp:120,atk:15,def:0,patterns:["pat_fast","pat_normal"]},m_boss:{id:"m_boss",name:"VOID OVERSEER",hp:850,atk:18,def:2,patterns:["pat_normal","pat_fast","pat_slow","pat_heavy"]}};var S=(t=>(t.FAST="FAST",t.NORMAL="NORMAL",t.SLOW="SLOW",t))(S||{});const O={pat_fast:{id:"pat_fast",speed:S.FAST,hitFr:15,recoverFr:20,flags:{parryable:!0,dodgeable:!0},dmgPct:1},pat_normal:{id:"pat_normal",speed:S.NORMAL,hitFr:15,recoverFr:20,flags:{parryable:!0,dodgeable:!0},dmgPct:1},pat_slow:{id:"pat_slow",speed:S.SLOW,hitFr:15,recoverFr:20,flags:{parryable:!0,dodgeable:!0},dmgPct:1},pat_heavy:{id:"pat_heavy",speed:S.SLOW,hitFr:15,recoverFr:30,flags:{parryable:!0,dodgeable:!0},dmgPct:1.5}},H={tutorial:{id:"tutorial",nodes:[{type:"COMBAT",encounterIds:["m_w1_1","m_w1_2"]},{type:"REWARD_AUGMENT"},{type:"COMBAT",encounterIds:["m_w2_1","m_w2_2"]},{type:"REST_CHOICE"},{type:"COMBAT",encounterIds:["m_w1_2","m_w2_2"]},{type:"REWARD_AUGMENT"},{type:"COMBAT",encounterIds:["m_w2_1","m_w2_2"]},{type:"REWARD_AUGMENT"},{type:"BOSS",encounterIds:["m_boss"]}]}};function G(t){const n=t.player,e=["hp","maxHp","atk","def","ap","maxAp"];for(const r of e){const a=n[r];if(typeof a!="number"||!Number.isFinite(a))throw new Error(`[INVALID_STATE] Player field "${r}" is not a finite number: ${a}`)}if(n.maxHp<=0)throw new Error(`[INVALID_STATE] maxHp must be greater than 0: ${n.maxHp}`);if(n.maxAp<=0)throw new Error(`[INVALID_STATE] maxAp must be greater than 0: ${n.maxAp}`);if(n.actionsUsed===void 0)throw new Error("[INVALID_STATE] actionsUsed is missing");if(n.augBuffs===void 0)throw new Error("[INVALID_STATE] augBuffs is missing");if(!["PLAYER","MONSTER","NONE"].includes(t.currentTurn))throw new Error(`[INVALID_STATE] Invalid currentTurn: ${t.currentTurn}`);if(t.stagePlan!==null&&(C(t.stagePlan),typeof t.currentNodeIndex!="number"||t.currentNodeIndex<0))throw new Error(`[INVALID_STATE] currentNodeIndex is invalid: ${t.currentNodeIndex}`)}function q(){console.log("[VALIDATOR] Verifying data schema references...");for(const[t,n]of Object.entries(L)){if(!n.patterns||n.patterns.length===0)throw new Error(`[INVALID_SCHEMA] Monster ${t} has no patterns defined`);for(const e of n.patterns)if(!O[e])throw new Error(`[INVALID_SCHEMA] Monster ${t} references missing pattern ID: ${e}`)}for(const[t,n]of Object.entries(H))for(let e=0;e<n.nodes.length;e++){const r=n.nodes[e];if(r.type==="COMBAT"){if(!r.encounterIds||r.encounterIds.length===0)throw new Error(`[INVALID_SCHEMA] Stage ${t} Node[${e}] (COMBAT) has no encounterIds`);for(const a of r.encounterIds)if(!L[a])throw new Error(`[INVALID_SCHEMA] Stage ${t} Node[${e}] references missing monster ID: ${a}`)}}console.log("[VALIDATOR] Data schema validation passed. All ID references are intact.")}const U={[S.FAST]:11,[S.NORMAL]:15,[S.SLOW]:20},F={PARRY_MAX_FR:21,PERFECT_FR:8,K:50};function N(t,n){const e=Math.max(1,Math.round(t*(F.K/(F.K+n))));if(!Number.isFinite(e))throw new Error(`[CRITICAL] Damage calculation resulted in non-finite value: ${e}`);return e}function M(t){const n=t.stagePlan;if(!n)return t;const e=n.nodes[t.currentNodeIndex];if(!e)return t;if(e.type==="COMBAT"||e.type==="BOSS"){t.currentTurn="MONSTER",t.roundStartTimerFr=100;const r=t.currentNodeIndex+1;console.log(`[ENGINE] Round ${r} Start!`),t.monsters=(e.encounterIds||[]).map((a,i)=>{const l=L[a];if(!l)throw new Error(`Monster ${a} not found`);return{id:`${a}_${i}`,name:l.name,hp:l.hp,maxHp:l.hp,atk:l.atk,def:l.def,patterns:l.patterns,state:"IDLE",attackTimerFr:60,maxTimerFr:60,currentPatternIdx:0,currentAttack:{isUnparryable:!1,isUndodgeable:!1,dmgPct:1,hitFr:15,recoverFr:20}}}),t.currentMonsterIndex=0,t.player.state.killsThisTurn=0,t.player.state.firstAttackThisTurn=!0}else e.type==="REWARD_AUGMENT"?t.showAugmentOverlay=!0:e.type==="REST_CHOICE"&&(t.showEventOverlay=!0);return t}function j(t,n){G(t);let e=JSON.parse(JSON.stringify(t));const r=e.player;switch(n.type){case"START_GAME":const a=H.tutorial;if(!a)throw new Error("튜토리얼 스테이지 플랜이 없습니다.");e.gameStarted=!0,e.currentRound=1,e.currentStageId=a.id,e.stagePlan=a,e.currentNodeIndex=0,e=M(e),console.log(`[ENGINE] START_GAME: 스폰 완료 (${e.monsters?e.monsters.length:0}기)`);break;case"START_TURN":if(e.currentTurn=n.turn,n.turn==="PLAYER"){const o=r.augBuffs.startAp||0;r.ap=Math.min(r.maxAp,r.ap+o),r.actionsUsed={atk:!1,spin:!1,heavy:!1},r.state.killsThisTurn=0}break;case"END_TURN_MANUAL":e.currentTurn==="PLAYER"&&!e.isEndingTurnAutomatically&&(e.isEndingTurnAutomatically=!0,e.playerEndTimerFr=10,console.log("[ENGINE] Manual Turn End Requested"));break;case"EXECUTE_SKILL":if(r.hp<=0)break;const i=n.skill;let l=0,h=0,E=!1;if(i==="atk"?(l=2,h=1):i==="spin"?(l=3,h=1.2,E=!0):i==="heavy"&&(l=5,h=2),r.ap<l){console.warn(`[ENGINE] Not enough AP for ${i}. Need ${l}, have ${r.ap}`);break}const c=e.monsters.filter(o=>o.hp>0);if(!E&&c.length>1){e.targetingSkill=i,console.log(`[ENGINE] Targeting mode started for ${i}`);break}if(r.ap-=l,r.actionsUsed[i]=!0,e.lastEvent=`SKILL_${i.toUpperCase()}`,c.length>0)if(E){const m=r.atk*h/c.length;c.forEach(u=>{const k=N(m*(r.augBuffs.takeDmgMult||1),0);u.hp=Math.max(0,u.hp-k),e.lastEvent="PLAYER_HIT",console.log(`[ENGINE] Player used ${i}! Monster ${u.name} HP reduced to ${u.hp}`)})}else{const o=c[0],m=r.atk*h,u=N(m*(r.augBuffs.takeDmgMult||1),0);o.hp=Math.max(0,o.hp-u),e.lastEvent="PLAYER_HIT",console.log(`[ENGINE] Player used ${i}! Monster ${o.name} HP reduced to ${o.hp}`)}break;case"SELECT_TARGET":if(!e.targetingSkill)break;const f=n.index,p=e.targetingSkill,d=e.monsters[f];if(!d||d.hp<=0)break;let y=0,A=0;p==="atk"?(y=2,A=1):p==="heavy"&&(y=5,A=2),r.ap-=y,r.actionsUsed[p]=!0,e.lastEvent=`SKILL_${p.toUpperCase()}`;const g=N(r.atk*A*(r.augBuffs.takeDmgMult||1),0);d.hp=Math.max(0,d.hp-g),e.lastEvent="PLAYER_HIT",console.log(`[ENGINE] Target ${f} selected! Player used ${p}, Monster HP: ${d.hp}`),e.targetingSkill=null;break;case"PARRY_START":r.parryTimerFr===0&&r.dashTimerFr===0&&e.currentTurn==="MONSTER"&&(r.isParrying=!0,r.parryTimerFr=F.PARRY_MAX_FR);break;case"DODGE_START":r.dashTimerFr===0&&r.parryTimerFr===0&&e.currentTurn==="MONSTER"&&(r.dashTimerFr=50,console.log("[ENGINE] EVASION ACTIVATED"));break;case"TICK_FR_STEP":if(r.hp<=0&&e.gameStarted){e.showGameOverOverlay=!0,e.gameStarted=!1,e.currentTurn="NONE",console.log("[ENGINE] PLAYER DIED. Game Over.");break}if(e.lastEvent=null,e.monsters&&e.monsters.length>0){const o=e.monsters.filter(m=>m.hp>0);if(e.monsters=o,o.length===0){console.log("[ENGINE] Encounter Ended - All monsters defeated."),e.currentTurn="NONE",e.isEndingTurnAutomatically=!1,e.playerEndTimerFr=0,e.combatFeedback=null,e=P(e),e=M(e);break}}e.combatFeedback&&(e.combatFeedback.timerFr--,e.combatFeedback.timerFr<=0&&(e.combatFeedback=null));const I=e.stagePlan?.nodes[e.currentNodeIndex],v=I?.type==="COMBAT"||I?.type==="BOSS";if(e.currentTurn==="PLAYER"){if(!v){e.currentTurn="NONE";break}if(e.isEndingTurnAutomatically)e.playerEndTimerFr>0&&e.playerEndTimerFr--,e.playerEndTimerFr<=0&&(e.currentTurn="MONSTER",e.currentMonsterIndex=0,r.state.heavyUsedLastTurn=r.actionsUsed.heavy,r.state.atkUsedLastTurn=r.actionsUsed.atk,r.state.killsThisTurn=0,r.actionsUsed={atk:!1,spin:!1,heavy:!1},e.isEndingTurnAutomatically=!1,e.roundStartTimerFr=50,e.monsters.forEach(o=>{o.hp>0&&(o.state="IDLE",o.attackTimerFr=U[S.NORMAL],o.maxTimerFr=o.attackTimerFr)}),console.log("[ENGINE] Turn switched to MONSTER"));else{const o=Math.floor(r.ap+.01),m=!r.actionsUsed.atk&&o>=2,u=!r.actionsUsed.spin&&o>=3,k=!r.actionsUsed.heavy&&o>=5;!m&&!u&&!k&&(e.isEndingTurnAutomatically=!0,o<2?e.playerEndTimerFr=1:e.playerEndTimerFr=48)}break}if(e.roundStartTimerFr>0){e.roundStartTimerFr--,e.roundStartTimerFr<=0&&r.ap>=5&&(r.state.highApAtkActive=!0);break}if(!v)break;const s=e.monsters[e.currentMonsterIndex];if(!s){e.currentMonsterIndex<e.monsters.length-1?e.currentMonsterIndex++:(e.currentTurn="PLAYER",console.log("[ENGINE] All monsters finished, Turn switched to PLAYER"));break}if(s.hp<=0){s.state="DONE",e.currentMonsterIndex<e.monsters.length-1?e.currentMonsterIndex++:(e.currentTurn="PLAYER",console.log("[ENGINE] All monsters finished, Turn switched to PLAYER"));break}if(s.state==="IDLE"){if(s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=0){s.state="CUE";const o=s.patterns&&s.patterns.length>0,m=o?s.patterns[s.currentPatternIdx]:"pat_normal",u=O[m]||O.pat_normal;o&&(s.currentPatternIdx=(s.currentPatternIdx+1)%s.patterns.length);const k=u.cueFr!==void 0?u.cueFr:U[u.speed];s.attackTimerFr=k||60,s.maxTimerFr=s.attackTimerFr,s.currentAttack={isUnparryable:u?!u.flags.parryable:!1,isUndodgeable:u?!u.flags.dodgeable:!1,dmgPct:u?u.dmgPct:1,hitFr:u?u.hitFr:15,recoverFr:u?u.recoverFr:20}}}else if(s.state==="CUE")s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=0&&(s.state="HIT",s.attackTimerFr=s.currentAttack.hitFr||15,s.maxTimerFr=s.attackTimerFr,s.hitTriggered=!1);else if(s.state==="HIT"){if(s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=2&&!s.hitTriggered)if(s.hitTriggered=!0,r.dashTimerFr>0)e.combatFeedback={text:"EVADED!",color:"#88ccff",timerFr:45},e.lastEvent="EVADE",console.log("[ENGINE] EVASION SUCCESS! (Damage Nullified)");else{const o=s.currentAttack.isUnparryable;if(r.isParrying&&!o){const m=F.PARRY_MAX_FR-r.parryTimerFr;m<=F.PERFECT_FR?(e.combatFeedback={text:"PERFECT!",color:"#FFD700",timerFr:45},e.lastEvent="PERFECT_PARRY",console.log(`[ENGINE] PERFECT PARRY! (elapsed: ${m})`),r.ap=Math.min(r.maxAp,r.ap+2),r.state.isPrefGainedThisTurn||(r.ap=Math.min(r.maxAp,r.ap+(r.augBuffs.parryAp||0)),r.state.isPrefGainedThisTurn=!0),(r.state.parryApGained||0)<2&&(r.ap=Math.min(r.maxAp,r.ap+(r.augBuffs.perfectApBonus||0)),r.state.parryApGained=(r.state.parryApGained||0)+1),r.state.perfFocusActive=!0,r.state.perfParryThisTurn=!0,r.state.perfStacks=Math.min((r.state.perfStacks||0)+1,3)):(e.combatFeedback={text:"GOOD",color:"#00FF00",timerFr:45},e.lastEvent="PARRY",console.log(`[ENGINE] GOOD PARRY! (elapsed: ${m})`),r.ap=Math.min(r.maxAp,r.ap+1),r.state.isPrefGainedThisTurn||(r.ap=Math.min(r.maxAp,r.ap+(r.augBuffs.parryAp||0)),r.state.isPrefGainedThisTurn=!0))}else{const m=s.atk*(s.currentAttack.dmgPct||1)*(r.augBuffs.takeDmgMult||1),u=N(m,r.def);r.hp=Math.max(0,r.hp-u),e.lastEvent="HIT",r.state.perfStacks=0,r.isParrying&&o?(e.combatFeedback={text:"UNPARRIABLE!",color:"#ff4a4a",timerFr:45},console.log("[ENGINE] UNPARRYABLE HIT PENETRATED GUARD!")):console.log(`[ENGINE] HIT DETECTED! Player HP: ${r.hp}`)}}s.attackTimerFr<=0&&(s.state="RECOVER",s.attackTimerFr=s.currentAttack.recoverFr||20,s.maxTimerFr=s.attackTimerFr,s.hitTriggered=!1)}else s.state==="RECOVER"&&(s.attackTimerFr>0&&s.attackTimerFr--,s.attackTimerFr<=0&&(s.state="DONE",e.currentMonsterIndex<e.monsters.length-1?e.currentMonsterIndex++:(e.currentTurn="PLAYER",console.log("[ENGINE] Last monster finished, Turn switched to PLAYER"))));r.parryTimerFr>0?r.parryTimerFr--:(r.parryTimerFr=0,r.isParrying=!1),r.dashTimerFr>0&&r.dashTimerFr--;break;case"ENTER_STAGE":e=z(e,n.stagePlan);break;case"ADVANCE_NODE":e=P(e),e=M(e);break;case"REST_CHOICE_MADE":n.choice==="heal"&&(r.hp=Math.min(r.maxHp,Math.round(r.hp+r.maxHp*.35))),e=P(e),e=M(e);break}return G(e),e}class J{constructor(){this.subscribers=[],this.state=X()}getState(){return this.state}subscribe(n){this.subscribers.push(n)}dispatch(n){n.type!=="TICK_FR_STEP"&&console.log(`[ACTION] ${n.type}`,n),this.state=j(this.state,n),this.notify()}notify(){this.subscribers.forEach(n=>{try{n(this.state)}catch(e){console.error("UI Update blocked but core remains stable:",e)}})}}const b=new J;function Q(t){if(!t.gameStarted||!t.stagePlan)return;const n=t.stagePlan.nodes[t.currentNodeIndex];if(!n)return;const e=document.getElementById(T.overlayAug),r=document.getElementById(T.overlayEvent),a=document.getElementById("player-controls");switch(e&&(e.style.display="none"),r&&(r.style.display="none"),a&&a.classList.remove("hidden"),n.type){case"REWARD_AUGMENT":e&&(e.style.display="flex",e.innerHTML=`
-                    <div class="flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-500">
-                        <div class="text-center mb-4">
-                            <h2 class="text-3xl font-black italic text-[#fae133] tracking-tighter">AUGMENT ACQUIRED</h2>
-                            <p class="text-[10px] text-white/40 uppercase tracking-widest">Select one enhancement to proceed</p>
-                        </div>
-                        <div class="grid grid-cols-1 gap-4 w-full max-w-sm px-4">
-                            <button class="glass-panel p-5 rounded-2xl border border-white/10 hover:border-[#fae133]/50 hover:bg-white/5 transition-all text-left group active:scale-95" onclick="location.reload()">
-                                <div class="flex justify-between items-start mb-1">
-                                    <span class="text-[#fae133] font-black italic tracking-tight group-hover:translate-x-1 transition-transform">RECOVERY CORE</span>
-                                    <span class="text-[8px] bg-white/10 px-2 py-0.5 rounded-full text-white/60">COMMON</span>
-                                </div>
-                                <div class="text-[11px] text-white/60 leading-tight">Restores <span class="text-white font-bold">20 HP</span> immediately after selection.</div>
-                            </button>
-                            
-                            <button class="glass-panel p-5 rounded-2xl border border-white/10 hover:border-[#fae133]/50 hover:bg-white/5 transition-all text-left group active:scale-95" onclick="location.reload()">
-                                <div class="flex justify-between items-start mb-1">
-                                    <span class="text-[#fae133] font-black italic tracking-tight group-hover:translate-x-1 transition-transform">OVERCHARGE</span>
-                                    <span class="text-[8px] bg-[#fae133]/20 px-2 py-0.5 rounded-full text-[#fae133]">RARE</span>
-                                </div>
-                                <div class="text-[11px] text-white/60 leading-tight">Increases <span class="text-white font-bold">ATK by 10%</span> for the rest of the operation.</div>
-                            </button>
-                        </div>
-                        <div class="mt-8">
-                             <div class="text-[9px] text-white/20 italic animate-pulse">SYSTEM: TEST MODE - CLICKING REBOOTS TO LOBBY</div>
-                        </div>
-                    </div>
-                `),a&&a.classList.add("hidden");break;case"REST_CHOICE":r&&(r.style.display="flex"),a&&a.classList.add("hidden");break;case"COMBAT":case"BOSS":break;default:console.warn(`[UI] Unknown node type: ${n.type}`);break}}function Z(t){const n=document.getElementById(T.hpLabel),e=document.getElementById(T.apLabel),r=R(T.hpBar),a=R(T.apBar);n&&(n.innerText=`${Math.ceil(t.player.hp)} / ${t.player.maxHp}`),e&&(e.innerText=Math.floor(t.player.ap).toString());const i=t.player.hp/t.player.maxHp*100;r.style.width=`${Math.max(0,i)}%`;const l=document.getElementById(T.hpBarMini);l&&(l.style.width=`${Math.max(0,i)}%`);const h=t.player.ap/t.player.maxAp*100;a.style.width=`${Math.max(0,h)}%`;const E=document.getElementById(T.apBarMini);E&&(E.style.width=`${Math.max(0,h)}%`);const c=R(T.turn);t.currentTurn==="PLAYER"?(c.innerText="PLAYER PHASE",c.className="text-sm font-black text-[#fae133] italic tracking-tighter uppercase opacity-90"):t.currentTurn==="MONSTER"&&(c.innerText="ENEMY PHASE",c.className="text-sm font-black text-red-500 italic tracking-tighter uppercase opacity-90");const f=R(T.message),p=document.getElementById(T.toastContainer);t.targetingSkill?(f.innerText="공격할 적을 선택하세요",p?.classList.remove("hidden")):(f.innerText="",p?.classList.add("hidden")),[{id:T.btnSkillAtk,cost:2},{id:T.btnSkillSpin,cost:3},{id:T.btnSkillHeavy,cost:5}].forEach(m=>{const u=document.getElementById(m.id);if(u){const k=t.player.ap<m.cost;u.disabled=k}});const y=document.getElementById("player-controls"),A=document.getElementById("monster-controls"),g=document.getElementById("control-container");t.targetingSkill?g&&(g.classList.remove("slide-up"),g.classList.add("slide-down")):t.currentTurn==="PLAYER"?(g&&(g.classList.remove("slide-down"),g.classList.add("slide-up")),y&&(y.style.display="flex"),A&&(A.style.display="none")):t.currentTurn==="MONSTER"?(g&&(g.classList.remove("slide-down"),g.classList.add("slide-up")),y&&(y.style.display="none"),A&&(A.style.display="grid")):g&&(g.classList.remove("slide-up"),g.classList.add("slide-down"));const I=document.getElementById(T.debugHub);I&&(I.innerHTML=`
-            PHASE: ${t.currentTurn}<br/>
-            PLAYER AP: ${t.player.ap.toFixed(1)}<br/>
-            MONSTERS: ${t.monsters.filter(m=>m.hp>0).length} ALIVE
-        `);const v=R(T.lobby),s=R(T.battleScreen);t.gameStarted?(v.style.display="none",s.style.display="flex"):(v.style.display="flex",s.style.display="none");const o=document.getElementById(T.overlayGameOver);o&&(o.classList.toggle("hidden",!t.showGameOverOverlay),t.showGameOverOverlay&&(o.innerHTML=`
-                <div class="animate-in fade-in zoom-in duration-500 flex flex-col items-center">
-                    <h2 class="text-6xl font-black italic text-red-600 mb-4 tracking-tighter">TERMINATED</h2>
-                    <button onclick="location.reload()" class="bg-red-600 text-white px-10 py-3 rounded-full font-bold italic active:scale-95 transition-transform shadow-lg shadow-red-900/40">REBOOT</button>
-                </div>
-            `)),Q(t)}function ee(t,n){if(!t||!t.canvas)return;const e=t.canvas.clientWidth,r=t.canvas.clientHeight;if(t.clearRect(0,0,e,r),!n.gameStarted)return;const a=e*.5,i=r*.82,l=e*.5,h=r*.25,E=n.player;if((E.isParrying||E.parryTimerFr>0)&&(t.save(),t.shadowBlur=15,t.shadowColor="#FFD700",t.strokeStyle="#FFD700",t.lineWidth=3,t.beginPath(),t.arc(a,i,40,0,Math.PI*2),t.stroke(),t.restore()),E.dashTimerFr>0){t.save(),t.setLineDash([5,5]),t.strokeStyle="#88ccff",t.lineWidth=2;const c=1-E.dashTimerFr/50,f=35+10*Math.sin(c*Math.PI);t.beginPath(),t.arc(a,i,f,0,Math.PI*2),t.stroke(),t.restore()}if(t.save(),t.fillStyle=E.isParrying||E.parryTimerFr>0?"#3b82f6":"#10b981",t.beginPath(),t.arc(a,i,32,0,Math.PI*2),t.fill(),t.restore(),n.monsters&&n.monsters.length>0){const c=n.monsters.length,f=110,p=l-(c-1)*f/2;n.monsters.forEach((d,y)=>{const A=p+y*f,g=h;let I=A,v=g,s="#ef4444";if(d.state==="CUE"){const o=1-d.attackTimerFr/Math.max(1,d.maxTimerFr);v-=Math.sin(o*Math.PI)*20,s=`rgb(255, ${Math.floor(68+180*o)}, ${Math.floor(68+180*o)})`}else if(d.state==="HIT"){const o=1-d.attackTimerFr/Math.max(1,d.maxTimerFr);I=A+(a-A)*(o*o),v=g+(i-g)*(o*o)}else if(d.state==="RECOVER"){const o=1-d.attackTimerFr/Math.max(1,d.maxTimerFr);I=a+(A-a)*o,v=i+(g-i)*o}t.save(),n.targetingSkill&&d.hp>0&&(t.shadowBlur=20,t.shadowColor="#fae133",t.strokeStyle="#fae133",t.lineWidth=3,t.beginPath(),t.arc(I,v,48,0,Math.PI*2),t.stroke()),t.fillStyle=s,t.beginPath(),t.arc(I,v,40,0,Math.PI*2),t.fill(),d.hp>0&&(t.fillStyle="white",t.font="bold 12px Outfit",t.textAlign="center",t.fillText(`${Math.ceil(d.hp)}`,I,v+5)),t.restore()})}if(n.combatFeedback&&n.combatFeedback.timerFr>0){t.save(),t.fillStyle=n.combatFeedback.color,t.font="900 32px Outfit",t.textAlign="center",t.shadowColor="black",t.shadowBlur=5;const c=Math.min(1,n.combatFeedback.timerFr/10);t.globalAlpha=c;const f=r*.45-(45-n.combatFeedback.timerFr);t.fillText(n.combatFeedback.text,e*.5,f),t.restore()}}function w(t="light"){const n=document.getElementById("game-container");n&&(n.style.animation="none",n.offsetHeight,t==="heavy"?n.style.animation="shake-heavy 0.3s cubic-bezier(.36,.07,.19,.97) both":n.style.animation="shake 0.15s cubic-bezier(.36,.07,.19,.97) both",setTimeout(()=>{n.style.animation=""},t==="heavy"?300:150))}function _(t="white"){const n=document.createElement("div");n.style.position="absolute",n.style.inset="0",n.style.pointerEvents="none",n.style.zIndex="500",t==="red"?(n.style.background="radial-gradient(circle, transparent 50%, rgba(255,0,0,0.4) 150%)",n.style.boxShadow="inset 0 0 50px rgba(255,0,0,0.5)",n.style.transition="opacity 0.2s ease-out"):(n.style.backgroundColor="rgba(255, 255, 255, 0.4)",n.style.transition="opacity 0.1s ease-out"),(document.getElementById("play-area")||document.body).appendChild(n),requestAnimationFrame(()=>{requestAnimationFrame(()=>{n.style.opacity="0",setTimeout(()=>{n.remove()},200)})})}function te(t,n,e="#FFD700"){const r=document.getElementById("play-area");if(!r)return;const a=document.createElement("div");a.style.position="absolute",a.style.left=`${t}px`,a.style.top=`${n}px`,a.style.width="10px",a.style.height="10px",a.style.transform="translate(-50%, -50%) scale(1)",a.style.borderRadius="50%",a.style.border=`4px solid ${e}`,a.style.opacity="1",a.style.pointerEvents="none",a.style.zIndex="25",a.style.transition="all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)",r.appendChild(a),requestAnimationFrame(()=>{requestAnimationFrame(()=>{a.style.transform="translate(-50%, -50%) scale(8)",a.style.opacity="0",setTimeout(()=>a.remove(),300)})})}function re(){const t=document.createElement("div");t.id="debug-hud",t.style.cssText=`
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(0,0,0,0.8);
-        border: 1px solid #4a9eff;
-        color: #fff;
-        padding: 10px;
-        font-family: monospace;
-        font-size: 11px;
-        z-index: 99999;
-        pointer-events: none;
-        min-width: 200px;
-    `,document.body.appendChild(t);function n(){const r=typeof __BUILD_ID__<"u"?__BUILD_ID__:"local",a=b.getState(),i=a.player,l=a.monsters&&a.monsters.length>0?a.monsters[0]:null,h=a.gameStarted?a.currentTurn:"WAITING",E=i?i.ap:0,c=i?Math.round(i.parryTimerFr):0,f=l?l.state:"NONE",p=l?Math.round(l.attackTimerFr):0,d=l&&l.currentAttack?`${l.currentAttack.isUnparryable?"UNPARRY":"PARRYABLE"} / ${l.currentAttack.isUndodgeable?"UNDODGE":"DODGEABLE"}`:"NONE";t.innerHTML=`
-            <div style="color:#ffcc00; font-weight:bold; margin-bottom:5px;">[DEBUG HUD] v.${r}</div>
-            <div style="color:#4ade80">PHASE: ${h}</div>
-            <div>PLAYER AP: <span style="color:#4a9eff">${E}</span></div>
-            <div>PARRY timer: ${c>0?c:"-"}</div>
-            <div style="margin-top:5px; padding-top:5px; border-top:1px solid #444;"></div>
-            <div style="color:#ff4a4a">M_STATE: ${f}</div>
-            <div style="color:#ff4a4a">M_TIMER: ${p}</div>
-            <div style="color:#ffcc00">M_ATTR: ${d}</div>
-        `}n(),setInterval(()=>{n()},500);const e=(r,a="")=>{console.error(`[GLOBAL ERROR CAUGHT] ${r}`,a)};window.onerror=(r,a,i,l,h)=>(e(`${r} (Line: ${i})`,h?.stack||""),!1),window.addEventListener("unhandledrejection",r=>{e(`Unhandled Promise: ${r.reason}`)}),document.addEventListener("click",r=>{const i=r.target.closest("#btn-start");if(i){const l=i.getBoundingClientRect(),h=l.left+l.width/2,E=l.top+l.height/2,c=document.elementFromPoint(h,E);c&&c!==i&&!i.contains(c)&&console.warn("[DEBUG] Click intercepted! Button covered by:",c)}},!0)}re();function ne(){console.log("Augmented Simulator V3 Booting..."),q(),K(),window.lucide&&window.lucide.createIcons();let t=!1;b.subscribe(r=>{window.gameStarted=r.gameStarted,t=!0}),b.dispatch({type:"INIT"});const n=document.getElementById("gameCanvas");if(n){const r=n.getContext("2d");if(r){let a=function(c){const f=c-l;for(l=c,h+=f,h>200&&(h=200);h>=E;){const d=b.getState();if(d.gameStarted){d.monsters.forEach(A=>{A.hp>0&&!A.id&&console.error("[VALIDATOR] Invalid Monster detected in pool!")}),b.dispatch({type:"TICK_FR_STEP"});const y=b.getState().lastEvent;y&&(y==="HIT"?(w("heavy"),_("red")):y==="PARRY"?(w("light"),_("white")):y==="PERFECT_PARRY"?(w("heavy"),_("white"),te(n.clientWidth/2,n.clientHeight*.82)):y==="EVADE"?w("light"):y==="PLAYER_HIT"&&(w("light"),_("white")))}h-=E}const p=b.getState();t&&(Z(p),t=!1),ee(r,p),requestAnimationFrame(a)};const i=()=>{const c=n.parentElement;if(!c)return;const f=c.clientWidth,p=c.clientHeight;if(f===0||p===0)return;const d=window.devicePixelRatio||1;n.width=Math.floor(f*d),n.height=Math.floor(p*d),n.style.width=`${f}px`,n.style.height=`${p}px`,r.setTransform(d,0,0,d,0,0)};i(),n.parentElement&&new ResizeObserver(()=>requestAnimationFrame(i)).observe(n.parentElement);let l=performance.now(),h=0;const E=1e3/60;requestAnimationFrame(a),n.addEventListener("pointerdown",c=>{const f=b.getState();if(f.gameStarted){if(c.preventDefault(),f.targetingSkill){const p=n.getBoundingClientRect(),d=c.clientX-p.left,y=c.clientY-p.top,A=f.monsters.length,g=110,I=p.width*.5,v=p.height*.25,s=I-(A-1)*g/2;let o=-1,m=60;f.monsters.forEach((u,k)=>{if(u.hp<=0)return;const Y=s+k*g,V=v,D=Math.sqrt((d-Y)**2+(y-V)**2);D<m&&(m=D,o=k)}),o!==-1&&b.dispatch({type:"SELECT_TARGET",index:o});return}c.button===2?b.dispatch({type:"DODGE_START"}):b.dispatch({type:"PARRY_START"})}}),n.addEventListener("contextmenu",c=>c.preventDefault())}}document.body.addEventListener("click",r=>{const a=r.target;if(a.closest("#btn-hud-toggle")){const l=document.getElementById("hud-expanded");l&&(l.classList.toggle("hidden"),l.classList.add("animate-expanded"));return}a.closest("#btn-start")&&window.startGame(),a.closest("#btn-skill-atk")&&b.dispatch({type:"EXECUTE_SKILL",skill:"atk"}),a.closest("#btn-skill-spin")&&b.dispatch({type:"EXECUTE_SKILL",skill:"spin"}),a.closest("#btn-skill-heavy")&&b.dispatch({type:"EXECUTE_SKILL",skill:"heavy"}),a.closest("#btn-turn-end")&&b.dispatch({type:"END_TURN_MANUAL"}),a.closest("#btn-parry")&&b.dispatch({type:"PARRY_START"}),a.closest("#btn-dodge")&&b.dispatch({type:"DODGE_START"})});let e=!1;window.startGame=()=>{if(!e){e=!0;try{console.log("Game Start Signal Received."),b.dispatch({type:"START_GAME"})}catch(r){console.error(r)}finally{e=!1}}},window.openInventory=()=>{console.log("Inventory Open Signal Received.")},window.toggleGuide=r=>{console.log("Guide Toggle Signal Received:",r)},console.log("V3 Core Operational. Game Loop initialized via Event Delegation.")}document.addEventListener("DOMContentLoaded",ne);</script>
-  <style rel="stylesheet" crossorigin>:root{--glass-bg: rgba(255, 255, 255, .05);--glass-border: rgba(255, 255, 255, .1);--accent-red: #ff4a4a;--accent-blue: #3b82f6;--accent-gold: #fae133}body{margin:0;padding:0;background-color:#050507;color:#fff;font-family:Outfit,Inter,sans-serif;overflow:hidden;-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}#game-container{height:100vh;display:flex;flex-direction:column}#top-hud-zone{height:12%;min-height:80px}#battle-zone{height:60%;position:relative}#bottom-action-zone{height:28%;min-height:200px;overflow:hidden}.gauge-container{background:#0006;border:1px solid rgba(255,255,255,.05);box-shadow:inset 0 1px 3px #0006}.hp-bar-gradient{background:linear-gradient(90deg,#dc2626,#ef4444);box-shadow:0 0 10px #ef44444d}.ap-bar-gradient{background:linear-gradient(90deg,#2563eb,#3b82f6);box-shadow:0 0 10px #3b82f64d}.slide-area{transition:transform .4s cubic-bezier(.16,1,.3,1),opacity .3s ease}.slide-up{transform:translateY(0);opacity:1}.slide-down{transform:translateY(100%);opacity:0}.glass-panel{background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border)}.skill-btn{background:#312e814d;backdrop-filter:blur(10px);border:1px solid rgba(67,56,202,.2);transition:all .2s cubic-bezier(.4,0,.2,1)}.skill-btn:active:not(:disabled){background:#312e8199;border-color:#4338ca80;transform:scale(.95)}.skill-btn:disabled{opacity:.2;filter:grayscale(1);pointer-events:none}@keyframes toast-in{0%{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#message:not(:empty){animation:toast-in .3s ease-out forwards}#hud-expanded.animate-expanded{animation:slide-up .3s ease-out}@keyframes slide-up{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}#gameCanvas{display:block;width:100%;height:100%}#visual-overlays{z-index:20}</style>
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        canvas {
+            background-color: #222;
+            border: 2px solid #444;
+            display: block;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 800px;
+            height: 500px;
+            pointer-events: none;
+        }
+
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0) 50%, rgba(255, 0, 0, 0.4) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .vignette.active {
+            opacity: 1;
+        }
+
+        #top-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .status-box {
+            color: #fff;
+        }
+
+        .hp-text {
+            color: #ff5e5e;
+        }
+
+        .atk-text {
+            color: #ffbf00;
+        }
+
+        .def-text {
+            color: #4db8ff;
+        }
+
+        #bottom-ui {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            pointer-events: auto;
+        }
+
+        .cost-info {
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #augment-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+        }
+
+        .augment-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .augment-card {
+            width: 200px;
+            height: 280px;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: #222;
+        }
+
+        .augment-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .tier-common {
+            border: 3px solid #4ade80;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+        }
+
+        .tier-epic {
+            border: 3px solid #a855f7;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .tier-unique {
+            border: 3px solid #facc15;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+        }
+
+        .tier-common h3 {
+            color: #4ade80;
+        }
+
+        .tier-epic h3 {
+            color: #a855f7;
+        }
+
+        .tier-unique h3 {
+            color: #facc15;
+        }
+
+        #guide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            color: #fff;
+            padding: 40px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .guide-content {
+            max-width: 600px;
+            width: 100%;
+            line-height: 1.6;
+        }
+
+        .guide-content h2 {
+            color: #facc15;
+            border-bottom: 2px solid #555;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .guide-content h3 {
+            color: #4ade80;
+            margin-top: 20px;
+        }
+
+        .guide-content ul {
+            padding-left: 20px;
+        }
+
+        .guide-content li {
+            margin-bottom: 8px;
+        }
+
+        .guide-close-btn {
+            margin-top: 30px;
+            background: #555;
+            color: #fff;
+        }
+
+        .guide-btn {
+            background: #222;
+            color: #ccc;
+            border: 1px solid #444;
+            margin-top: 15px;
+        }
+
+        .guide-btn:hover {
+            background: #333;
+            color: #fff;
+            border-color: #666;
+        }
+
+        #event-overlay,
+        #game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+        }
+
+        #game-over-overlay {
+            background: rgba(50, 0, 0, 0.9);
+            z-index: 300;
+        }
+
+        .retry-btn {
+            background: #ff4a4a;
+            color: #fff;
+            padding: 15px 30px;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        .event-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .event-card {
+            width: 220px;
+            padding: 30px;
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 12px;
+            color: #fff;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .event-card:hover {
+            border-color: #fff;
+            transform: translateY(-5px);
+        }
+
+        .reroll-btn {
+            background: #555;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .reroll-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        #hit-icons-container {
+            position: absolute;
+            bottom: 120px;
+            /* 버튼 위쪽 */
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .hit-icon {
+            width: 15px;
+            height: 15px;
+            background: #4ade80;
+            /* GREEN */
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s;
+        }
+
+        .hit-icon.used {
+            opacity: 0.2;
+            background: #222;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            background: #444 !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-atk {
+            background: #4a9eff;
+            color: white;
+        }
+
+        button.action-atk {
+            border-bottom: 3px solid #ff4a4a;
+        }
+
+        button.action-exc {
+            border-bottom: 3px solid #00ffcc;
+        }
+
+        button.action-str {
+            border-bottom: 3px solid #ffd700;
+        }
+
+        #msg-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        #message {
+            font-size: 48px;
+            font-weight: 900;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        #turn-indicator {
+            position: absolute;
+            top: 50px;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+        }
+    </style>
 </head>
 
-<body class="bg-[#050507] text-white overflow-hidden flex justify-center">
-    <div id="game-container"
-        class="w-full max-w-[412px] h-full max-h-[850px] aspect-[9/18] m-auto flex flex-col bg-black relative shadow-2xl overflow-hidden">
-        <!-- Battle Screen -->
-        <div id="battle-screen" class="hidden flex flex-col h-full bg-[#050507]">
-            <!-- TOP HUD ZONE (12%) -->
-            <header id="top-hud-zone"
-                class="h-[12%] w-full z-50 p-2 pt-[env(safe-area-inset-top,10px)] flex flex-col justify-between items-center pointer-events-none border-b border-white/5 bg-black/40 backdrop-blur-sm">
-                <!-- TOP HUD ZONE (Fixed Anchors) -->
-                <div
-                    class="glass-panel grid grid-cols-3 items-center px-4 safe-top select-none pointer-events-none w-full">
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div id="start-overlay">
+            <h1 style="color:#fff; margin-bottom: 30px;">RPG BATTLE PROTOTYPE V2</h1>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="start-btn" onclick="startGame()">⚔️ 게임 시작 (Native 60FPS)</button>
+                <button class="guide-btn" onclick="toggleGuide(true)">❓ 가이드</button>
+            </div>
+        </div>
+        <div id="guide-overlay">
+            <div class="guide-content">
+                <h2>🎮 게임 가이드</h2>
 
-                    <!-- Left Anchor: Turn Indicator -->
-                    <div class="flex items-center justify-start h-full">
-                        <div id="turn-indicator"
-                            class="text-sm font-black italic tracking-tighter opacity-80 uppercase">PHASE: INIT</div>
-                    </div>
+                <h3>1. 방어 (적의 턴)</h3>
+                <ul>
+                    <li>적의 공격이 들어올 때 **화면 아무 곳이나 클릭**하여 패링을 시도하세요.</li>
+                    <li>**PERFECT**: 적중 직전 방어 (AP +2 수급)</li>
+                    <li>**GOOD**: 조금 빠른 방어 (AP +1 수급)</li>
+                </ul>
 
-                    <!-- Center Anchor: Toast Messages -->
-                    <div class="flex items-center justify-center">
-                        <div id="toast-container" class="hidden">
-                            <div class="glass-panel px-3 py-1 rounded-full">
-                                <span id="message" class="text-xs font-bold text-[#fae133]"></span>
-                            </div>
-                        </div>
-                    </div>
+                <h3>2. 공격 (플레이어 턴)</h3>
+                <ul>
+                    <li>**공격 (2 AP)**: 단일 적 공격. 스킬 선택 후 대상을 클릭하세요.</li>
+                    <li>**회전 베기 (3 AP)**: 모든 적 공격. 즉시 발동됩니다.</li>
+                    <li>**강타 (5 AP)**: 높은 피해의 강공격. 스킬 선택 후 대상을 클릭하세요.</li>
+                    <li>각 스킬은 한 턴에 **최대 1회**만 사용할 수 있습니다.</li>
+                </ul>
 
-                    <!-- Right Anchor: Status & Toggle -->
-                    <div class="flex items-center justify-end gap-3 h-full">
-                        <div id="mini-status" class="flex flex-col gap-1 items-end w-24">
-                            <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                                <div id="hp-bar-mini" class="h-full bg-red-500 transition-all duration-300"
-                                    style="width: 100%"></div>
-                            </div>
-                            <div class="w-2/3 h-1 bg-white/10 rounded-full overflow-hidden">
-                                <div id="ap-bar-mini" class="h-full bg-blue-500 transition-all duration-300"
-                                    style="width: 100%"></div>
-                            </div>
-                        </div>
-                        <button id="btn-hud-toggle"
-                            class="glass-panel p-2 rounded-lg pointer-events-auto active:scale-90 transition-transform">
-                            <i data-lucide="info" class="w-4 h-4 text-white/60"></i>
-                        </button>
-                    </div>
+                <h3>3. 증강 및 이벤트</h3>
+                <ul>
+                    <li>라운드를 클리어할 때마다 강력한 **증강(Augment)**을 골라 빌드를 완성하세요.</li>
+                    <li>3라운드는 강력한 보너스나 회복을 얻는 **이벤트 라운드**입니다.</li>
+                </ul>
+
+                <h3>4. 적 공격 정보</h3>
+                <ul>
+                    <li>화면 우하단의 **초록색 아이콘**은 현재 공격하는 적의 남은 연타 횟수입니다.</li>
+                    <li>적에게 한 대 맞거나 방어할 때마다 하나씩 어두워지니 박자를 놓치지 마세요!</li>
+                    <li>**Boss Round**의 최종 보스는 무려 3가지 패턴을 섞어서 사용하니 주의하세요!</li>
+                </ul>
+            </div>
+            <button class="guide-close-btn" onclick="toggleGuide(false)">닫기</button>
+        </div>
+        <div id="augment-overlay">
+            <h2 style="color:#fff; margin-bottom: 20px;">Choose an Augment</h2>
+            <div id="augment-cards" class="augment-container"></div>
+            <button id="btn-reroll" class="reroll-btn" onclick="rerollAugments()">Reroll (1 Remaining)</button>
+        </div>
+        <div id="event-overlay">
+            <h2 style="color:#fff; margin-bottom: 30px;">Round 3: Event Option</h2>
+            <div class="event-container">
+                <div class="event-card" onclick="selectEventOption(1)">
+                    <h3>🎁 선물</h3>
+                    <p>Common 증강 1개 선택</p>
                 </div>
-            </header>
-
-            <!-- BATTLE ZONE (60%) -->
-            <main id="battle-zone" class="h-[60%] w-full relative overflow-hidden bg-black/20">
-                <canvas id="gameCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
-                <!-- Visual Feedback Layer (Only for floating text like DAMAGE/PERFECT) -->
-                <div id="visual-overlays" class="absolute inset-0 pointer-events-none z-20">
-                    <div id="msg-container" class="hidden"></div> <!-- Deprecated, moved to toast/canvas -->
+                <div class="event-card" onclick="selectEventOption(2)">
+                    <h3>🍕 휴식</h3>
+                    <p>HP 회복 35%</p>
                 </div>
-            </main>
-
-            <!-- BOTTOM ACTION ZONE (28%) -->
-            <footer id="bottom-action-zone"
-                class="h-[28%] w-full z-30 pb-[env(safe-area-inset-bottom,20px)] px-5 pt-4 flex flex-col bg-[#050507]/90 backdrop-blur-2xl border-t border-white/5 relative">
-
-                <!-- Permanent Status Area (Always Visible) -->
-                <div id="permanent-status" class="flex flex-col gap-3 mb-4 z-40">
-                    <!-- HP Group -->
-                    <div class="flex flex-col gap-1.5">
-                        <div class="flex justify-between items-end">
-                            <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Vitality
-                                Trace</span>
-                            <span id="p-hp-label" class="text-xs font-bold text-red-500/80 font-mono">100 / 100</span>
-                        </div>
-                        <div class="h-[6px] w-full gauge-container rounded-full overflow-hidden">
-                            <div id="hp-bar-fill" class="h-full hp-bar-gradient transition-all duration-500 ease-out"
-                                style="width: 100%"></div>
-                        </div>
-                    </div>
-
-                    <!-- AP Group -->
-                    <div class="flex flex-col gap-1.5">
-                        <div class="flex justify-between items-end">
-                            <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Energy
-                                Flow</span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-[9px] text-white/20 font-bold uppercase">AP</span>
-                                <span id="p-ap-label"
-                                    class="text-sm font-black text-[#3b82f6] tracking-tighter">0</span>
-                            </div>
-                        </div>
-                        <div class="h-[4px] w-full gauge-container rounded-full overflow-hidden">
-                            <div id="ap-bar-fill" class="h-full ap-bar-gradient transition-all duration-500 ease-out"
-                                style="width: 0%"></div>
-                        </div>
-                    </div>
+            </div>
+        </div>
+        <div id="game-over-overlay">
+            <h1 style="color:#ff4a4a; font-size: 64px; margin-bottom: 20px;">GAME OVER</h1>
+            <p style="color:#ccc; margin-bottom: 20px;">전사하셨습니다...</p>
+            <button class="retry-btn" onclick="retryGame()">🔄 Retry?</button>
+        </div>
+        <div id="ui-layer">
+            <div id="vignette" class="vignette"></div>
+            <div id="top-status">
+                <div class="status-box">HP: <span id="p-hp" class="hp-text">100</span></div>
+                <div class="status-box">ATK: <span id="p-atk" class="atk-text">50</span></div>
+                <div class="status-box">DEF: <span id="p-def" class="def-text">0</span></div>
+            </div>
+            <div id="turn-indicator">Monster's Turn</div>
+            <div id="msg-container">
+                <div id="message">PERFECT!</div>
+            </div>
+            <div id="hit-icons-container"></div>
+            <div id="bottom-ui">
+                <div class="cost-info">
+                    <span class="ap-text">AP: <span id="p-ap">0</span></span>
                 </div>
-
-                <!-- Sliding Control Area -->
-                <div id="control-container" class="slide-area flex-1 flex flex-col justify-end pb-2">
-                    <!-- PLAYER TURN CONTROLS -->
-                    <div id="player-controls" class="flex flex-col gap-4">
-                        <div class="grid grid-cols-3 gap-3">
-                            <button id="btn-skill-atk"
-                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
-                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">STRIKE</span>
-                                <span class="text-[9px] text-white/30 font-bold">2 AP</span>
-                            </button>
-                            <button id="btn-skill-spin"
-                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
-                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">SPIN</span>
-                                <span class="text-[9px] text-white/30 font-bold">3 AP</span>
-                            </button>
-                            <button id="btn-skill-heavy"
-                                class="skill-btn bg-white/[0.03] border border-white/5 rounded-xl py-4 flex flex-col items-center justify-center active:scale-95 transition-all">
-                                <span class="text-xs font-bold text-white/80 uppercase tracking-tight">HEAVY</span>
-                                <span class="text-[9px] text-white/30 font-bold">5 AP</span>
-                            </button>
-                        </div>
-                        <div class="flex justify-center mt-1">
-                            <button id="btn-turn-end"
-                                class="w-full bg-[#f59e0b] hover:bg-[#d97706] text-black font-black italic py-3 rounded-lg text-[11px] uppercase tracking-widest active:scale-[0.98] transition-all shadow-lg shadow-orange-950/20">
-                                END OPERATION
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- MONSTER TURN CONTROLS -->
-                    <div id="monster-controls"
-                        class="hidden grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2">
-                        <button id="btn-dodge"
-                            class="defense-btn h-24 bg-white/[0.03] border border-[#88ccff]/20 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all">
-                            <span
-                                class="text-[10px] font-black text-[#88ccff]/40 uppercase tracking-widest mb-1">Evasive</span>
-                            <span class="text-xl font-black italic text-[#88ccff] tracking-tight">DODGE</span>
-                        </button>
-                        <button id="btn-parry"
-                            class="defense-btn h-24 bg-white/[0.03] border border-[#fbbf24]/20 rounded-2xl flex flex-col items-center justify-center active:scale-95 transition-all">
-                            <span
-                                class="text-[10px] font-black text-[#fbbf24]/40 uppercase tracking-widest mb-1">Defensive</span>
-                            <span class="text-xl font-black italic text-[#fbbf24] tracking-tight">PARRY</span>
-                        </button>
-                    </div>
+                <div class="actions">
+                    <button id="btn-atk" class="action-atk" disabled>1. 공격 (2 AP)</button>
+                    <button id="btn-spin" class="action-spin" style="background: #4a4;" disabled>2. 회전 베기 (3
+                        AP)</button>
+                    <button id="btn-heavy" class="action-heavy" style="background: #a84;" disabled>3. 강타 (5 AP)</button>
+                    <button id="btn-end" style="background: #a33;" disabled>턴 종료</button>
                 </div>
-            </footer>
+            </div>
         </div>
     </div>
 
-    <!-- Overlays -->
-    <div id="lobby-overlay"
-        class="fixed inset-0 bg-[#050507]/95 backdrop-blur-2xl z-[200] flex flex-col items-center justify-center p-8 text-center transition-all duration-500">
-        <h1 class="text-6xl font-black italic text-white font-title tracking-tighter uppercase mb-2 leading-none">
-            AUGMENTED<br /><span class="text-[#fae133]">SIMULATOR</span>
-        </h1>
-        <button id="btn-start"
-            class="w-full max-w-[280px] bg-[#fae133] hover:bg-[#fae133]/80 p-6 rounded-[2rem] font-black text-black text-xl italic uppercase tracking-widest transition-all active:scale-95 shadow-2xl mt-12">
-            Start Operation
-        </button>
-        <div class="grid grid-cols-2 gap-4 mt-6 w-full max-w-[280px]">
-            <button id="btn-archive"
-                class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Archive</button>
-            <button id="btn-briefing"
-                class="bg-white/5 border border-white/5 p-4 rounded-2xl flex flex-col items-center gap-2">Briefing</button>
-        </div>
-    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-    <div id="augment-overlay"
-        class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
-    </div>
-    <div id="event-overlay"
-        class="hidden fixed inset-0 bg-[#050507]/80 backdrop-blur-xl z-[300] flex flex-col items-center justify-center p-8">
-    </div>
-    <div id="inventory-overlay"
-        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[400] flex flex-col items-center justify-center p-6">
-    </div>
-    <div id="guide-overlay"
-        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8">
-    </div>
-    <div id="game-over-overlay"
-        class="hidden fixed inset-0 bg-[#050507]/90 backdrop-blur-3xl z-[500] flex flex-col items-center justify-center p-8 text-center">
-    </div>
-    <div id="error-overlay"
-        class="hidden fixed inset-0 bg-red-900/90 backdrop-blur-3xl z-[9999] flex flex-col items-center justify-center p-12 text-white font-mono text-xs overflow-auto">
-    </div>
-    </div>
+        const AUGMENT_DATA = {
+            "Common": [
+                { id: "c1", name: "날카로움", desc: "공격력 ×1.10", effect: p => p.augBuffs.atk *= 1.1 },
+                { id: "c2", name: "축적된 분노", desc: "강타 공격력 ×1.20", effect: p => p.augBuffs.heavy *= 1.2 },
+                { id: "c3", name: "회전 가속", desc: "회전베기 공격력 ×1.15", effect: p => p.augBuffs.spin *= 1.15 },
+                { id: "c4", name: "정밀 방어", desc: "패링 성공 시 AP +1 (턴당 1회)", effect: p => p.augBuffs.parryAp += 1 },
+                { id: "c5", name: "연속 호흡", desc: "전투 시작 시 AP +2", effect: p => p.augBuffs.startAp += 2 },
+                { id: "c6", name: "처형 본능", desc: "대상 HP 30% 이하일 때 공격력 ×1.15", effect: p => p.augBuffs.executeLow = 0.3 },
+                { id: "c7", name: "약점 파악", desc: "같은 적 연속 공격 시 2타부터 공격력 ×1.10", effect: p => p.augBuffs.stackAtk = 0.1 },
+                { id: "c8", name: "철갑 분쇄", desc: "강타 적중 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.heavySunder = 0.15 },
+                { id: "c9", name: "피의 회수", desc: "적 처치 시 AP +1 (턴당 2회)", effect: p => p.augBuffs.killAp += 1 },
+                { id: "c10", name: "집중력", desc: "퍼펙트 패링 성공 시 다음 공격력 ×1.20", effect: p => p.augBuffs.perfectFocus = 0.20 }
+            ],
+            "Epic": [
+                { id: "e1", name: "약점 해부", desc: "같은 적 연속 공격 시 공격력 ×1.06 (최대 5중첩)", effect: p => p.augBuffs.stackAtkEpic = 0.06 },
+                { id: "e2", name: "과열 타격", desc: "강타 사용 후 다음 턴 첫 공격 공격력 ×1.35", effect: p => p.augBuffs.heavyOverheat = 0.35 },
+                { id: "e3", name: "원심 폭발", desc: "회전베기 공격력 ×1.25 / 처치 시 AP +1", effect: p => { p.augBuffs.spin *= 1.25; p.augBuffs.spinKillAp += 1; } },
+                { id: "e4", name: "완벽한 리듬", desc: "퍼펙트 패링 시 이번 턴 공격력 ×1.20", effect: p => p.augBuffs.turnAtkPerf = 0.2 },
+                { id: "e5", name: "초반 가속", desc: "전투 시작 시 AP +3 / 첫 턴 공격력 ×1.10", effect: p => { p.augBuffs.startAp += 3; p.augBuffs.startTurnAtk = 0.1; } },
+                { id: "e6", name: "피의 수확", desc: "적 처치 시 공격력 ×1.04 (최대 10중첩)", effect: p => p.augBuffs.killStackAtk = 0.04 },
+                { id: "e7", name: "단두의 각", desc: "적 HP 30% 이하일 때 강타 공격력 ×1.40", effect: p => p.augBuffs.heavyExecute = 0.4 },
+                { id: "e8", name: "침착한 폭력", desc: "현재 AP 가 0~2일 때 공격력 ×1.18", effect: p => p.augBuffs.lowApAtk = 1.18 },
+                { id: "e9", name: "관성 베기", desc: "기본 공격 사용 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.inertiaSlice = 0.15 },
+                { id: "e10", name: "파괴의 맥박", desc: "매 턴 첫 공격 공격력 ×1.15 (강타라면 x1.25)", effect: p => p.augBuffs.firstAtkMult = 0.15 }
+            ],
+            "Unique": [
+                { id: "u1", name: "검성의 서약", desc: "모든 스킬 공격력 ×1.20", effect: p => { p.augBuffs.atk *= 1.2; p.augBuffs.spin *= 1.2; p.augBuffs.heavy *= 1.2; } },
+                { id: "u2", name: "큰 한 방", desc: "강타 공격력 ×1.60 / 강타 처치 시 AP +2", effect: p => { p.augBuffs.heavy *= 1.6; p.augBuffs.heavyKillAp += 2; } },
+                { id: "u3", name: "폭풍의 중심", desc: "회전베기 공격력 ×1.50 / 적 2마리 이상 시 추가 x1.1", effect: p => { p.augBuffs.spin *= 1.5; p.augBuffs.spinMultiTarget = 0.1; } },
+                { id: "u4", name: "무한 템포", desc: "전투 시작 AP +4 / 퍼펙트 패링 시 AP +1 (턴당 2)", effect: p => { p.augBuffs.startAp += 4; p.augBuffs.perfectApBonus += 1; } },
+                { id: "u5", name: "피의 엔진", desc: "적 처치 시 공격력 ×1.06 (무제한) / 피격 피해 x1.1", effect: p => { p.augBuffs.unlimitKillAtk = 0.06; p.augBuffs.takeDmgMult *= 1.1; } },
+                { id: "u6", name: "결투가", desc: "적 1마리일 때 공격력 ×1.35 / 강타 추가 x1.15", effect: p => { p.augBuffs.soloAtk = 0.35; p.augBuffs.soloHeavy = 0.15; } },
+                { id: "u7", name: "집행인의 판결", desc: "적 HP 40% 이하 시 Atk x1.25 / 강타 추가 x1.2", effect: p => { p.augBuffs.executeAll = 0.25; p.augBuffs.heavyExecAll = 0.2; } },
+                { id: "u8", name: "연쇄 분쇄", desc: "강타 연속 사용(연속 턴) 시 공격력 ×1.50", effect: p => p.augBuffs.heavyChain = 0.5 },
+                { id: "u9", name: "정점의 호흡", desc: "턴 시작 시 AP 5 이상이면 공격력 ×1.25", effect: p => p.augBuffs.highApBuff = 0.25 },
+                { id: "u10", name: "완전무결", desc: "퍼펙트 패링 당 Atk x1.08 (최대 3) / 피격 시 소멸", effect: p => p.augBuffs.perfStackBuff = 0.08 }
+            ]
+        };
+
+        const ui = {
+            hp: document.getElementById('p-hp'),
+            atk: document.getElementById('p-atk'),
+            def: document.getElementById('p-def'),
+            ap: document.getElementById('p-ap'),
+            turn: document.getElementById('turn-indicator'),
+            msg: document.getElementById('message'),
+            vignette: document.getElementById('vignette'),
+            hitIcons: document.getElementById('hit-icons-container'),
+            overlay: document.getElementById('start-overlay'),
+            overlayAug: document.getElementById('augment-overlay'),
+            overlayEvent: document.getElementById('event-overlay'),
+            overlayGuide: document.getElementById('guide-overlay'),
+            overlayGameOver: document.getElementById('game-over-overlay'), // NEW
+            btnReroll: document.getElementById('btn-reroll'),
+            btns: {
+                atk: document.getElementById('btn-atk'),
+                spin: document.getElementById('btn-spin'),
+                heavy: document.getElementById('btn-heavy'),
+                end: document.getElementById('btn-end')
+            }
+        };
+
+        const CONFIG = {
+            FPS: 60,
+            PARRY_STANCE_DURATION: 10, // 0.16s (기존 21에서 절반)
+            PERFECT_WINDOW: 4,         // 66ms (기존 8에서 절반)
+            ATTACK_DURATION: 8,        // 0.13s (기존 15에서 절반)
+            REACTION_WINDOW: 1.56,     // 26ms (26 / 16.66) - 고정
+            RETURN_DURATION: 10,       // 0.16s (기존 20에서 절반)
+            K: 50 // 방어 상수
+        };
+
+        const Player = {
+            x: 150,
+            y: 225,
+            radius: 30,
+            hp: 100,
+            maxHp: 100,
+            atk: 50,
+            def: 0,
+            ap: 0,
+            color: "#4a9eff",
+            parryTimer: 0,
+            isParrying: false,
+            actionsUsed: { atk: false, spin: false, heavy: false },
+            augBuffs: {
+                atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
+                executeLow: 0, stackAtk: 0, heavySunder: 0, killAp: 0, perfectFocus: 0,
+                stackAtkEpic: 0, heavyOverheat: 0, spinKillAp: 0, turnAtkPerf: 0,
+                startTurnAtk: 0, killStackAtk: 0, heavyExecute: 0, lowApAtk: 1.0,
+                inertiaSlice: 0, firstAtkMult: 0, heavyKillAp: 0, spinMultiTarget: 0,
+                perfectApBonus: 0, unlimitKillAtk: 0, takeDmgMult: 1.0,
+                soloAtk: 0, soloHeavy: 0, executeAll: 0, heavyExecAll: 0,
+                heavyChain: 0, highApBuff: 0, perfStackBuff: 0,
+                multiAtkAtk: 0 // Ensure this is initialized even if not currently used
+            },
+            state: {
+                killsThisTurn: 0, parryApGained: 0, isPrefGainedThisTurn: false,
+                consecutiveTarget: null, consecutiveCount: 0,
+                heavyUsedLastTurn: false, heavyHitThisTurn: false,
+                perfFocusActive: false, perfParryThisTurn: false,
+                killStacks: 0, unlimitKills: 0, firstAttackThisTurn: true,
+                perfStacks: 0, multiAtkCount: 0, heavyLastTurn: false,
+                atkUsedLastTurn: false
+            },
+            activeAugments: []
+        };
+
+        let rerollAvailable = true;
+        let currentAugTier = "Common";
+        let forcedTier = null;
+
+        function showAugmentSelection(tier = null) {
+            ui.overlayAug.style.display = "flex";
+            rerollAvailable = true;
+            ui.btnReroll.disabled = false;
+            ui.btnReroll.innerText = "Reroll (1 Remaining)";
+
+            if (tier) {
+                currentAugTier = tier;
+                forcedTier = tier;
+            } else {
+                forcedTier = null;
+                const rand = Math.random();
+                if (rand < 0.05) currentAugTier = "Unique";
+                else if (rand < 0.30) currentAugTier = "Epic";
+                else currentAugTier = "Common";
+            }
+
+            rollAugments();
+        }
+
+        function rollAugments() {
+            const list = AUGMENT_DATA[currentAugTier];
+            const shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
+            const container = document.getElementById('augment-cards');
+            container.innerHTML = "";
+            shuffled.forEach(aug => {
+                const card = document.createElement('div');
+                card.className = `augment-card tier-${currentAugTier.toLowerCase()}`;
+                card.innerHTML = `<h3>${aug.name}</h3><p style="color:#aaa; font-size:12px; margin:5px 0;">${currentAugTier}</p><p>${aug.desc}</p>`;
+                card.onclick = () => selectAugment(aug);
+                container.appendChild(card);
+            });
+        }
+
+        function selectAugment(aug) {
+            aug.effect(Player);
+            Player.activeAugments.push(aug);
+            ui.overlayAug.style.display = "none";
+
+            if (currentRound === 3) {
+                currentRound = 4;
+                spawnWave(4);
+            } else {
+                spawnWave(currentRound);
+            }
+        }
+
+        function rerollAugments() {
+            if (!rerollAvailable) return;
+            rerollAvailable = false;
+            ui.btnReroll.disabled = true;
+            ui.btnReroll.innerText = "Reroll (0 Remaining)";
+            rollAugments();
+        }
+
+        class Monster {
+            constructor(type, x, y, hp, atk, patterns) {
+                this.name = type;
+                this.homeX = x; this.homeY = y;
+                this.x = x; this.y = y;
+                // 보스(BOSS)일 경우 더 크고 위협적인 연출
+                if (type === "BOSS") {
+                    this.radius = 60;
+                    this.color = "#ff0000";
+                } else {
+                    this.radius = 25;
+                    this.color = "#ff4a4a";
+                }
+                this.hp = hp; this.maxHp = hp; this.atk = atk;
+                this.state = "IDLE"; this.timer = 0;
+                this.patterns = patterns;
+                this.currentPatternIdx = 0;
+                this.currentPattern = patterns[0];
+                this.patternStep = 0;
+            }
+            nextPattern() {
+                this.currentPatternIdx = (this.currentPatternIdx + 1) % this.patterns.length;
+                this.currentPattern = this.patterns[this.currentPatternIdx];
+                this.patternStep = 0;
+            }
+        }
+
+        const WAVE_DATA = {
+            1: [
+                { type: "Enemy 1", hp: 100, atk: 10, y: 150, patterns: ["NORMAL"] },
+                { type: "Enemy 2", hp: 100, atk: 10, y: 350, patterns: ["NORMAL", "FAST"] }
+            ],
+            2: [
+                { type: "Enemy A", hp: 80, atk: 9, y: 150, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 120, atk: 8, y: 350, patterns: ["NORMAL", "SLOW"] }
+            ],
+            3: [], // Event Round
+            4: [
+                { type: "Enemy A", hp: 85, atk: 9, y: 100, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 105, atk: 8, y: 250, patterns: ["NORMAL", "FAST"] },
+                { type: "Enemy C", hp: 130, atk: 7, y: 400, patterns: ["NORMAL", "FAST", "SLOW"] }
+            ],
+            5: [
+                { type: "Enemy A", hp: 70, atk: 10, y: 80, patterns: ["FAST"] },
+                { type: "Enemy B", hp: 75, atk: 10, y: 180, patterns: ["NORMAL"] },
+                { type: "Enemy C", hp: 110, atk: 9, y: 280, patterns: ["NORMAL", "FAST"] },
+                { type: "Enemy D", hp: 140, atk: 8, y: 380, patterns: ["NORMAL", "FAST", "SLOW"] }
+            ],
+            6: [
+                {
+                    type: "BOSS", hp: 780, atk: 12, y: 225,
+                    multiPatterns: [
+                        ["NORMAL", "FAST", "SLOW"],
+                        ["FAST", "NORMAL", "FAST", "SLOW"],
+                        ["SLOW", "NORMAL", "FAST"]
+                    ]
+                }
+            ]
+        };
+
+        const PATTERN_SPEEDS = {
+            "FAST": 20,    // 40 -> 20
+            "NORMAL": 30,  // 60 -> 30
+            "SLOW": 45     // 90 -> 45
+        };
+
+        let monsters = [];
+        let currentTurn = "NONE";
+        let currentMonsterIndex = 0;
+        let isTargeting = false;
+        let selectedSkill = null; // "atk", "spin", "heavy"
+        let damageTexts = []; // {x, y, text, timer, color}
+        let currentRound = 1;
+        let isEndingTurnAutomatically = false;
+        let gameStarted = false;
+        let roundStartTimer = 0;
+        let lastTimestamp = 0;
+
+        // UI 캐싱 필드
+        const uiCache = {
+            hp: -1, atk: -1, def: -1, ap: -1, turn: "",
+            atkBtn: null, spinBtn: null, heavyBtn: null, endBtn: null
+        };
+
+        function toggleGuide(show) {
+            ui.overlayGuide.style.display = show ? "flex" : "none";
+        }
+
+        function gameOver() {
+            gameStarted = false;
+            ui.overlayGameOver.style.display = "flex";
+        }
+
+        function retryGame() {
+            // 초기화
+            Player.hp = 100;
+            Player.ap = 0;
+            Player.activeAugments = [];
+            Player.augBuffs = {
+                atk: 1.0, spin: 1.0, heavy: 1.0, parryAp: 0, startAp: 0,
+                executeLow: 0, stackAtk: 0, heavySunder: 0, killAp: 0, perfectFocus: 0,
+                stackAtkEpic: 0, heavyOverheat: 0, spinKillAp: 0, turnAtkPerf: 0,
+                startTurnAtk: 0, killStackAtk: 0, heavyExecute: 0, lowApAtk: 1.0,
+                inertiaSlice: 0, firstAtkMult: 0, heavyKillAp: 0, spinMultiTarget: 0,
+                perfectApBonus: 0, unlimitKillAtk: 0, takeDmgMult: 1.0,
+                soloAtk: 0, soloHeavy: 0, executeAll: 0, heavyExecAll: 0,
+                heavyChain: 0, highApBuff: 0, perfStackBuff: 0,
+                multiAtkAtk: 0
+            };
+            Player.state = {
+                killsThisTurn: 0, parryApGained: 0, isPrefGainedThisTurn: false,
+                consecutiveTarget: null, consecutiveCount: 0,
+                heavyUsedLastTurn: false, heavyHitThisTurn: false,
+                perfFocusActive: false, perfParryThisTurn: false,
+                killStacks: 0, unlimitKills: 0, firstAttackThisTurn: true,
+                perfStacks: 0, multiAtkCount: 0, heavyLastTurn: false,
+                atkUsedLastTurn: false
+            };
+            currentRound = 1;
+            ui.overlayGameOver.style.display = "none";
+            startGame();
+        }
+
+        function startGame() {
+            gameStarted = true;
+            ui.overlay.style.display = "none";
+            lastTimestamp = performance.now();
+            spawnWave(currentRound);
+            requestAnimationFrame(gameLoop);
+        }
+
+        function spawnWave(round) {
+            if (round === 3) {
+                showEventOverlay();
+                return;
+            }
+            if (!WAVE_DATA[round]) {
+                showFeedback("Game Clear!", "#FFD700");
+                return;
+            }
+
+            monsters = WAVE_DATA[round].map(t => {
+                let patterns = [];
+                if (t.multiPatterns) {
+                    patterns = t.multiPatterns.map(p => ({ hits: p.map(s => PATTERN_SPEEDS[s]) }));
+                } else {
+                    patterns = [{ hits: t.patterns.map(s => PATTERN_SPEEDS[s]) }];
+                }
+
+                return new Monster(t.type, 600, t.y, t.hp, t.atk, patterns);
+            });
+            currentMonsterIndex = 0;
+            currentTurn = "MONSTER";
+            roundStartTimer = 50; // 약 0.8초 대기 (100 -> 50)
+            ui.turn.innerText = (round === 6) ? "Boss Round - Standby..." : `Round ${round} - Standby...`;
+            showFeedback((round === 6) ? "Boss Appearance!" : `Round ${round} Start!`, (round === 6) ? "#ff4a4a" : "#fff");
+
+            Player.ap += Player.augBuffs.startAp;
+            Player.state.killsThisTurn = 0;
+            Player.state.firstAttackThisTurn = true;
+            updateHitIcons();
+        }
+
+        function showEventOverlay() {
+            ui.overlayEvent.style.display = "flex";
+        }
+
+        function selectEventOption(option) {
+            ui.overlayEvent.style.display = "none";
+            if (option === 1) {
+                showAugmentSelection("Common");
+            } else {
+                Player.hp = Math.min(Player.maxHp, Math.round(Player.hp + Player.maxHp * 0.35));
+                showFeedback("Healed 35% HP", "#4f4");
+                currentRound = 4;
+                spawnWave(4);
+            }
+        }
+
+        function winRound() {
+            if (currentRound === 6) {
+                showFeedback("VICTORY!", "#FFD700");
+                gameStarted = false;
+                // 승리 시 더 이상 진행 안 함
+                return;
+            }
+            currentRound++;
+            if (currentRound === 3) {
+                showEventOverlay();
+            } else {
+                showAugmentSelection();
+            }
+        }
+
+        function init() {
+            window.addEventListener('mousedown', handleInput);
+            ui.btns.atk.onclick = () => startSkill("atk");
+            ui.btns.spin.onclick = () => executeSpinSlash(); // 즉시 시전
+            ui.btns.heavy.onclick = () => startSkill("heavy");
+            ui.btns.end.onclick = () => endPlayerTurn();
+        }
+
+        function startSkill(skill) {
+            isTargeting = true;
+            selectedSkill = skill;
+            showFeedback("Select Target!", "#fff");
+        }
+
+        function handleInput(e) {
+            if (!gameStarted) return;
+            if (currentTurn === "PLAYER") {
+                if (isTargeting) handleTargeting(e);
+                return;
+            }
+            if (currentTurn === "MONSTER") {
+                Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
+                Player.isParrying = true;
+            }
+        }
+
+        function handleTargeting(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            monsters.forEach((m) => {
+                const dist = Math.sqrt((mx - m.x) ** 2 + (my - m.y) ** 2);
+                if (dist < m.radius * 2 && m.hp > 0) {
+                    if (selectedSkill === "atk") executeAttack(m);
+                    else if (selectedSkill === "heavy") executeHeavyStrike(m);
+                    isTargeting = false;
+                    selectedSkill = null;
+                }
+            });
+        }
+
+        function executeAttack(target) {
+            if (Player.ap < 2) return;
+            Player.ap -= 2;
+            dealDamage(Player.atk, target, "normal");
+            Player.actionsUsed.atk = true;
+            Player.state.multiAtkCount++;
+            updateUI();
+        }
+
+        function executeHeavyStrike(target) {
+            if (Player.ap < 5) return;
+            Player.ap -= 5;
+            dealDamage(Player.atk * 2, target, "heavy");
+            Player.actionsUsed.heavy = true;
+            updateUI();
+        }
+
+        function executeSpinSlash() {
+            if (Player.ap < 3) return;
+            const alive = monsters.filter(m => m.hp > 0);
+            if (alive.length === 0) return;
+            Player.ap -= 3;
+            let mult = 1.2;
+            if (alive.length >= 2) mult *= (1 + Player.augBuffs.spinMultiTarget);
+            const totalDmg = Player.atk * mult;
+            const dmgPer = totalDmg / alive.length;
+            alive.forEach(m => dealDamage(dmgPer, m, "spin"));
+            Player.actionsUsed.spin = true;
+            showFeedback("SPIN SLASH!", "#4a4");
+            updateUI();
+        }
+
+        function dealDamage(amount, target, type = "normal") {
+            let mult = Player.augBuffs.atk;
+            if (type === "spin") mult = Player.augBuffs.spin;
+            if (type === "heavy") {
+                mult = Player.augBuffs.heavy;
+                // 증강: 단두의 각
+                if (target.hp / target.maxHp <= 0.3) mult *= (1 + Player.augBuffs.heavyExecute);
+                // 증강: 집행인의 판결
+                if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.heavyExecAll);
+            }
+
+            // 공통 증강 효과
+            if (target.hp / target.maxHp <= Player.augBuffs.executeLow) mult *= 1.15;
+            if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.executeAll);
+
+            // 약점 파악/해부
+            if (Player.state.consecutiveTarget === target) {
+                if (Player.state.consecutiveCount >= 1) mult *= (1 + Player.augBuffs.stackAtk);
+                mult *= (1 + Player.augBuffs.stackAtkEpic * Math.min(Player.state.consecutiveCount, 5));
+            }
+
+            // 조건부 버프들
+            if (Player.state.heavyUsedLastTurn && Player.state.firstAttackThisTurn) {
+                mult *= (1 + Player.augBuffs.heavySunder);
+                mult *= (1 + Player.augBuffs.heavyOverheat);
+            }
+            if (Player.state.atkUsedLastTurn && Player.state.firstAttackThisTurn) {
+                mult *= (1 + Player.augBuffs.inertiaSlice); // Epic 9: 관성 베기
+            }
+            if (Player.state.perfParryThisTurn) mult *= (1 + Player.augBuffs.turnAtkPerf);
+            if (Player.state.perfFocusActive) {
+                mult *= (1 + Player.augBuffs.perfectFocus); // 집중력
+                Player.state.perfFocusActive = false;
+            }
+            if (Player.state.unlimitKills > 0) mult *= (1 + Player.augBuffs.unlimitKillAtk * Player.state.unlimitKills);
+            if (Player.state.killStacks > 0) mult *= (1 + Player.augBuffs.killStackAtk * Math.min(Player.state.killStacks, 10));
+
+            //  Unique: 정점의 호흡, 결투가
+            if (Player.state.highApAtkActive) mult *= (1 + Player.augBuffs.highApBuff);
+            if (monsters.length === 1) {
+                mult *= (1 + Player.augBuffs.soloAtk);
+                if (type === "heavy") mult *= (1 + Player.augBuffs.soloHeavy);
+            }
+            if (Player.state.perfStacks > 0) mult *= (1 + Player.augBuffs.perfStackBuff * Player.state.perfStacks);
+            if (Player.state.firstAttackThisTurn) {
+                mult *= (1 + Player.augBuffs.firstAtkMult);
+                if (type === "heavy") mult *= 1.08; // 파괴의 맥박(강타시 추가) -> +0.1 보정
+            }
+            // if (type === "normal" && Player.state.multiAtkCount >= 1) mult *= Player.augBuffs.multiAtkAtk; // This was removed in previous edits
+
+            const finalDmg = Math.ceil(amount * mult);
+            target.hp = Math.max(0, target.hp - finalDmg);
+            addDamageText(target.x, target.y - 30, `-${finalDmg}`, "#ff4a4a");
+
+            Player.state.firstAttackThisTurn = false;
+            Player.state.consecutiveTarget = target;
+            Player.state.consecutiveCount++;
+            if (type === "heavy") Player.state.heavyHitThisTurn = true;
+
+            if (target.hp <= 0) {
+                target.state = "DONE";
+                // 증강: 피의 회수, 원심 폭발
+                if (Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.killAp;
+                if (type === "spin" && Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.spinKillAp;
+                if (type === "heavy" && Player.state.killsThisTurn < 1) Player.ap += Player.augBuffs.heavyKillAp;
+
+                Player.state.killStacks++;
+                Player.state.unlimitKills++;
+                Player.state.killsThisTurn++;
+
+                setTimeout(() => {
+                    monsters = monsters.filter(m => m.hp > 0);
+                    if (monsters.length === 0) {
+                        winRound();
+                    }
+                }, 100);
+            }
+        }
+
+        function endPlayerTurn() {
+            if (currentTurn !== "PLAYER") return;
+            currentTurn = "MONSTER";
+            currentMonsterIndex = 0;
+            // 턴 종료 시 상태 갱신
+            Player.state.heavyUsedLastTurn = Player.actionsUsed.heavy;
+            Player.state.atkUsedLastTurn = Player.actionsUsed.atk; // Epic 9 위해 저장
+            Player.state.killsThisTurn = 0;
+            isTargeting = false;
+            selectedSkill = null;
+            Player.actionsUsed = { atk: false, spin: false, heavy: false };
+            isEndingTurnAutomatically = false;
+            roundStartTimer = 25; // 턴 전환 대기 (50 -> 25)
+            monsters.forEach(m => {
+                if (m.hp > 0) {
+                    m.state = "IDLE";
+                    m.patternStep = 0;
+                    m.timer = 0;
+                }
+            });
+            ui.turn.innerText = "Monster's Turn";
+            updateHitIcons();
+            updateUI();
+        }
+
+        function updateHitIcons() {
+            ui.hitIcons.innerHTML = "";
+            const m = monsters[currentMonsterIndex];
+            if (!m || !m.patterns || currentTurn !== "MONSTER") return;
+
+            const p = m.currentPattern; // Use currentPattern directly
+            p.hits.forEach((h, i) => {
+                const icon = document.createElement("div");
+                icon.className = "hit-icon" + (i < m.patternStep ? " used" : "");
+                ui.hitIcons.appendChild(icon);
+            });
+        }
+
+        function showFeedback(text, color) {
+            ui.msg.innerText = text;
+            ui.msg.style.color = color;
+            ui.msg.style.opacity = 1;
+            setTimeout(() => ui.msg.style.opacity = 0, 800);
+        }
+
+        function addDamageText(x, y, text, color) {
+            damageTexts.push({ x, y, text, color, timer: 30 }); // 60 -> 30
+        }
+
+        function triggerVignette() {
+            ui.vignette.classList.add('active');
+            setTimeout(() => ui.vignette.classList.remove('active'), 300);
+        }
+
+        function update(dt) {
+            if (!gameStarted) return;
+            // 파워 텍스트 업데이트
+            for (let i = damageTexts.length - 1; i >= 0; i--) {
+                const dt_item = damageTexts[i];
+                dt_item.y -= 1.0 * dt; // 0.5 * 2.0 -> 1.0 * 1.0
+                dt_item.timer -= dt;
+                if (dt_item.timer <= 0) damageTexts.splice(i, 1);
+            }
+
+            if (currentTurn === "PLAYER") {
+                updateUI();
+                checkAutoTurnEnd();
+                return;
+            }
+
+            if (roundStartTimer > 0) {
+                roundStartTimer -= dt;
+                if (roundStartTimer <= 0) {
+                    roundStartTimer = 0;
+                    ui.turn.innerText = (currentRound === 6) ? "Boss Round" : "Monster's Turn";
+                    updateHitIcons();
+                    // 증강: 정점의 호흡 (턴 시작 시 체크)
+                    Player.state.highApAtkActive = (Player.ap >= 5);
+                }
+                updateUI();
+                return;
+            }
+
+            // --- 몬스터 턴 로직 ---
+            if (Player.parryTimer > 0) Player.parryTimer -= dt;
+            else { Player.parryTimer = 0; Player.isParrying = false; }
+
+            const m = monsters[currentMonsterIndex];
+            if (!m) { nextMonsterOrTurn(); return; }
+            if (m.hp <= 0) { m.state = "DONE"; nextMonsterOrTurn(); return; }
+
+            if (m.state === "IDLE") {
+                m.timer += dt;
+                if (m.timer > 30) { // 60 -> 30
+                    m.currentPattern = m.patterns[m.currentPatternIdx];
+                    m.state = "TELEGRAPH";
+                    m.timer = 0;
+                    m.startX = m.homeX; m.startY = m.homeY;
+                    updateHitIcons();
+                }
+            } else if (m.state === "TELEGRAPH") {
+                m.timer += dt;
+                const waitFrames = m.currentPattern.hits[m.patternStep];
+                const prepRatio = Math.min(m.timer / waitFrames, 1);
+                m.x = m.homeX + Math.sin(prepRatio * Math.PI) * 20;
+                if (m.timer >= waitFrames) { m.state = "ATTACK"; m.timer = 0; m.startX = m.x; m.startY = m.y; }
+            } else if (m.state === "ATTACK") {
+                m.timer += dt;
+                let t = m.timer / CONFIG.ATTACK_DURATION;
+                m.x = m.startX + (Player.x + Player.radius - m.startX) * (t * t);
+                m.y = m.startY + (Player.y - m.startY) * (t * t);
+
+                // 판정 타이밍 (26ms 반응창 적용)
+                if (m.timer >= CONFIG.ATTACK_DURATION - CONFIG.REACTION_WINDOW && m.timer < CONFIG.ATTACK_DURATION && !m.hitTriggered) {
+                    m.hitTriggered = true;
+                    if (Player.isParrying) {
+                        const elapsed = CONFIG.PARRY_STANCE_DURATION - Player.parryTimer;
+                        if (elapsed <= CONFIG.PERFECT_WINDOW) {
+                            showFeedback("PERFECT!", "#FFD700");
+                            Player.ap += 2.0;
+                            if (!Player.state.isPrefGainedThisTurn) {
+                                Player.ap += Player.augBuffs.parryAp;
+                                Player.state.isPrefGainedThisTurn = true;
+                            }
+                            if (Player.state.parryApGained < 2) {
+                                Player.ap += Player.augBuffs.perfectApBonus;
+                                Player.state.parryApGained++;
+                            }
+                            Player.state.perfFocusActive = true;
+                            Player.state.perfParryThisTurn = true;
+                            Player.state.perfStacks = Math.min(Player.state.perfStacks + 1, 3);
+                        } else {
+                            showFeedback("GOOD", "#00FF00");
+                            Player.ap += 1.0;
+                            if (!Player.state.isPrefGainedThisTurn) {
+                                Player.ap += Player.augBuffs.parryAp;
+                                Player.state.isPrefGainedThisTurn = true;
+                            }
+                        }
+                    } else {
+                        const finalDmg = Math.round(m.atk * (CONFIG.K / (CONFIG.K + Player.def)) * Player.augBuffs.takeDmgMult);
+                        Player.hp = Math.max(0, Player.hp - finalDmg);
+                        addDamageText(Player.x, Player.y - 40, `-${finalDmg}`, "#ff4a4a");
+                        Player.state.perfStacks = 0;
+                        triggerVignette();
+                        if (Player.hp <= 0) gameOver();
+                    }
+                }
+
+                if (m.timer >= CONFIG.ATTACK_DURATION) {
+                    m.state = "RETURN"; m.returnStartX = m.x; m.returnStartY = m.y; m.timer = 0; m.hitTriggered = false;
+                    m.patternStep++; updateHitIcons();
+                }
+            } else if (m.state === "RETURN") {
+                m.timer += dt;
+                const isLastHit = m.patternStep === m.currentPattern.hits.length;
+                const duration = isLastHit ? CONFIG.RETURN_DURATION : 25; // 51 -> 25
+                const targetX = isLastHit ? m.homeX : (m.homeX + m.returnStartX) / 2;
+                const targetY = isLastHit ? m.homeY : (m.homeY + m.returnStartY) / 2;
+
+                let t = m.timer / duration;
+                m.x = m.returnStartX + (targetX - m.returnStartX) * (1 - Math.pow(1 - t, 2));
+                m.y = m.returnStartY + (targetY - m.returnStartY) * (1 - Math.pow(1 - t, 2));
+
+                if (m.timer >= duration) {
+                    if (m.patternStep < m.currentPattern.hits.length) {
+                        m.state = "ATTACK"; m.timer = 0; m.startX = m.x; m.startY = m.y;
+                    } else {
+                        if (currentRound === 6) m.nextPattern();
+                        m.state = "DONE";
+                        nextMonsterOrTurn();
+                    }
+                }
+            }
+            updateUI();
+        }
+
+        function checkAutoTurnEnd() {
+            if (isEndingTurnAutomatically) return;
+
+            // 소수점 오차 방지를 위해 floor 처리된 AP 사용 및 약간의 마진(0.1) 추가
+            const fAp = Math.floor(Player.ap + 0.01);
+            const canAtk = !Player.actionsUsed.atk && fAp >= 2;
+            const canSpin = !Player.actionsUsed.spin && fAp >= 3;
+            const canHeavy = !Player.actionsUsed.heavy && fAp >= 5;
+
+            if (!canAtk && !canSpin && !canHeavy) {
+                isEndingTurnAutomatically = true;
+                setTimeout(endPlayerTurn, 800);
+            }
+        }
+
+        function nextMonsterOrTurn() {
+            if (currentMonsterIndex < monsters.length - 1) {
+                currentMonsterIndex++;
+                // 다음 몬스터가 죽어있을 경우에 대한 예외 처리
+                if (monsters[currentMonsterIndex].hp <= 0) {
+                    monsters[currentMonsterIndex].state = "DONE";
+                    nextMonsterOrTurn();
+                }
+                updateHitIcons();
+            } else {
+                currentTurn = "PLAYER";
+                ui.turn.innerText = "Player's Turn";
+                ui.hitIcons.innerHTML = "";
+            }
+        }
+
+        function updateUI() {
+            if (uiCache.hp !== Player.hp) { ui.hp.innerText = Player.hp; uiCache.hp = Player.hp; }
+            if (uiCache.atk !== Player.atk) { ui.atk.innerText = Player.atk; uiCache.atk = Player.atk; }
+            if (uiCache.def !== Player.def) { ui.def.innerText = Player.def; uiCache.def = Player.def; }
+
+            Player.ap = Number(Player.ap) || 0;
+            const fAp = Math.floor(Player.ap);
+            if (uiCache.ap !== fAp) { ui.ap.innerText = isNaN(fAp) ? 0 : fAp; uiCache.ap = fAp; }
+
+            const atkD = currentTurn !== "PLAYER" || Player.ap < 2 || Player.actionsUsed.atk;
+            const spinD = currentTurn !== "PLAYER" || Player.ap < 3 || Player.actionsUsed.spin;
+            const heavyD = currentTurn !== "PLAYER" || Player.ap < 5 || Player.actionsUsed.heavy;
+            const endD = currentTurn !== "PLAYER";
+
+            if (uiCache.atkBtn !== atkD) { ui.btns.atk.disabled = atkD; uiCache.atkBtn = atkD; }
+            if (uiCache.spinBtn !== spinD) { ui.btns.spin.disabled = spinD; uiCache.spinBtn = spinD; }
+            if (uiCache.heavyBtn !== heavyD) { ui.btns.heavy.disabled = heavyD; uiCache.heavyBtn = heavyD; }
+            if (uiCache.endBtn !== endD) { ui.btns.end.disabled = endD; uiCache.endBtn = endD; }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!gameStarted) return;
+
+            monsters.forEach((m) => {
+                let color = m.color; // 기본 레드로 복구 (#ff4a4a)
+                if (m.state === "TELEGRAPH") {
+                    const waitFrames = m.currentPattern.hits[m.patternStep];
+                    const alpha = m.timer / waitFrames;
+                    color = `rgb(${255}, ${74 + 181 * alpha}, ${74 + 181 * alpha})`;
+                }
+
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 몬스터 HP 수치 표시
+                ctx.fillStyle = "#fff";
+                ctx.font = "14px bold Inter";
+                ctx.textAlign = "center";
+                ctx.fillText(`HP ${Math.ceil(m.hp)}`, m.x, m.y + m.radius + 20);
+
+                // 타겟팅 하이라이트
+                if (isTargeting && m.hp > 0) {
+                    ctx.strokeStyle = "#fff";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(m.x, m.y, m.radius + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            });
+
+            // 데미지 텍스트
+            damageTexts.forEach(dt => {
+                ctx.fillStyle = dt.color;
+                ctx.font = "bold 24px Inter";
+                ctx.fillText(dt.text, dt.x, dt.y);
+            });
+
+            ctx.save();
+            if (Player.isParrying) {
+                // 패링 태세 시각 효과 (노란색 오라)
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "#FFD700";
+                ctx.strokeStyle = "#FFD700";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(Player.x, Player.y, Player.radius + 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = Player.color;
+            ctx.beginPath();
+            ctx.arc(Player.x, Player.y, Player.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function gameLoop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            let elapsed = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
+            // 델타 타임 계산 (60FPS 기준 1.0)
+            // 브라우저 탭 전환 등으로 인한 과도한 점프 방지 (최대 100ms)
+            // 배율을 1.0으로 수정하여 프레임 상수에 원본 속도로 대응
+            let dt = (Math.min(elapsed, 100) / 16.66);
+
+            update(dt);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        init();
+    </script>
 </body>
 
 </html>

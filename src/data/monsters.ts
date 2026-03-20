@@ -1,15 +1,34 @@
-// src/data/monsters.ts
-import { MonsterDef } from './types';
+export interface MonsterTemplate {
+  id: string;
+  name: string;
+  hp: number;
+  atk: number;
+  telegraph: number;
+  postdelay: number;
+  hitstop: number;
+  isDefault?: boolean;
+}
 
-export const MONSTERS: Record<string, MonsterDef> = {
-    // Round 1
-    'm_w1_1': { id: 'm_w1_1', name: 'Scout Drone', hp: 100, atk: 10, def: 0, patterns: ['pat_normal'] },
-    'm_w1_2': { id: 'm_w1_2', name: 'Fast Strider', hp: 80, atk: 12, def: 0, patterns: ['pat_fast'] },
+export const MONSTER_LIBRARY: MonsterTemplate[] = [
+  { id: "mon_tuto_1", name: "나무 허수아비", hp: 120, atk: 10, telegraph: 1.5, postdelay: 1.2, hitstop: 3, isDefault: true },
+  { id: "mon_tuto_2", name: "육중한 갑옷병", hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4, isDefault: true },
+  { id: "mon_swarm_1", name: "그림자 슬라임", hp: 80, atk: 8, telegraph: 1.0, postdelay: 0.8, hitstop: 2, isDefault: true },
+  { id: "mon_swarm_2", name: "떠도는 불꽃", hp: 60, atk: 12, telegraph: 0.9, postdelay: 1.2, hitstop: 2, isDefault: true },
+  { id: "mon_elite_1", name: "침묵의 집행자", hp: 600, atk: 22, telegraph: 0.8, postdelay: 1.0, hitstop: 5, isDefault: true },
+  { id: "mon_boss_1", name: "부활한 사자왕", hp: 2500, atk: 40, telegraph: 0.65, postdelay: 1.3, hitstop: 8, isDefault: true },
+];
 
-    // Round 2
-    'm_w2_1': { id: 'm_w2_1', name: 'Shield Core', hp: 150, atk: 8, def: 5, patterns: ['pat_normal', 'pat_slow'] },
-    'm_w2_2': { id: 'm_w2_2', name: 'Assault Unit', hp: 120, atk: 15, def: 0, patterns: ['pat_fast', 'pat_normal'] },
+export const WAVE_DATA: Record<number, string[]> = {
+  1: ["mon_tuto_1"],
+  2: ["mon_tuto_2"],
+  4: ["mon_swarm_1", "mon_swarm_1"],
+  5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"],
+  6: ["mon_elite_1"],
+  10: ["mon_boss_1"]
+};
 
-    // Boss
-    'm_boss': { id: 'm_boss', name: 'VOID OVERSEER', hp: 850, atk: 18, def: 2, patterns: ['pat_normal', 'pat_fast', 'pat_slow', 'pat_heavy'] }
+export const PATTERN_SPEEDS = {
+  "FAST": 40,
+  "NORMAL": 60,
+  "SLOW": 90
 };

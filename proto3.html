@@ -1,3 +1,4 @@
+?
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -43,31 +44,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        #error-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #ff4a4a;
-            color: white;
-            padding: 10px 20px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 9999;
-            display: none;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-
-        #error-stack {
-            font-family: monospace;
-            font-size: 10px;
-            margin-top: 5px;
-            opacity: 0.8;
-            white-space: pre-wrap;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-
         html {
             font-size: 16px;
         }
@@ -86,14 +62,14 @@
         #game-container {
             width: 100%;
             max-width: 412px;
-            /* 표준 모바일 너비 */
+            /* ?��? 모바???�비 */
             height: 100%;
             max-height: 850px;
-            /* 표준 모바일 높이 예시 */
+            /* ?��? 모바???�이 ?�시 */
             aspect-ratio: 9 / 18;
-            /* 세로로 긴 비율 고정 */
+            /* ?�로�?�?비율 고정 */
             margin: auto;
-            /* 데스크톱 중앙 정렬 */
+            /* ?�스?�톱 중앙 ?�렬 */
             display: flex;
             flex-direction: column;
             background: #000;
@@ -105,51 +81,14 @@
         /* 1. HUD */
         header#top-status {
             flex: 0 0 60px;
-            /* 높이 고정 */
-            padding: 0 1.5rem;
+            /* ?�이 고정 */
+            padding: 0 1rem;
             background: rgba(15, 15, 20, 0.95);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
-        }
-
-        /* UI Safe Area & Layout Rules */
-        .ui-safe-container {
-            position: absolute;
-            inset: 60px 0 180px 0;
-            /* Header to Footer */
-            pointer-events: none;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 20px;
-        }
-
-        #turn-indicator-overlay {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            z-index: 50;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-blur: 4px;
-            padding: 4px 12px;
-            border-radius: 99px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--primary);
-            font-family: var(--font-title);
-            font-weight: 900;
-            font-style: italic;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-size: 14px;
-            pointer-events: none;
-            transition: opacity 0.3s;
         }
 
         .status-group {
@@ -230,7 +169,7 @@
         /* 3. Footer Control Area */
         footer#bottom-ui {
             flex: 0 0 280px;
-            /* 하단 UI 영역 높이 완전 고정 (가변 방지) */
+            /* ?�단 UI ?�역 ?�이 ?�전 고정 (�?�? 방�?) */
             position: relative;
             background: rgba(10, 10, 12, 0.98);
             border-top: 2px solid rgba(250, 225, 51, 0.2);
@@ -238,7 +177,7 @@
             overflow: hidden;
         }
 
-        /* 턴 전환 시 요소들이 공간을 차지하지 않고 중앙 정렬되도록 함 */
+        /* ???�환 ???�소?�이 공간??차�??��? ?�고 중앙 ?�렬?�도�???*/
         .ui-stack-container {
             position: relative;
             width: 100%;
@@ -265,7 +204,7 @@
             font-size: 0.8125rem;
             font-weight: 800;
             color: #666;
-            /* 색상 가독성 개선 */
+            /* ?�상 �??�성 개선 */
         }
 
         .ap-text {
@@ -277,12 +216,11 @@
 
         .btn-stack {
             position: absolute;
+            /* ?�역 �?�? 방�?�??�해 ?��? 좌표 ?�용 */
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -40%);
-            /* 모바일 잘림 방지를 위해 약간 상단으로 이동 */
-            width: 90%;
-            /* 너비 확장 */
+            transform: translate(-50%, -30%);
+            width: 85%;
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
@@ -295,25 +233,22 @@
 
         #monster-actions {
             z-index: 5;
-            display: none;
-            /* 초기값 */
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
+            transform: translate(-50%, -10%);
+            /* ?�치 미세 조정 */
         }
 
         .btn-row {
             display: flex;
-            width: 100%;
+            flex-wrap: wrap;
             gap: 0.75rem;
         }
 
         button {
-            min-height: 3.5rem;
-            /* 터치 영역 확대 */
+            min-height: 3rem;
+            /* 최소 48px */
             padding: 0.75rem 1rem;
             border: none;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             font-family: var(--font-title);
             font-weight: 900;
             font-size: 1rem;
@@ -323,8 +258,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            flex: 1 1 0;
-            /* 균등 배분 */
+            flex: 1 1 45%;
         }
 
         button:active {
@@ -385,13 +319,8 @@
 </head>
 
 <body>
-    <div id="error-overlay">
-        <div>⚠️ SYSTEM ERROR DETECTED</div>
-        <div id="error-msg"></div>
-        <div id="error-stack"></div>
-    </div>
     <div id="game-container">
-        <!-- Battle Screen: 전투 중 모든 HUD, 플레이 영역, 하단 조작계가 표시되는 영역 -->
+        <!-- Battle Screen: ?�투 �?모든 HUD, ?�레???�역, ?�단 조작계�? ?�시?�는 ?�역 -->
         <!-- Battle Screen -->
         <div id="battle-screen" class="hidden flex-col h-full bg-background">
             <!-- 1. HUD -->
@@ -433,7 +362,9 @@
                             class="text-5xl font-black italic text-white font-title drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] opacity-0 transition-all duration-300 uppercase tracking-tighter">
                         </div>
                     </div>
-                    <div id="turn-indicator-overlay" class="hidden">PLAYER'S TURN</div>
+                    <div id="turn-indicator"
+                        class="absolute top-[10%] left-1/2 -translate-x-1/2 text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">
+                        Player's Turn</div>
                 </div>
             </main>
 
@@ -442,7 +373,7 @@
                 class="flex-none h-[280px] px-8 py-6 bg-surface border-t-2 border-primary/20 z-[100] transition-opacity duration-300 overflow-hidden relative">
                 <div class="flex flex-col h-full justify-between items-center max-w-sm mx-auto">
                     <div class="flex items-center gap-4 px-6 py-2 bg-white/5 rounded-2xl border border-white/5 mb-4">
-                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">ENERGY</span>
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">AP</span>
                         <span id="p-ap" class="text-3xl font-black text-primary font-title">0</span>
                     </div>
 
@@ -476,18 +407,14 @@
                     <div id="monster-actions"
                         class="hidden w-full flex-col items-center gap-4 transition-all duration-300">
                         <div id="pc-guide"
-                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] pulse mb-2 w-full text-center px-4">
-                            L-CLICK: PARRY | R-CLICK: DASH
-                        </div>
-                        <div id="mobile-buttons" class="hidden w-full flex-col gap-3 px-6">
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] pulse mb-2">L-CLICK:
+                            PARRY | R-CLICK: DASH</div>
+                        <div id="mobile-buttons" class="hidden w-full flex-col gap-3">
                             <button id="btn-parry"
-                                class="w-full bg-white p-5 rounded-2xl font-black text-background text-lg uppercase shadow-[0_10px_40px_rgba(255,255,255,0.2)]">
-                                PARRY NOW
-                            </button>
+                                class="w-full bg-white p-5 rounded-2xl font-black text-background text-lg uppercase shadow-[0_10px_40px_rgba(255,255,255,0.2)]">PARRY
+                                NOW</button>
                             <button id="btn-dash"
-                                class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white text-lg uppercase tracking-widest">
-                                DASH
-                            </button>
+                                class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-5 rounded-2xl font-black text-white text-lg uppercase tracking-widest">DASH</button>
                         </div>
                     </div>
                 </div>
@@ -832,162 +759,89 @@
     </div>
 
     <script>
-        /**
-         * [SAFETY NET] 오류 오버레이 시스템
-         * 전역 에러를 포착하여 화면 상단에 즉시 노출 (조용히 망가지기 금지)
-         */
-        window.onerror = function (msg, url, lineNo, columnNo, error) {
-            const overlay = document.getElementById('error-overlay');
-            const msgEl = document.getElementById('error-msg');
-            const stackEl = document.getElementById('error-stack');
-            if (overlay && msgEl) {
-                overlay.style.display = 'block';
-                msgEl.innerText = `${msg} (Line: ${lineNo})`;
-                if (stackEl && error) stackEl.innerText = error.stack;
-            }
-            return false;
-        };
-
-        // --- LAYER 1: UI SELECTORS & MUSTGET GUARD ---
-        const UI_ENGINE = {
-            SELECTORS: {
-                lobby: 'lobby-overlay',
-                battleScreen: 'battle-screen',
-                overlayAug: 'augment-overlay',
-                overlayEvent: 'event-overlay',
-                overlayGameOver: 'game-over-overlay',
-                inventory: 'inventory-overlay',
-                stageEditor: 'stage-editor-overlay',
-                overlayGuide: 'guide-overlay',
-                hp: 'p-hp',
-                atk: 'p-atk',
-                def: 'p-def',
-                ap: 'p-ap',
-                msg: 'message',
-                turn: 'turn-indicator-overlay', // [FIX] ID 정합성 확보
-                vignette: 'vignette',
-                hitIcons: 'hit-icons-container',
-                btnReroll: 'btn-reroll',
-                btnAtk: 'btn-atk',
-                btnSpin: 'btn-spin',
-                btnHeavy: 'btn-heavy',
-                btnEnd: 'btn-end',
-                canvas: 'gameCanvas' // [NEW] 캔버스 ID 중앙 관리
-            },
-
-            /**
-             * [SAFETY NET] mustGet 가드
-             * 요소가 없으면 즉시 에러를 발생시켜 오버레이 노출
-             */
-            mustGet(id) {
-                const el = document.getElementById(id);
-                if (!el) throw new Error(`CRITICAL UI ELEMENT MISSING: ${id}`);
-                return el;
-            }
-        };
-
-        // --- LAYER 1.5: CORE RENDERER SETUP ---
-        // 기존 전역 코드와의 호환성을 위해 canvas/ctx 전역 선언 유지 (Safety Guarded)
-        const canvas = UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.canvas);
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+
+        // Layout Constants
         let CANVAS_W = 400;
         let CANVAS_H = 700;
 
-        // --- LAYER 2: GAME_CORE (PURE LOGIC) ---
-        // 브라우저 API 접근 금지 규약 준수
-        const GAME_CORE = {
-            CONFIG: {
-                FPS: 60, PARRY_STANCE_DURATION: 21, PERFECT_WINDOW: 8,
-                ATTACK_DURATION: 15, RETURN_DURATION: 20, REACTION_WINDOW: 26, K: 50
-            },
 
-            // 증강 데이터 (한글)
-            AUGMENT_DATA: {
-                "Common": [
-                    { id: "c1", name: "날카로움", desc: "공격력 ×1.10", effect: p => p.augBuffs.atk *= 1.1 },
-                    { id: "c2", name: "축적된 분노", desc: "강타 공격력 ×1.20", effect: p => p.augBuffs.heavy *= 1.2 },
-                    { id: "c3", name: "회전 가속", desc: "회전베기 공격력 ×1.15", effect: p => p.augBuffs.spin *= 1.15 },
-                    { id: "c4", name: "정밀 방어", desc: "패링 성공 시 AP +1 (턴당 1회)", effect: p => p.augBuffs.parryAp += 1 },
-                    { id: "c5", name: "연속 호흡", desc: "전투 시작 시 AP +2", effect: p => p.augBuffs.startAp += 2 },
-                    { id: "c6", name: "처형 본능", desc: "대상 HP 30% 이하일 때 공격력 ×1.15", effect: p => p.augBuffs.executeLow = 0.3 },
-                    { id: "c7", name: "약점 파악", desc: "같은 적 연속 공격 시 2타부터 공격력 ×1.10", effect: p => p.augBuffs.stackAtk = 0.1 },
-                    { id: "c8", name: "철갑 분쇄", desc: "강타 적중 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.heavySunder = 0.15 },
-                    { id: "c9", name: "피의 회수", desc: "적 처치 시 AP +1 (턴당 2회)", effect: p => p.augBuffs.killAp += 1 },
-                    { id: "c10", name: "집중력", desc: "퍼펙트 패링 성공 시 다음 공격력 ×1.20", effect: p => p.augBuffs.perfectFocus = 0.20 }
-                ],
-                "Epic": [
-                    { id: "e1", name: "약점 해부", desc: "같은 적 연속 공격 시 공격력 ×1.06 (최대 5중첩)", effect: p => p.augBuffs.stackAtkEpic = 0.06 },
-                    { id: "e2", name: "과열 타격", desc: "강타 사용 후 다음 턴 첫 공격 공격력 ×1.35", effect: p => p.augBuffs.heavyOverheat = 0.35 },
-                    { id: "e3", name: "원심 폭발", desc: "회전베기 공격력 ×1.25 / 처치 시 AP +1", effect: p => { p.augBuffs.spin *= 1.25; p.augBuffs.spinKillAp += 1; } },
-                    { id: "e4", name: "완벽한 리듬", desc: "퍼펙트 패링 시 이번 턴 공격력 ×1.20", effect: p => p.augBuffs.turnAtkPerf = 0.2 },
-                    { id: "e5", name: "초반 가속", desc: "전투 시작 시 AP +3 / 첫 턴 공격력 ×1.10", effect: p => { p.augBuffs.startAp += 3; p.augBuffs.startTurnAtk = 0.1; } },
-                    { id: "e6", name: "피의 수확", desc: "적 처치 시 공격력 ×1.04 (최대 10중첩)", effect: p => p.augBuffs.killStackAtk = 0.04 },
-                    { id: "e7", name: "단두의 각", desc: "적 HP 30% 이하일 때 강타 공격력 ×1.40", effect: p => p.augBuffs.heavyExecute = 0.4 },
-                    { id: "e8", name: "침착한 폭력", desc: "현재 AP 가 0~2일 때 공격력 ×1.18", effect: p => p.augBuffs.lowApAtk = 1.18 },
-                    { id: "e9", name: "관성 베기", desc: "기본 공격 사용 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.inertiaSlice = 0.15 },
-                    { id: "e10", name: "파괴의 맥박", desc: "매 턴 첫 공격 공격력 ×1.15 (강타라면 x1.25)", effect: p => p.augBuffs.firstAtkMult = 0.15 }
-                ],
-                "Unique": [
-                    { id: "u1", name: "검성의 서약", desc: "모든 스킬 공격력 ×1.20", effect: p => { p.augBuffs.atk *= 1.2; p.augBuffs.spin *= 1.2; p.augBuffs.heavy *= 1.2; } },
-                    { id: "u2", name: "큰 한 방", desc: "강타 공격력 ×1.60 / 강타 처치 시 AP +2", effect: p => { p.augBuffs.heavy *= 1.6; p.augBuffs.heavyKillAp += 2; } },
-                    { id: "u3", name: "폭풍의 중심", desc: "회전베기 공격력 ×1.50 / 적 2마리 이상 시 추가 x1.1", effect: p => { p.augBuffs.spin *= 1.5; p.augBuffs.spinMultiTarget = 0.1; } },
-                    { id: "u4", name: "무한 템포", desc: "전투 시작 AP +4 / 퍼펙트 패링 시 AP +1 (턴당 2)", effect: p => { p.augBuffs.startAp += 4; p.augBuffs.perfectApBonus += 1; } },
-                    { id: "u5", name: "피의 엔진", desc: "적 처치 시 공격력 ×1.06 (무제한) / 피격 피해 x1.1", effect: p => { p.augBuffs.unlimitKillAtk = 0.06; p.augBuffs.takeDmgMult *= 1.1; } },
-                    { id: "u6", name: "결투가", desc: "적 1마리일 때 공격력 ×1.35 / 강타 추가 x1.15", effect: p => { p.augBuffs.soloAtk = 0.35; p.augBuffs.soloHeavy = 0.15; } },
-                    { id: "u7", name: "집행인의 판결", desc: "적 HP 40% 이하 시 Atk x1.25 / 강타 추가 x1.2", effect: p => { p.augBuffs.executeAll = 0.25; p.augBuffs.heavyExecAll = 0.2; } },
-                    { id: "u8", name: "연쇄 분쇄", desc: "강타 연속 사용(연속 턴) 시 공격력 ×1.50", effect: p => p.augBuffs.heavyChain = 0.5 },
-                    { id: "u9", name: "정점의 호흡", desc: "턴 시작 시 AP 5 이상이면 공격력 ×1.25", effect: p => p.augBuffs.highApBuff = 0.25 },
-                    { id: "u10", name: "완전무결", desc: "퍼펙트 패링 당 Atk x1.08 (최대 3) / 피격 시 소멸", effect: p => p.augBuffs.perfStackBuff = 0.08 }
-                ]
-            },
 
-            getInitialState() {
-                return {
-                    gameStarted: false,
-                    currentTurn: "NONE",
-                    currentRound: 1,
-                    player: {
-                        hp: 80, maxHp: 80, atk: 45, def: 5, ap: 0, maxAp: 10,
-                        isParrying: false, parryTimer: 0, dashTimer: 0,
-                        actionsUsed: { atk: false, spin: false, heavy: false }
-                    },
-                    monsters: [],
-                    history: [] // 액션 로그
-                };
+        const AUGMENT_DATA = {
+            "Common": [
+                { id: "c1", name: "날카로움", desc: "공격력 ×1.10", effect: p => p.augBuffs.atk *= 1.1 },
+                { id: "c2", name: "축적된 분노", desc: "강타 공격력 ×1.20", effect: p => p.augBuffs.heavy *= 1.2 },
+                { id: "c3", name: "회전 가속", desc: "회전베기 공격력 ×1.15", effect: p => p.augBuffs.spin *= 1.15 },
+                { id: "c4", name: "정밀 방어", desc: "패링 성공 시 AP +1 (턴당 1회)", effect: p => p.augBuffs.parryAp += 1 },
+                { id: "c5", name: "연속 호흡", desc: "전투 시작 시 AP +2", effect: p => p.augBuffs.startAp += 2 },
+                { id: "c6", name: "처형 본능", desc: "대상 HP 30% 이하일 때 공격력 ×1.15", effect: p => p.augBuffs.executeLow = 0.3 },
+                { id: "c7", name: "약점 파악", desc: "같은 적 연속 공격 시 2타부터 공격력 ×1.10", effect: p => p.augBuffs.stackAtk = 0.1 },
+                { id: "c8", name: "철갑 분쇄", desc: "강타 적중 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.heavySunder = 0.15 },
+                { id: "c9", name: "피의 회수", desc: "적 처치 시 AP +1 (턴당 2회)", effect: p => p.augBuffs.killAp += 1 },
+                { id: "c10", name: "집중력", desc: "퍼펙트 패링 성공 시 다음 공격력 ×1.20", effect: p => p.augBuffs.perfectFocus = 0.20 }
+            ],
+            "Epic": [
+                { id: "e1", name: "약점 해부", desc: "같은 적 연속 공격 시 공격력 ×1.06 (최대 5중첩)", effect: p => p.augBuffs.stackAtkEpic = 0.06 },
+                { id: "e2", name: "과열 타격", desc: "강타 사용 후 다음 턴 첫 공격 공격력 ×1.35", effect: p => p.augBuffs.heavyOverheat = 0.35 },
+                { id: "e3", name: "원심 폭발", desc: "회전베기 공격력 ×1.25 / 처치 시 AP +1", effect: p => { p.augBuffs.spin *= 1.25; p.augBuffs.spinKillAp += 1; } },
+                { id: "e4", name: "완벽한 리듬", desc: "퍼펙트 패링 시 이번 턴 공격력 ×1.20", effect: p => p.augBuffs.turnAtkPerf = 0.2 },
+                { id: "e5", name: "초반 가속", desc: "전투 시작 시 AP +3 / 첫 턴 공격력 ×1.10", effect: p => { p.augBuffs.startAp += 3; p.augBuffs.startTurnAtk = 0.1; } },
+                { id: "e6", name: "피의 수확", desc: "적 처치 시 공격력 ×1.04 (최대 10중첩)", effect: p => p.augBuffs.killStackAtk = 0.04 },
+                { id: "e7", name: "단두의 각", desc: "적 HP 30% 이하일 때 강타 공격력 ×1.40", effect: p => p.augBuffs.heavyExecute = 0.4 },
+                { id: "e8", name: "침착한 폭력", desc: "현재 AP 가 0~2일 때 공격력 ×1.18", effect: p => p.augBuffs.lowApAtk = 1.18 },
+                { id: "e9", name: "관성 베기", desc: "기본 공격 사용 시 다음 턴 첫 공격 공격력 ×1.15", effect: p => p.augBuffs.inertiaSlice = 0.15 },
+                { id: "e10", name: "파괴의 맥박", desc: "매 턴 첫 공격 공격력 ×1.15 (강타라면 x1.25)", effect: p => p.augBuffs.firstAtkMult = 0.15 }
+            ],
+            "Unique": [
+                { id: "u1", name: "검성의 서약", desc: "모든 스킬 공격력 ×1.20", effect: p => { p.augBuffs.atk *= 1.2; p.augBuffs.spin *= 1.2; p.augBuffs.heavy *= 1.2; } },
+                { id: "u2", name: "큰 한 방", desc: "강타 공격력 ×1.60 / 강타 처치 시 AP +2", effect: p => { p.augBuffs.heavy *= 1.6; p.augBuffs.heavyKillAp += 2; } },
+                { id: "u3", name: "폭풍의 중심", desc: "회전베기 공격력 ×1.50 / 적 2마리 이상 시 추가 x1.1", effect: p => { p.augBuffs.spin *= 1.5; p.augBuffs.spinMultiTarget = 0.1; } },
+                { id: "u4", name: "무한 템포", desc: "전투 시작 AP +4 / 퍼펙트 패링 시 AP +1 (턴당 2)", effect: p => { p.augBuffs.startAp += 4; p.augBuffs.perfectApBonus += 1; } },
+                { id: "u5", name: "피의 엔진", desc: "적 처치 시 공격력 ×1.06 (무제한) / 피격 피해 x1.1", effect: p => { p.augBuffs.unlimitKillAtk = 0.06; p.augBuffs.takeDmgMult *= 1.1; } },
+                { id: "u6", name: "결투가", desc: "적 1마리일 때 공격력 ×1.35 / 강타 추가 x1.15", effect: p => { p.augBuffs.soloAtk = 0.35; p.augBuffs.soloHeavy = 0.15; } },
+                { id: "u7", name: "집행인의 판결", desc: "적 HP 40% 이하 시 Atk x1.25 / 강타 추가 x1.2", effect: p => { p.augBuffs.executeAll = 0.25; p.augBuffs.heavyExecAll = 0.2; } },
+                { id: "u8", name: "연쇄 분쇄", desc: "강타 연속 사용(연속 턴) 시 공격력 ×1.50", effect: p => p.augBuffs.heavyChain = 0.5 },
+                { id: "u9", name: "정점의 호흡", desc: "턴 시작 시 AP 5 이상이면 공격력 ×1.25", effect: p => p.augBuffs.highApBuff = 0.25 },
+                { id: "u10", name: "완전무결", desc: "퍼펙트 패링 당 Atk x1.08 (최대 3) / 피격 시 소멸", effect: p => p.augBuffs.perfStackBuff = 0.08 }
+            ]
+        };
+
+        const ui = {
+            lobby: document.getElementById('lobby-overlay'),
+            battleScreen: document.getElementById('battle-screen'),
+            overlayAug: document.getElementById('augment-overlay'),
+            overlayEvent: document.getElementById('event-overlay'),
+            overlayGameOver: document.getElementById('game-over-overlay'),
+            inventory: document.getElementById('inventory-overlay'),
+            stageEditor: document.getElementById('stage-editor-overlay'),
+            overlayGuide: document.getElementById('guide-overlay'),
+            hp: document.getElementById('p-hp'),
+            atk: document.getElementById('p-atk'),
+            def: document.getElementById('p-def'),
+            ap: document.getElementById('p-ap'),
+            msg: document.getElementById('message'),
+            turn: document.getElementById('turn-indicator'),
+            vignette: document.getElementById('vignette'),
+            hitIcons: document.getElementById('hit-icons-container'),
+            btnReroll: document.getElementById('btn-reroll'),
+            btns: {
+                atk: document.getElementById('btn-atk'),
+                spin: document.getElementById('btn-spin'),
+                heavy: document.getElementById('btn-heavy'),
+                end: document.getElementById('btn-end')
             }
         };
 
-        // --- LAYER 3: APP_STORE (STATE MANAGEMENT) ---
-        const APP_STORE = {
-            state: GAME_CORE.getInitialState(),
-            subscribers: [],
-
-            dispatch(action) {
-                // 이력 저장
-                this.state.history.push({ time: Date.now(), action });
-                if (this.state.history.length > 10) this.state.history.shift();
-
-                // 리듀서 로직 (리팩터링 시 분리 가능)
-                // 현재는 기존 전역 변수 구조를 점진적으로 이전 중
-                this.notify();
-            },
-
-            notify() {
-                this.subscribers.forEach(fn => {
-                    try {
-                        fn(this.state);
-                    } catch (e) {
-                        // [SAFETY NET] UI 업데이트 실패 시에도 코어는 계속 진행
-                        console.error("UI Update Failed but core continues:", e);
-                    }
-                });
-            }
+        const CONFIG = {
+            FPS: 60,
+            PARRY_STANCE_DURATION: 21,
+            PERFECT_WINDOW: 8,
+            ATTACK_DURATION: 15,
+            RETURN_DURATION: 20,
+            REACTION_WINDOW: 26, // [NEW] ?�호 ????격까�????�간
+            K: 50
         };
-
-        // 기존 전역 변수들은 리팩터링 완료 전까지 순차적으로 객체로 이전됩니다.
-        // 현재 기존 로직의 프리징 원인인 ID 참조 부분만 우선 수정하여 정상화를 보장합니다.
-
-        // ... (기존 함수의 로직은 유지하되 UI_ENGINE.mustGet을 사용하도록 수정 중)
 
         const Player = {
             x: 200,
@@ -1021,8 +875,10 @@
                 perfFocusActive: false, perfParryThisTurn: false,
                 killStacks: 0, unlimitKills: 0, firstAttackThisTurn: true,
                 perfStacks: 0, multiAtkCount: 0, heavyLastTurn: false,
-                atkUsedLastTurn: false
+                atkUsedLastTurn: false,
+                highApAtkActive: false
             },
+
             activeAugments: []
         };
 
@@ -1053,27 +909,18 @@
         }
 
         function rollAugments() {
-            try {
-                const list = GAME_CORE.AUGMENT_DATA[currentAugTier];
-                if (!list) throw new Error(`INVALID AUGMENT TIER: ${currentAugTier}`);
-
-                const shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
-                const container = document.getElementById('augment-cards');
-                if (!container) throw new Error("AUGMENT CARDS CONTAINER MISSING");
-
-                container.innerHTML = "";
-                shuffled.forEach(aug => {
-                    const card = document.createElement('div');
-                    card.className = `augment-card tier-${currentAugTier.toLowerCase()}`;
-                    card.innerHTML = `<h3>${aug.name}</h3><p style="color:#aaa; font-size:12px; margin:5px 0;">${currentAugTier}</p><p>${aug.desc}</p>`;
-                    card.setAttribute('style', 'display: flex !important; flex-direction: column !important; width: 100% !important; cursor: pointer !important; margin: 0 0 12px 0 !important; padding: 20px !important; border-radius: 16px !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid var(--glass-border) !important; z-index: 99999 !important;');
-                    card.onclick = () => selectAugment(aug);
-                    container.appendChild(card);
-                });
-            } catch (e) {
-                console.error("Critical error in rollAugments:", e);
-                // 강제 복구: 로비로 이동하거나 게임 재시작 유도 가능
-            }
+            const list = AUGMENT_DATA[currentAugTier];
+            const shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 3);
+            const container = document.getElementById('augment-cards');
+            container.innerHTML = "";
+            shuffled.forEach(aug => {
+                const card = document.createElement('div');
+                card.className = `augment-card tier-${currentAugTier.toLowerCase()}`;
+                card.innerHTML = `<h3>${aug.name}</h3><p style="color:#aaa; font-size:12px; margin:5px 0;">${currentAugTier}</p><p>${aug.desc}</p>`;
+                card.setAttribute('style', 'display: flex !important; flex-direction: column !important; width: 100% !important; cursor: pointer !important; margin: 0 0 12px 0 !important; padding: 20px !important; border-radius: 16px !important; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid var(--glass-border) !important; z-index: 99999 !important;');
+                card.onclick = () => selectAugment(aug);
+                container.appendChild(card);
+            });
         }
 
         function selectAugment(aug) {
@@ -1171,42 +1018,6 @@
             // The Monster constructor now handles pattern assignment based on type.
         };
 
-        // --- LAYER 4: UI INITIALIZATION & SYNC ---
-        // 소실된 'ui' 객체를 UI_ENGINE.SELECTORS와 mustGet을 사용해 재구축 (한글)
-        const ui = {
-            lobby: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.lobby),
-            battleScreen: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.battleScreen),
-            overlayAug: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.overlayAug),
-            overlayEvent: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.overlayEvent),
-            overlayGameOver: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.overlayGameOver),
-            inventory: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.inventory),
-            stageEditor: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.stageEditor),
-            overlayGuide: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.overlayGuide),
-            hp: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.hp),
-            atk: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.atk),
-            def: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.def),
-            ap: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.ap),
-            msg: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.msg),
-            turn: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.turn),
-            vignette: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.vignette),
-            hitIcons: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.hitIcons),
-            btnReroll: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.btnReroll),
-            btns: {
-                atk: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.btnAtk),
-                spin: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.btnSpin),
-                heavy: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.btnHeavy),
-                end: UI_ENGINE.mustGet(UI_ENGINE.SELECTORS.btnEnd)
-            }
-        };
-
-        const CONFIG = GAME_CORE.CONFIG;
-
-        // UI 캐싱 필드 (불필요한 DOM 접근 방지) (한글)
-        const uiCache = {
-            hp: -1, atk: -1, def: -1, ap: -1, turn: "",
-            atkBtn: null, spinBtn: null, heavyBtn: null, endBtn: null
-        };
-
         const PATTERN_SPEEDS = {
             "FAST": 40,
             "NORMAL": 60,
@@ -1252,7 +1063,7 @@
         function saveToStorage() {
             localStorage.setItem('monster_library', JSON.stringify(monsterLibrary));
             localStorage.setItem('custom_stages', JSON.stringify(customStages));
-            showFeedback("전체 저장 완료!", "#4ade80");
+            showFeedback("?�체 ?????�료!", "#4ade80");
         }
 
         // --- Editor UI Logic ---
@@ -1275,7 +1086,7 @@
 
             if (id) {
                 const m = monsterLibrary.find(x => x.id === id);
-                document.getElementById('creator-title').innerText = "🛠️ 몬스터 수정";
+                document.getElementById('creator-title').innerText = "몬스터 수정";
                 document.getElementById('lib-name').value = m.name;
                 document.getElementById('lib-hp').value = m.hp;
                 document.getElementById('lib-atk').value = m.atk;
@@ -1287,7 +1098,7 @@
                 document.getElementById('lib-val-postdelay').innerText = m.postdelay;
                 document.getElementById('lib-val-hitstop').innerText = m.hitstop;
             } else {
-                document.getElementById('creator-title').innerText = "🛠️ 신규 몬스터 생성";
+                document.getElementById('creator-title').innerText = "신규 몬스터 생성";
                 document.getElementById('lib-name').value = "신규 몬스터";
                 document.getElementById('lib-hp').value = 100;
                 document.getElementById('lib-atk').value = 10;
@@ -1337,7 +1148,7 @@
         function renderLibrary() {
             const list = document.getElementById('monster-library-list');
             if (monsterLibrary.length === 0) {
-                list.innerHTML = '<p style="opacity:0.5; font-size:12px;">저장된 몬스터가 없습니다.</p>';
+                list.innerHTML = '<p style="opacity:0.5; font-size:12px;">등록된 몬스터가 없습니다.</p>';
                 return;
             }
             list.innerHTML = monsterLibrary.map(m => `
@@ -1358,7 +1169,7 @@
                 customStages[round].push(monsterId);
                 renderStageEditor();
             } else if (round !== null) {
-                alert("유효한 라운드가 아닙니다.");
+                alert("유효하지 않은 라운드입니다.");
             }
         }
 
@@ -1380,13 +1191,19 @@
                     const m = monsterLibrary.find(x => x.id === id);
                     return m ? `<span class="stage-monster-pill">${m.name} <span style="margin-left:5px; cursor:pointer; color:#ff4a4a;" onclick="removeFromStage(${r}, ${idx})">×</span></span>` : '';
                 }).join('')}
-                            ${mIds.length === 0 ? '<span style="opacity:0.3; font-size:11px;">배치된 몬스터 없음</span>' : ''}
+                            ${mIds.length === 0 ? '<span style="opacity:0.3; font-size:11px;">배치된 몬스터가 없음</span>' : ''}
                         </div>
                     </div>
                 `;
             }
             list.innerHTML = html;
         }
+
+        // UI 캐싱 코드
+        const uiCache = {
+            hp: -1, atk: -1, def: -1, ap: -1, turn: "",
+            atkBtn: null, spinBtn: null, heavyBtn: null, endBtn: null
+        };
 
         function toggleGuide(show) {
             ui.overlayGuide.style.display = show ? "flex" : "none";
@@ -1410,7 +1227,8 @@
                 inertiaSlice: 0, firstAtkMult: 0, heavyKillAp: 0, spinMultiTarget: 0,
                 perfectApBonus: 0, unlimitKillAtk: 0, takeDmgMult: 1.0,
                 soloAtk: 0, soloHeavy: 0, executeAll: 0, heavyExecAll: 0,
-                heavyChain: 0, highApBuff: 0, perfStackBuff: 0
+                heavyChain: 0, highApBuff: 0, perfStackBuff: 0,
+                multiAtkAtk: 0
             };
             Player.state = {
                 killsThisTurn: 0, parryApGained: 0, isPrefGainedThisTurn: false,
@@ -1432,7 +1250,7 @@
             ui.battleScreen.classList.add('flex');
             ui.lobby.classList.add('hidden');
 
-            // 2. 레이아웃 확정 후 캔버스 리사이징 및 좌표 초기화
+            // 2. 레이아웃 조정 및 캔버스 리사이징 및 좌표 초기화
             resizeCanvas();
 
             gameStarted = true;
@@ -1445,21 +1263,21 @@
             currentTurn = "NONE";
             updateInterfaceVisibility();
 
-            // 상점/이벤트 구간 (3, 7, 12, 16 스테이지)
+            // 특정/이벤트 구간 (3, 7, 12, 16 스테이지)
             const eventRounds = [3, 7, 12, 16];
             if (eventRounds.includes(round)) {
                 showEventOverlay();
                 return;
             }
 
-            // [개선] 몬스터 정렬 및 배치 로직
+            // [개선] 몬스터 배열 및 배치 로직
             monsters = [];
             let ids = customStages[round];
 
-            // 데이터가 없는 스테이지라면 이전 데이터 재활용 또는 폴백
+            // 아이디가 없는 스테이지면 이전 아이디를 활성화하는 폴백
             if (!ids || ids.length === 0) {
                 if (round > 20) {
-                    showFeedback("🎉 모든 구역 정복!", "#FFD700");
+                    showFeedback("모든 구역 정복!", "#FFD700");
                     gameStarted = false;
                     return;
                 }
@@ -1472,7 +1290,7 @@
                 let m = createMonsterFromId(id);
                 if (!m) return;
 
-                // X축 균등 배분 (Portrait 최적화: 겹침 방지)
+                // X축 균등 배분 (Portrait 최적화, 겹침 방지)
                 let xRatio = 0.5;
                 if (count === 2) xRatio = (i === 0) ? 0.28 : 0.72;
                 else if (count === 3) xRatio = [0.18, 0.5, 0.82][i];
@@ -1484,14 +1302,34 @@
                 monsters.push(m);
             });
 
-            showFeedback(`WAVE ${round}`, "#4db8ff");
+            updateMessage(`WAVE ${round}`, 1200);
 
             // 시뮬레이션용 로그 (상태 기록)
             console.log(`[SIM] WAVE ${round} Started. Monsters: ${count}`);
 
             currentMonsterIndex = 0;
-            currentTurn = "PLAYER"; // 몬스터 배치 완료 후 플레이어 턴으로 시작
-            Player.ap = Math.min(Player.maxAp, Player.ap + 3); // 턴 시작 AP 소폭 보정
+            startPlayerTurn();
+        }
+
+        function startPlayerTurn() {
+            currentTurn = "PLAYER";
+            // 턴 시작 시 AP 증가 (기본 +3, 증강: 연속 호흡 +2, 초반 가속 +3, 무한 템포 +4)
+            let apGain = 3 + Player.augBuffs.startAp;
+            Player.ap = Math.min(Player.maxHp, Player.ap + apGain);
+
+            // 상태 초기화
+            Player.state.firstAttackThisTurn = true;
+            Player.state.killsThisTurn = 0;
+            Player.state.consecutiveTarget = null;
+            Player.state.consecutiveCount = 0;
+            Player.state.multiAtkCount = 0;
+            Player.state.isPrefGainedThisTurn = false;
+            Player.state.perfParryThisTurn = false;
+            Player.state.heavyHitThisTurn = false;
+
+            // 증강: 정점의 호흡 (턴 시작 시 AP 5 이상이면 공격력 증가)
+            Player.state.highApAtkActive = (Player.ap >= 5);
+
             updateInterfaceVisibility();
         }
 
@@ -1501,18 +1339,10 @@
                 const defaults = {
                     "mon_tuto_1": { name: "연습용 허수아비", hp: 100, atk: 10, telegraph: 1.2, postdelay: 1.0, hitstop: 3 },
                     "mon_tuto_2": { name: "강화 허수아비", hp: 150, atk: 12, telegraph: 1.0, postdelay: 1.0, hitstop: 3 },
-                    "mon_boss_1": { name: "디-스톰파", hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
+                    "mon_boss_1": { name: "테스트 보스", hp: 1200, atk: 25, telegraph: 0.8, postdelay: 1.2, hitstop: 5 }
                 };
                 let d = defaults[id] || defaults["mon_tuto_1"];
                 libM = { ...d };
-            }
-            // 밸런스 시트 반영 (스테이지 2 강화 허수아비 등)
-            if (id === "mon_tuto_2") {
-                libM.hp = 180;
-                libM.atk = 24;
-            } else if (id === "mon_boss_1") {
-                libM.hp = 1500;
-                libM.atk = 32;
             }
             return new Monster(libM.name, libM.hp, libM.atk, libM.telegraph, libM.postdelay, libM.hitstop);
         }
@@ -1536,16 +1366,16 @@
         }
 
         function winRound() {
-            // 최종 보스 클리어 체크
+            // 최종 보스 ?�리??체크
             if (currentRound >= 20) {
-                showFeedback("심연을 정복했습니다!", "#FFD700");
+                showFeedback("?�연???�복?�습?�다!", "#FFD700");
                 gameStarted = false;
                 return;
             }
 
             currentRound++;
 
-            // 다음 라운드가 이벤트 라운드인지 확인
+            // ?�음 ?�운?��? ?�벤???�운?�인�? ?�인
             const eventRounds = [3, 7, 12, 16];
             if (eventRounds.includes(currentRound)) {
                 showEventOverlay();
@@ -1591,8 +1421,8 @@
                     <div style="display: flex; gap: 5px;">
                         <button class="btn-sm action-str" onclick="addMonsterToStagePrompt('${m.id}')">배치</button>
                         ${!m.isDefault ? `
-                            <button class="btn-sm action-atk" onclick="openMonsterCreator('${m.id}')">수정</button>
-                            <button class="btn-sm guide-close-btn" onclick="deleteMonster('${m.id}')">삭제</button>
+                            <button class="btn-sm action-atk" onclick="openMonsterCreator('${m.id}')">?�정</button>
+                            <button class="btn-sm guide-close-btn" onclick="deleteMonster('${m.id}')">??��</button>
                         ` : ''}
                     </div>
                 </div>
@@ -1610,7 +1440,7 @@
                     <div class="stage-box" style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <span style="font-weight:bold; color:#4db8ff; font-size: 18px;">Round ${r}</span>
-                            <span style="font-size: 12px; color: #666;">탭하여 편집</span>
+                            <span style="font-size: 12px; color: #666;">??��???�집</span>
                         </div>
                         <div style="min-height: 40px; border: 1px dashed #333; padding: 10px; border-radius: 8px;">
                             ${mIds.map((id, idx) => {
@@ -1630,7 +1460,7 @@
                                     </div>
                                 ` : '';
                 }).join('')}
-                            ${mIds.length === 0 ? '<div style="color:#444; font-size:12px; text-align:center;">배치된 몬스터가 없습니다.</div>' : ''}
+                            ${mIds.length === 0 ? '<div style="color:#444; font-size:12px; text-align:center;">배치??몬스?��? ?�습?�다.</div>' : ''}
                         </div>
                     </div>
                 `;
@@ -1640,51 +1470,29 @@
 
         function resetStagesToDefault() {
             if (!confirm("모든 스테이지 배치를 초기 상태로 되돌리시겠습니까?")) return;
-            // --- 확장된 몬스터 라이브러리 (학습 -> 다수 -> 엘리트 -> 보스 순환용) ---
             const monsterLibrary = [
-                // 1. 학습용 (단일)
                 { id: "mon_tuto_1", name: "나무 허수아비", hp: 120, atk: 10, telegraph: 1.5, postdelay: 1.2, hitstop: 3 },
-                { id: "mon_tuto_2", name: "녹슨 기갑병", hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4 },
-
-                // 2. 다수 구성용 (약한 적들)
+                { id: "mon_tuto_2", name: "육중한 갑옷병", hp: 200, atk: 15, telegraph: 1.2, postdelay: 1.0, hitstop: 4 },
                 { id: "mon_swarm_1", name: "그림자 슬라임", hp: 80, atk: 8, telegraph: 1.0, postdelay: 0.8, hitstop: 2 },
                 { id: "mon_swarm_2", name: "떠도는 불꽃", hp: 60, atk: 12, telegraph: 0.9, postdelay: 1.2, hitstop: 2 },
-
-                // 3. 엘리트 (단일/쌍)
                 { id: "mon_elite_1", name: "침묵의 집행자", hp: 600, atk: 22, telegraph: 0.8, postdelay: 1.0, hitstop: 5 },
-                { id: "mon_elite_2", name: "고대의 기사", hp: 850, atk: 28, telegraph: 0.7, postdelay: 1.1, hitstop: 6 },
-                { id: "mon_elite_3", name: "광기어린 암살자", hp: 450, atk: 35, telegraph: 0.6, postdelay: 0.8, hitstop: 4 },
-
-                // 4. 보스 급
-                { id: "mon_boss_1", name: "폐허의 제왕", hp: 2500, atk: 40, telegraph: 0.65, postdelay: 1.3, hitstop: 8 },
+                { id: "mon_elite_2", name: "고대인 기사", hp: 850, atk: 28, telegraph: 0.7, postdelay: 1.1, hitstop: 6 },
+                { id: "mon_elite_3", name: "광기에 어린 화살병", hp: 450, atk: 35, telegraph: 0.6, postdelay: 0.8, hitstop: 4 },
+                { id: "mon_boss_1", name: "부활한 사자왕", hp: 2500, atk: 40, telegraph: 0.65, postdelay: 1.3, hitstop: 8 },
                 { id: "mon_boss_final", name: "심연의 지배자", hp: 5000, atk: 55, telegraph: 0.55, postdelay: 1.4, hitstop: 10 },
-
-                // 5. 성장 체감용 (강한 단일몹)
                 { id: "mon_growth_1", name: "거대 바위 골렘", hp: 1200, atk: 30, telegraph: 1.1, postdelay: 1.5, hitstop: 8 },
                 { id: "mon_growth_2", name: "정예 방패병", hp: 1500, atk: 18, telegraph: 1.0, postdelay: 1.0, hitstop: 6 }
             ];
 
-            // --- 순환형 난이도 스테이지 설계 (20단계 이상) ---
             let customStages = {
-                1: ["mon_tuto_1"],                               // 1. 학습
-                2: ["mon_tuto_2"],                               // 2. 학습 심화
-                4: ["mon_swarm_1", "mon_swarm_1"],               // 4. 다수 (성장 시범)
-                5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"],// 5. 다수 (분기)
-                6: ["mon_elite_1"],                              // 6. 첫 엘리트
-                7: ["mon_growth_1"],                             // 7. 성장 체감 (보너스 느낌)
-                8: ["mon_swarm_1", "mon_swarm_2", "mon_elite_1"],// 8. 혼합 구성
-                9: ["mon_elite_2"],                              // 9. 중간 보스급 엘리트
-                10: ["mon_boss_1"],                              // 10. 1차 보스
-                11: ["mon_growth_2"],                             // 11. 강화된 성장 체감 (강력해진 유저)
-                12: ["mon_elite_1", "mon_elite_1"],               // 12. 엘리트 듀오
-                13: ["mon_elite_2", "mon_elite_3"],               // 13. 엘리트 듀오 (변칙)
-                14: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_1"],// 14. 물량전
-                15: ["mon_elite_3"],                              // 15. 속도형 엘리트
-                16: ["mon_growth_1", "mon_growth_2"],             // 16. 거대 몹 듀오
-                17: ["mon_elite_2", "mon_elite_2", "mon_elite_2"],// 17. 극한의 3인 엘리트
-                18: ["mon_boss_1", "mon_elite_1"],                // 18. 보스 + 엘리트
-                19: ["mon_growth_2"],                             // 19. 최종 결전 전 숨고르기
-                20: ["mon_boss_final"]                            // 20. 최종 보스
+                1: ["mon_tuto_1"], 2: ["mon_tuto_2"], 4: ["mon_swarm_1", "mon_swarm_1"],
+                5: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_2"], 6: ["mon_elite_1"],
+                7: ["mon_growth_1"], 8: ["mon_swarm_1", "mon_swarm_2", "mon_elite_1"],
+                9: ["mon_elite_2"], 10: ["mon_boss_1"], 11: ["mon_growth_2"],
+                12: ["mon_elite_1", "mon_elite_1"], 13: ["mon_elite_2", "mon_elite_3"],
+                14: ["mon_swarm_2", "mon_swarm_2", "mon_swarm_1"], 15: ["mon_elite_3"],
+                16: ["mon_growth_1", "mon_growth_2"], 17: ["mon_elite_2", "mon_elite_2", "mon_elite_2"],
+                18: ["mon_boss_1", "mon_elite_1"], 19: ["mon_growth_2"], 20: ["mon_boss_final"]
             };
             localStorage.removeItem('custom_stages');
             renderFullStageEditor();
@@ -1772,13 +1580,14 @@
             if (target.hp / target.maxHp <= Player.augBuffs.executeLow) mult *= 1.15;
             if (target.hp / target.maxHp <= 0.4) mult *= (1 + Player.augBuffs.executeAll);
 
-            // 약점 파악/해부
+            // ?점 ?악/??
+            // 특정 조건부 버프
             if (Player.state.consecutiveTarget === target) {
                 if (Player.state.consecutiveCount >= 1) mult *= (1 + Player.augBuffs.stackAtk);
                 mult *= (1 + Player.augBuffs.stackAtkEpic * Math.min(Player.state.consecutiveCount, 5));
             }
 
-            // 조건부 버프들
+            // 조건부 버프
             if (Player.state.heavyUsedLastTurn && Player.state.firstAttackThisTurn) {
                 mult *= (1 + Player.augBuffs.heavySunder);
                 mult *= (1 + Player.augBuffs.heavyOverheat);
@@ -1788,13 +1597,13 @@
             }
             if (Player.state.perfParryThisTurn) mult *= (1 + Player.augBuffs.turnAtkPerf);
             if (Player.state.perfFocusActive) {
-                mult *= (1 + Player.augBuffs.perfectFocus); // 집중력
+                mult *= (1 + Player.augBuffs.perfectFocus); // 집중
                 Player.state.perfFocusActive = false;
             }
             if (Player.state.unlimitKills > 0) mult *= (1 + Player.augBuffs.unlimitKillAtk * Player.state.unlimitKills);
             if (Player.state.killStacks > 0) mult *= (1 + Player.augBuffs.killStackAtk * Math.min(Player.state.killStacks, 10));
 
-            //  Unique: 정점의 호흡, 결투가
+            //  Unique: ?점???흡, 결투?
             if (Player.state.highApAtkActive) mult *= (1 + Player.augBuffs.highApBuff);
             if (monsters.length === 1) {
                 mult *= (1 + Player.augBuffs.soloAtk);
@@ -1803,7 +1612,7 @@
             if (Player.state.perfStacks > 0) mult *= (1 + Player.augBuffs.perfStackBuff * Player.state.perfStacks);
             if (Player.state.firstAttackThisTurn) {
                 mult *= (1 + Player.augBuffs.firstAtkMult);
-                if (type === "heavy") mult *= 1.08; // 파괴의 맥박(강타시 추가) -> +0.1 보정
+                if (type === "heavy") mult *= 1.08; // ?괴??맥박(강???추?) -> +0.1 보정
             }
             // if (type === "normal" && Player.state.multiAtkCount >= 1) mult *= Player.augBuffs.multiAtkAtk; // This was removed in previous edits
 
@@ -1818,7 +1627,7 @@
 
             if (target.hp <= 0) {
                 target.state = "DONE";
-                // 증강: 피의 회수, 원심 폭발
+                // 증강: ?의 ?수, ?심 ??
                 if (Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.killAp;
                 if (type === "spin" && Player.state.killsThisTurn < 2) Player.ap += Player.augBuffs.spinKillAp;
                 if (type === "heavy" && Player.state.killsThisTurn < 1) Player.ap += Player.augBuffs.heavyKillAp;
@@ -1842,7 +1651,7 @@
             currentMonsterIndex = 0;
             // 턴 종료 시 상태 갱신
             Player.state.heavyUsedLastTurn = Player.actionsUsed.heavy;
-            Player.state.atkUsedLastTurn = Player.actionsUsed.atk; // Epic 9 위해 저장
+            Player.state.atkUsedLastTurn = Player.actionsUsed.atk; // Epic 9 위해
             Player.state.killsThisTurn = 0;
             isTargeting = false;
             selectedSkill = null;
@@ -1850,15 +1659,8 @@
             isEndingTurnAutomatically = false;
             roundStartTimer = 25;
 
-            // UI Toggle (Safety Guarded)
-            try {
-                updateInterfaceVisibility();
-                ui.turn.innerText = "Monster's Turn";
-                updateHitIcons();
-                updateUI();
-            } catch (e) {
-                console.warn("Turn transition UI update failed, but game logic continues:", e);
-            }
+            // UI Toggle
+            updateInterfaceVisibility();
 
             monsters.forEach(m => {
                 if (m.hp > 0) {
@@ -1867,6 +1669,9 @@
                     m.timer = 0;
                 }
             });
+            ui.turn.innerText = "Monster's Turn";
+            updateHitIcons();
+            updateUI();
         }
 
         function updateHitIcons() {
@@ -1907,7 +1712,7 @@
                 return;
             }
 
-            // 파워 텍스트 업데이트
+            // ?�워 ?�스???�데?�트
             for (let i = damageTexts.length - 1; i >= 0; i--) {
                 const dt_item = damageTexts[i];
                 dt_item.y -= 0.5 * dt;
@@ -1927,14 +1732,14 @@
                     roundStartTimer = 0;
                     ui.turn.innerText = (currentRound === 6) ? "Boss Round" : "Monster's Turn";
                     updateHitIcons();
-                    // 증강: 정점의 호흡 (턴 시작 시 체크)
+                    // 증강: ?�점???�흡 (???�작 ??체크)
                     Player.state.highApAtkActive = (Player.ap >= 5);
                 }
                 updateUI();
                 return;
             }
 
-            // --- 몬스터 턴 로직 ---
+            // --- 몬스????로직 ---
             if (Player.parryTimer > 0) Player.parryTimer -= dt;
             else { Player.parryTimer = 0; Player.isParrying = false; }
 
@@ -1967,7 +1772,7 @@
                 // Vertical Shake
                 m.y = m.homeY + Math.sin(prepRatio * Math.PI) * 15;
 
-                // [NEW] 26프레임 반응 기준용 Cue(신호) 발생 로직
+                // [NEW] 26?�레??반응 기�???Cue(?�호) 발생 로직
                 const remainingTelegraph = waitFrames - m.timer;
                 if (remainingTelegraph + CONFIG.ATTACK_DURATION <= CONFIG.REACTION_WINDOW) {
                     m.cueActive = true;
@@ -1980,7 +1785,7 @@
                     m.timer = 0;
                     m.startX = m.x;
                     m.startY = m.y;
-                    m.cueActive = false; // 공격 시작 시 신호 종료
+                    m.cueActive = false; // 공격 ?�작 ???�호 종료
                 }
             } else if (m.state === "ATTACK") {
                 m.timer += dt;
@@ -1988,7 +1793,7 @@
                 m.x = m.startX + (Player.x - m.startX) * (t * t);
                 m.y = m.startY + (Player.y - Player.radius - m.startY) * (t * t);
 
-                // 판정 타이밍 (0~2프레임 오차 허용을 위해 범위 체크)
+                // ?�정 ???�밍 (0~2?�레???�차 ?�용???�해 범위 체크)
                 if (m.timer >= CONFIG.ATTACK_DURATION - 2 && m.timer < CONFIG.ATTACK_DURATION && !m.hitTriggered) {
                     m.hitTriggered = true;
                     if (Player.dashTimer > 0) {
@@ -2062,7 +1867,7 @@
         function checkAutoTurnEnd() {
             if (isEndingTurnAutomatically) return;
 
-            // 소수점 오차 방지를 위해 floor 처리된 AP 사용 및 약간의 마진(0.1) 추가
+            // ?�수???�차 방�?�??�해 floor 처리??AP ?�용 �??�간??마진(0.1) 추�?
             const fAp = Math.floor(Player.ap + 0.01);
             const canAtk = !Player.actionsUsed.atk && fAp >= 2;
             const canSpin = !Player.actionsUsed.spin && fAp >= 3;
@@ -2077,72 +1882,48 @@
         function nextMonsterOrTurn() {
             if (currentMonsterIndex < monsters.length - 1) {
                 currentMonsterIndex++;
-                // 다음 몬스터가 죽어있을 경우에 대한 예외 처리
+                // ?�음 몬스?��? 죽어?�을 경우???????�외 처리
                 if (monsters[currentMonsterIndex].hp <= 0) {
                     monsters[currentMonsterIndex].state = "DONE";
                     nextMonsterOrTurn();
                 }
                 updateHitIcons();
             } else {
-                currentTurn = "PLAYER";
+                startPlayerTurn();
                 ui.turn.innerText = "Player's Turn";
                 ui.hitIcons.innerHTML = "";
-
-                // UI Toggle
-                updateInterfaceVisibility();
             }
         }
 
         function updateInterfaceVisibility() {
-            try {
-                const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver, ui.stageEditor, ui.monsterCreator, ui.inventory, ui.overlayGuide];
-                const isAnyOverlayVisible = overlays.some(o => o && (o.style.display === "flex" || o.style.display === "block" || (o.classList && !o.classList.contains('hidden'))));
+            const overlays = [ui.lobby, ui.overlayAug, ui.overlayEvent, ui.overlayGameOver];
+            const isAnyOverlayVisible = overlays.some(o => o && (o.style.display === "flex" || o.style.display === "block" || !o.classList.contains('hidden')));
 
-                const bottomUI = document.getElementById('bottom-ui');
-                const topHUD = document.getElementById('top-status');
-                const turnIndicator = ui.turn; // 중앙 관리된 참조 사용
+            const bottomUI = document.getElementById('bottom-ui');
+            const topHUD = document.getElementById('top-status');
 
-                // 오버레이가 떠있거나 게임 시작 전이면 전투 UI 숨김
-                if (isAnyOverlayVisible || !gameStarted) {
-                    if (bottomUI) bottomUI.classList.add('hidden');
-                    if (topHUD) topHUD.classList.add('hidden');
-                    if (turnIndicator) turnIndicator.classList.add('hidden');
-                    return;
-                }
+            if (isAnyOverlayVisible || !gameStarted || currentTurn === "NONE") {
+                if (bottomUI) { bottomUI.classList.add('opacity-0'); bottomUI.classList.add('pointer-events-none'); }
+                if (topHUD) topHUD.classList.add('opacity-0');
+                return;
+            }
 
-                // 전투 중에는 기본적으로 HUD 표시 (NONE 턴 포함)
-                if (bottomUI) bottomUI.classList.remove('hidden');
-                if (topHUD) topHUD.classList.remove('hidden');
+            if (bottomUI) { bottomUI.classList.remove('opacity-0'); bottomUI.classList.remove('pointer-events-none'); }
+            if (topHUD) topHUD.classList.remove('opacity-0');
 
-                const playerActions = document.getElementById('player-actions');
-                const monsterActions = document.getElementById('monster-actions');
+            const playerActions = document.getElementById('player-actions');
+            const monsterActions = document.getElementById('monster-actions');
 
-                if (currentTurn === "PLAYER") {
-                    if (playerActions) { playerActions.classList.remove('hidden'); playerActions.classList.add('flex'); }
-                    if (monsterActions) { monsterActions.classList.add('hidden'); monsterActions.classList.remove('flex'); }
-
-                    if (turnIndicator) {
-                        turnIndicator.classList.remove('hidden');
-                        turnIndicator.innerText = "PLAYER'S TURN";
-                        turnIndicator.style.color = "var(--primary)";
-                    }
-                } else if (currentTurn === "MONSTER") {
-                    if (playerActions) { playerActions.classList.add('hidden'); playerActions.classList.remove('flex'); }
-                    if (monsterActions) { monsterActions.classList.remove('hidden'); monsterActions.classList.add('flex'); }
-
-                    if (turnIndicator) {
-                        turnIndicator.classList.remove('hidden');
-                        turnIndicator.innerText = "MONSTER'S TURN";
-                        turnIndicator.style.color = "var(--danger)";
-                    }
-                } else {
-                    if (playerActions) playerActions.classList.add('hidden');
-                    if (monsterActions) monsterActions.classList.add('hidden');
-                    if (turnIndicator) turnIndicator.classList.add('hidden');
-                }
-            } catch (e) {
-                // [SAFETY NET] UI 가시성 처리 실패 시에도 턴은 넘어감
-                console.warn("Visibility Update Failed, ignoring to prevent freeze:", e);
+            if (currentTurn === "PLAYER") {
+                playerActions.classList.remove('hidden');
+                playerActions.classList.add('flex');
+                monsterActions.classList.add('hidden');
+                monsterActions.classList.remove('flex');
+            } else if (currentTurn === "MONSTER") {
+                playerActions.classList.add('hidden');
+                playerActions.classList.remove('flex');
+                monsterActions.classList.remove('hidden');
+                monsterActions.classList.add('flex');
             }
         }
 
@@ -2153,8 +1934,9 @@
             if (uiCache.atk !== Player.atk) { ui.atk.innerText = Player.atk; uiCache.atk = Player.atk; }
             if (uiCache.def !== Player.def) { ui.def.innerText = Player.def; uiCache.def = Player.def; }
 
+            Player.ap = Number(Player.ap) || 0;
             const fAp = Math.floor(Player.ap);
-            if (uiCache.ap !== fAp) { ui.ap.innerText = fAp; uiCache.ap = fAp; }
+            if (uiCache.ap !== fAp) { ui.ap.innerText = isNaN(fAp) ? 0 : fAp; uiCache.ap = fAp; }
 
             const isPlayer = currentTurn === "PLAYER";
             const atkD = !isPlayer || Player.ap < 2 || Player.actionsUsed.atk;
@@ -2167,7 +1949,7 @@
             if (uiCache.heavyBtn !== heavyD) { ui.btns.heavy.disabled = heavyD; uiCache.heavyBtn = heavyD; }
             if (uiCache.endBtn !== endD) { ui.btns.end.disabled = endD; uiCache.endBtn = endD; }
 
-            // AP 부족 시 자동 턴 종료 체크
+            // AP �?�????�동 ??종료 체크
             if (isPlayer && !isEndingTurnAutomatically && atkD && spinD && heavyD) {
                 isEndingTurnAutomatically = true;
                 setTimeout(() => {
@@ -2198,7 +1980,7 @@
                     const alpha = Math.min(m.timer / waitFrames, 1);
                     color = `rgb(${255}, ${74 + 181 * alpha}, ${74 + 181 * alpha})`;
 
-                    // 신호(Cue) 발생 시 하얀색으로 강조
+                    // ?�호(Cue) 발생 ???��??�으�?강조
                     if (m.cueActive) {
                         color = "#ffffff";
                         ctx.shadowBlur = 20;
@@ -2211,7 +1993,8 @@
                 ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // 몬스터 HP 수치만 표시
+                // 몬스??HP ?�치�??�시
+                // 몬스??HP ?치??시
                 ctx.fillStyle = "#fff";
                 ctx.font = "bold 14px Inter";
                 ctx.textAlign = "center";
@@ -2271,8 +2054,8 @@
             let elapsed = timestamp - lastTimestamp;
             lastTimestamp = timestamp;
 
-            // 델타 타임 계산 (60FPS 기준 1.0)
-            // 브라우저 탭 전환 등으로 인한 과도한 점프 방지 (최대 100ms)
+            // ?��? ????계산 (60FPS 기�? 1.0)
+            // 브라?��? ???�환 ?�으�??�한 과도???�프 방�? (최�? 100ms)
             let dt = (Math.min(elapsed, 100) / 16.66);
 
             update(dt);
@@ -2294,17 +2077,17 @@
 
             if (!root || !playArea) return;
 
-            // 1. 실제 렌더링된 컨테이너의 크기를 정확히 파악
+            // 1. ?�제 ?�더링된 컨테?�너???�기�??�확???�악
             const rect = playArea.getBoundingClientRect();
 
-            // 2. 캔버스의 내부 해상도를 CSS 크기와 1:1로 일치시켜 왜곡 방지
+            // 2. 캔버?�의 ?��? ?�상?��? CSS ?�기?? 1:1�??�치?�켜 ?�곡 방�?
             canvas.width = rect.width || 412;
             canvas.height = rect.height || 500;
 
             CANVAS_W = canvas.width;
             CANVAS_H = canvas.height;
 
-            // 3. 캐릭터 좌표 설정 (캔버스 크기 대비 백분율 유지)
+            // 3. 캐릭??좌표 ?�정 (캔버???�기 ??�?백분???��?)
             Player.x = CANVAS_W / 2;
             Player.y = CANVAS_H * 0.85;
 
@@ -2317,7 +2100,7 @@
                 }
             });
 
-            // 4. CSS 스케일링으로 인한 찌그러짐 방지 (auto 설정)
+            // 4. CSS ?��??�링?�로 ?�한 찌그?�짐 방�? (auto ?�정)
             canvas.style.width = "100%";
             canvas.style.height = "100%";
         }
@@ -2328,14 +2111,14 @@
                 loadFromStorage();
                 window.addEventListener('resize', resizeCanvas);
 
-                // 전역 컨텍스트 메뉴 차단 (PC 우클릭 조작을 위해 필수)
+                // ?�역 컨텍?�트 메뉴 차단 (PC ?�클�?조작???�해 ?�수)
                 window.addEventListener('contextmenu', e => e.preventDefault());
 
-                // 입력 핸들링 (캔버스 본체)
+                // ?�력 ?�들�?(캔버??본체)
                 canvas.addEventListener('mousedown', handleInput);
                 canvas.addEventListener('touchstart', handleInput, { passive: false });
 
-                // 조작 가이드 / 버튼 설정
+                // 조작 �??�드 / 버튼 ?�정
                 const pcGuide = document.getElementById('pc-guide');
                 const mobBtns = document.getElementById('mobile-buttons');
                 const btnParry = document.getElementById('btn-parry');
@@ -2374,10 +2157,10 @@
                 if (e.target !== canvas) return;
                 e.preventDefault();
                 if (!isMobile) {
-                    if (e.button === 0) { // 좌클릭 (Parry)
+                    if (e.button === 0) { // 좌클�?(Parry)
                         Player.parryTimer = CONFIG.PARRY_STANCE_DURATION;
                         Player.isParrying = true;
-                    } else if (e.button === 2) { // 우클릭 (Dash)
+                    } else if (e.button === 2) { // ?�클�?(Dash)
                         executeDash();
                     }
                 } else {
