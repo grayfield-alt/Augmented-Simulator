@@ -394,7 +394,7 @@
         <div id="start-overlay">
             <h1 style="color:#fff; margin-bottom: 30px;">RPG BATTLE PROTOTYPE V2</h1>
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button class="start-btn" onclick="startGame()">⚔️ 게임 시작 (Native 60FPS)</button>
+                <button class="start-btn" onclick="startGame()">⚔️ 게임 시작 (30FPS Mode)</button>
                 <button class="guide-btn" onclick="toggleGuide(true)">❓ 가이드</button>
             </div>
         </div>
@@ -549,12 +549,12 @@
         };
 
         const CONFIG = {
-            FPS: 60,
-            PARRY_STANCE_DURATION: 10, // 0.16s (기존 21에서 절반)
-            PERFECT_WINDOW: 4,         // 66ms (기존 8에서 절반)
-            ATTACK_DURATION: 8,        // 0.13s (기존 15에서 절반)
-            REACTION_WINDOW: 1.56,     // 26ms (26 / 16.66) - 고정
-            RETURN_DURATION: 10,       // 0.16s (기존 20에서 절반)
+            FPS: 30,                       // 60 -> 30
+            PARRY_STANCE_DURATION: 11,     // 0.35s (21/2)
+            PERFECT_WINDOW: 4,             // 0.13s (8/2)
+            ATTACK_DURATION: 8,            // 0.25s (15/2)
+            REACTION_WINDOW: 0.78,         // 26ms (26/33.33)
+            RETURN_DURATION: 10,           // 0.33s (20/2)
             K: 50 // 방어 상수
         };
 
@@ -1294,8 +1294,8 @@
 
             // 델타 타임 계산 (60FPS 기준 1.0)
             // 브라우저 탭 전환 등으로 인한 과도한 점프 방지 (최대 100ms)
-            // 배율을 1.0으로 수정하여 프레임 상수에 원본 속도로 대응
-            let dt = (Math.min(elapsed, 100) / 16.66);
+            // 배율을 1.0으로 수정하여 프레임 상수에 원본 속도로 대응 (30FPS 기준)
+            let dt = (Math.min(elapsed, 100) / 33.33);
 
             update(dt);
             draw();
