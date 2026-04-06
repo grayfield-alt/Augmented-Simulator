@@ -13,7 +13,7 @@
         rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="module" crossorigin src="/Augmented-Simulator/assets/main-S-SAo6yj.js"></script>
+  <script type="module" crossorigin src="/Augmented-Simulator/assets/main-C49fk8zz.js"></script>
   <link rel="modulepreload" crossorigin href="/Augmented-Simulator/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="stylesheet" crossorigin href="/Augmented-Simulator/assets/main-BQHB5XDb.css">
 </head>
@@ -36,13 +36,8 @@
                             class="text-sm font-black italic tracking-tighter opacity-80 uppercase">PHASE: INIT</div>
                     </div>
 
-                    <!-- Center Anchor: Toast Messages -->
+                    <!-- Center Anchor: Spacer for Grid Balance -->
                     <div class="flex items-center justify-center">
-                        <div id="toast-container" class="hidden">
-                            <div class="glass-panel px-3 py-1 rounded-full">
-                                <span id="message" class="text-xs font-bold text-[#fae133]"></span>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Right Anchor: Status & Toggle -->
@@ -64,6 +59,13 @@
                     </div>
                 </div>
             </header>
+
+            <!-- Floating Toast Container (Extracted to absolute layer) -->
+            <div id="toast-container" class="hidden absolute top-[14%] left-1/2 -translate-x-1/2 z-[60] pointer-events-none animate-in fade-in slide-in-from-top-2 duration-300">
+                <div class="glass-panel px-5 py-2 rounded-full border border-[#fae133]/30 shadow-[0_4px_20px_rgba(250,225,51,0.2)] bg-[#050507]/90 backdrop-blur-md">
+                    <span id="message" class="text-[13px] font-black text-[#fae133] whitespace-nowrap tracking-wide"></span>
+                </div>
+            </div>
 
             <!-- BATTLE ZONE (60%) -->
             <main id="battle-zone" class="h-[60%] w-full relative overflow-hidden bg-black/20">
